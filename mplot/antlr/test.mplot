@@ -1,0 +1,2 @@
+sep "," xl "X Label" yl "Y Label" x 3 y 2 f "data.csv" o
+

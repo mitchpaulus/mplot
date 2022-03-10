@@ -1,0 +1,3 @@
+#!/bin/sh
+
+java -jar "$ANTLR_JAR" -visitor Mplot.g4

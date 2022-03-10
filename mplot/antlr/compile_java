@@ -1,0 +1,6 @@
+#!/bin/sh
+
+rm -f *.java *.class
+
+java -jar "$ANTLR_JAR" -Dlanguage=Java Mplot.g4
+javac *.java
