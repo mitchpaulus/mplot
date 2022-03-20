@@ -1,2 +1,9 @@
-sep "," xl "X Label" yl "Y Label" x 3 y 2 f "data.csv" o
+t "My title" "X Label" "Y Label"
+x 1
+y 2 3 f "data.csv" "data2.txt" - o
+g
 
+#004987
+
+s "series 1"
+skip 1 s "series 2"
