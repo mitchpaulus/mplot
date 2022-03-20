@@ -19,6 +19,6 @@ public static class Extensions
         // Get b in Hex format (FF)
         var b = color.B.ToString("X2");
 
-        return $"rgbcolor \"Ox{r}{g}{b}\"";
+        return $"\"0x{r}{g}{b}\"";
     }
 }

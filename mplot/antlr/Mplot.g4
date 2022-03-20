@@ -25,7 +25,7 @@ element
 
 file      : ('f' | 'file') STRING+ ;
 font      : ('font' | 'fo') STRING ;
-dpi       : ('dpi' | 'd') INTEGER ;
+dpi       : ('dpi' | 'd') INT ;
 separator : 'sep' STRING ;
 series    : 's' STRING ;
 skip      : 'skip' INT ;
@@ -36,14 +36,15 @@ xcol      : 'x' INT+ ;
 labels    : 'l' STRING STRING ;
 ylabel    : 'yl' STRING ;
 ycol      : 'y' INT+ ;
-width     : 'w' INT ;
-height    : 'h' INT ;
+width     : 'w' (rational | INT) ;
+height    : 'h' (rational | INT) ;
 
 marker
   : 'o' # CircleMarker
   | '+' # PlusMarker
   | '-' # LinesMarker
   ;
+
 
 separator_type
   : COMMA_CHAR # CommaSep
@@ -65,6 +66,11 @@ rgbColor : RGB INT INT INT ;
 fragment HEX_DIGIT : '0'..'9' | 'a'..'f' | 'A'..'F' ;
 
 INT : [0-9]+ ;
+
+rational
+  : numerator=INT '/' denominator=INT  # Fraction
+  | integer=INT '-' numerator=INT '/' denominator=INT  # MixedFraction
+  ;
 
 WS : [ \t\n]+ -> skip ;
 

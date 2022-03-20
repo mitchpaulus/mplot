@@ -18,8 +18,12 @@ internal class MplotListener : MplotBaseListener
     public string Title { get; set; }
 
     public int DefaultDpi = 96;
-    public int PlotDpi = 384; // 96 * 4
+    public int PlotDpi = 96 * 4; // 96 * 4
     public int TextDpi = 96;
+
+    public Rational Width { get; set; } = new Rational(6);
+
+    public Rational Height { get; set; } = new Rational(4);
 
     public int Skip = 0;
 
@@ -55,6 +59,27 @@ internal class MplotListener : MplotBaseListener
     public override void EnterTitle(MplotParser.TitleContext context)
     {
         Title = context.STRING().GetText().RemoveQuotes();
+    }
+
+    public override void EnterHeight(MplotParser.HeightContext context)
+    {
+        if (context.INT() != null)
+        {
+            Height = new Rational(int.Parse(context.INT().GetText()));
+        }
+        else if (context.rational() is MplotParser.FractionContext fractionContext)
+        {
+            Height = new Rational(int.Parse(fractionContext.numerator.Text),
+                int.Parse(fractionContext.denominator.Text));
+        }
+        else if (context.rational() is MplotParser.MixedFractionContext mixedFractionContext)
+        {
+            int denominator = int.Parse(mixedFractionContext.denominator.Text);
+            int integerPortion = int.Parse(mixedFractionContext.integer.Text);
+            int numerator = int.Parse(mixedFractionContext.numerator.Text);
+
+            Width = new Rational(integerPortion * denominator, denominator) + new Rational(numerator, denominator);
+        }
     }
 
     public override void EnterCommaSep(MplotParser.CommaSepContext context) => Separator = new CommaSeparator();
@@ -127,7 +152,13 @@ internal class MplotListener : MplotBaseListener
     public string WriteGnuplot()
     {
         List<string> lines = new();
-        lines.Add("set terminal pngcairo\n");
+
+        int widthPixels  =  (Width * PlotDpi).Round();
+        int heightPixels = (Height * PlotDpi).Round();
+
+        string fontScale = PlotDpi % TextDpi == 0 ? (PlotDpi / TextDpi).ToString() : ((double)PlotDpi / TextDpi).ToString("f3");
+
+        lines.Add($"set terminal pngcairo size {widthPixels},{heightPixels} font \"Arial,10\" fontscale {fontScale}\n");
 
         if (!string.IsNullOrWhiteSpace(Title)) lines.Add($"set title \"{Title}\"");
         if (!string.IsNullOrWhiteSpace(XLabel)) lines.Add($"set xlabel \"{XLabel}\"");
@@ -261,5 +292,114 @@ public class CharactersSeparator : Separator
     public override string ToGnuplot()
     {
         return $"set datafile separator \"{_sep}\"";
+    }
+}
+
+public class Rational
+{
+    public int Numerator { get; }
+    public int Denominator { get; }
+
+    public Rational(int numerator, int denominator)
+    {
+        Numerator = numerator;
+        Denominator = denominator;
+    }
+
+    public Rational(int numerator)
+    {
+        Numerator = numerator;
+        Denominator = 1;
+    }
+
+    public override string ToString()
+    {
+        return $"{Numerator}/{Denominator}";
+    }
+
+    // Implement addition
+    public static Rational operator +(Rational r1, Rational r2)
+    {
+        int numerator = r1.Numerator * r2.Denominator + r2.Numerator * r1.Denominator;
+        int denominator = r1.Denominator * r2.Denominator;
+        return new Rational(numerator, denominator);
+    }
+
+    public static Rational operator+(Rational r1, int r2) => r1 + new Rational(r2);
+
+    public static Rational operator+(int r1, Rational r2) => new Rational(r1) + r2;
+
+    // Implement subtraction
+    public static Rational operator -(Rational r1, Rational r2)
+    {
+        int numerator = r1.Numerator * r2.Denominator - r2.Numerator * r1.Denominator;
+        int denominator = r1.Denominator * r2.Denominator;
+        return new Rational(numerator, denominator);
+    }
+
+    public static Rational operator-(Rational r1, int r2) => r1 - new Rational(r2);
+
+    public static Rational operator-(int r1, Rational r2) => new Rational(r1) - r2;
+
+    // Implement multiplication
+    public static Rational operator *(Rational r1, Rational r2)
+    {
+        int numerator = r1.Numerator * r2.Numerator;
+        int denominator = r1.Denominator * r2.Denominator;
+        return new Rational(numerator, denominator);
+    }
+
+    public static Rational operator*(Rational r1, int r2) => r1 * new Rational(r2);
+
+    public static Rational operator*(int r1, Rational r2) => new Rational(r1) * r2;
+
+    // Implement division
+    public static Rational operator /(Rational r1, Rational r2)
+    {
+        int numerator = r1.Numerator * r2.Denominator;
+        int denominator = r1.Denominator * r2.Numerator;
+        // If denominator is zero, throw DivideByZeroException
+        if (denominator == 0) throw new DivideByZeroException();
+        return new Rational(numerator, denominator);
+    }
+
+    public static Rational operator/(Rational r1, int r2)
+    {
+        return r1 / new Rational(r2);
+    }
+
+    public static Rational operator/(int r1, Rational r2)
+    {
+        return new Rational(r1) / r2;
+    }
+
+    public bool IsPositive()
+    {
+
+        if (Numerator >= 0 && Denominator > 0)
+        {
+            return true;
+        }
+
+        if (Numerator <= 0 && Denominator < 0)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public int Floor()
+    {
+        return IsPositive() ? Numerator / Denominator : (Numerator / Denominator) - 1;
+    }
+
+    public int Round() => (this + new Rational(1, 2)).Floor();
+
+    public string ToDecimalString()
+    {
+        if (Numerator % Denominator == 0) return (Numerator / Denominator).ToString();
+        double value = (double)Numerator / Denominator;
+        return value.ToString("f3");
     }
 }
