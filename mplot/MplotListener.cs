@@ -10,8 +10,8 @@ internal class MplotListener : MplotBaseListener
     public string XLabel { get; set; }
     public string YLabel { get; set; }
 
-    public MplotQueue<int> Ycols { get; set; } = new (2);
-    public MplotQueue<int> Xcols { get; set; } = new (1);
+    public MplotQueue<ColumnSpecifier> Ycols { get; set; } = new (new(2));
+    public MplotQueue<ColumnSpecifier> Xcols { get; set; } = new (new(1));
 
     public bool Grid = false;
 
@@ -36,6 +36,10 @@ internal class MplotListener : MplotBaseListener
     public string LastFilePath { get; set; }
 
     public List<Series> Series = new List<Series>();
+    public bool TimeAxis { get; set; } = false;
+    public string TimeFormat { get; set; } = "";
+
+    public string XFormat { get; set; } = "";
 
 
     public string ParseXLabelContext(MplotParser.XlabelContext context) => context.STRING().GetText().RemoveQuotes();
@@ -78,8 +82,35 @@ internal class MplotListener : MplotBaseListener
             int integerPortion = int.Parse(mixedFractionContext.integer.Text);
             int numerator = int.Parse(mixedFractionContext.numerator.Text);
 
+            Height = new Rational(integerPortion * denominator, denominator) + new Rational(numerator, denominator);
+        }
+    }
+
+    public override void EnterWidth(MplotParser.WidthContext context)
+    {
+        if (context.INT() != null)
+        {
+            Width = new Rational(int.Parse(context.INT().GetText()));
+        }
+        else if (context.rational() is MplotParser.FractionContext fractionContext)
+        {
+            Width = new Rational(int.Parse(fractionContext.numerator.Text),
+                int.Parse(fractionContext.denominator.Text));
+        }
+        else if (context.rational() is MplotParser.MixedFractionContext mixedFractionContext)
+        {
+            int denominator = int.Parse(mixedFractionContext.denominator.Text);
+            int integerPortion = int.Parse(mixedFractionContext.integer.Text);
+            int numerator = int.Parse(mixedFractionContext.numerator.Text);
+
             Width = new Rational(integerPortion * denominator, denominator) + new Rational(numerator, denominator);
         }
+    }
+
+    public override void EnterTimeFormat(MplotParser.TimeFormatContext context)
+    {
+        TimeFormat = context.STRING().GetText().RemoveQuotes();
+        TimeAxis = true;
     }
 
     public override void EnterCommaSep(MplotParser.CommaSepContext context) => Separator = new CommaSeparator();
@@ -122,9 +153,46 @@ internal class MplotListener : MplotBaseListener
         ColorStack.Queue(color);
     }
 
-    public override void EnterYcol(MplotParser.YcolContext context) => Ycols.Queue(context.INT().Select(node => int.Parse(node.GetText())));
+    public override void EnterYcol(MplotParser.YcolContext context)
+    {
+        if (context.INT() != null)
+        {
+            var integer = int.Parse(context.INT().GetText());
+            Ycols.Queue(new ColumnSpecifier(integer));
+        }
+        else if (context.STRING() != null)
+        {
+            var text = context.STRING().GetText().RemoveQuotes();
+            Ycols.Queue(new ColumnSpecifier(text));
+        }
+        else
+        {
+            throw new NotImplementedException("Y col context type not implemented yet.");
+        }
+    }
 
-    public override void EnterXcol(MplotParser.XcolContext context) =>  Xcols.Queue(context.INT().Select(node => int.Parse(node.GetText())));
+    public override void EnterXcol(MplotParser.XcolContext context)
+    {
+        if (context.INT() != null)
+        {
+            var integer = int.Parse(context.INT().GetText());
+            Xcols.Queue(new ColumnSpecifier(integer));
+        }
+        else if (context.STRING() != null)
+        {
+            var text = context.STRING().GetText().RemoveQuotes();
+            Xcols.Queue(new ColumnSpecifier(text));
+        }
+        else
+        {
+            throw new NotImplementedException("Y col context type not implemented yet.");
+        }
+    }
+
+    public override void EnterXformat(MplotParser.XformatContext context)
+    {
+        XFormat = context.STRING().GetText().RemoveQuotes();
+    }
 
     public override void EnterSkip(MplotParser.SkipContext context)
     {
@@ -167,6 +235,17 @@ internal class MplotListener : MplotBaseListener
         lines.Add(Separator.ToGnuplot());
 
         if (Grid) lines.Add("set grid");
+
+        if (TimeAxis)
+        {
+            lines.Add("set xdata time");
+            lines.Add($"set timefmt \"{TimeFormat}\"");
+        }
+
+        if (!string.IsNullOrWhiteSpace(XFormat))
+        {
+            lines.Add($"set format x \"{XFormat}\"");
+        }
 
         if (Series.Any())
         {
@@ -226,15 +305,15 @@ public class XMarker : Marker { }
 
 public class Series
 {
-    private readonly int _xCol;
-    private readonly int _yCol;
+    private readonly ColumnSpecifier _xCol;
+    private readonly ColumnSpecifier _yCol;
     private readonly string _name;
     private readonly string _filePath;
     private readonly Marker _marker;
     private readonly int _skip;
     private readonly Color _lineColor;
 
-    public Series(int xCol, int yCol, string name, string filePath, Marker marker, int skip, Color lineColor)
+    public Series(ColumnSpecifier xCol, ColumnSpecifier yCol, string name, string filePath, Marker marker, int skip, Color lineColor)
     {
         _xCol = xCol;
         _yCol = yCol;
@@ -402,4 +481,26 @@ public class Rational
         double value = (double)Numerator / Denominator;
         return value.ToString("f3");
     }
+}
+
+public class ColumnSpecifier
+{
+    public bool UseString { get; }
+    public string ColumnName { get; }
+    public int ColumnIndex { get; }
+
+    public ColumnSpecifier(string columnName)
+    {
+        UseString = true;
+        ColumnName = columnName;
+    }
+
+    public ColumnSpecifier(int columnIndex)
+    {
+        UseString = false;
+        ColumnIndex = columnIndex;
+        ColumnName = "";
+    }
+
+    public override string ToString() => UseString ? $"\"{ColumnName}\"" : ColumnIndex.ToString();
 }

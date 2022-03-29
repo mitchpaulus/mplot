@@ -21,30 +21,35 @@ element
   | hexColor
   | rgbColor
   | grid
+  | timeAxis
+  | timeFormat
+  | xformat
   ;
 
-file      : ('f' | 'file') STRING+ ;
-font      : ('font' | 'fo') STRING ;
-dpi       : ('dpi' | 'd') INT ;
-separator : 'sep' STRING ;
-series    : 's' STRING ;
-skip      : 'skip' INT ;
-title     : 'ct' STRING ;
-titles    : 't' STRING STRING STRING ;
-xlabel    : 'xl' STRING ;
-xcol      : 'x' INT+ ;
-labels    : 'l' STRING STRING ;
-ylabel    : 'yl' STRING ;
-ycol      : 'y' INT+ ;
-width     : 'w' (rational | INT) ;
-height    : 'h' (rational | INT) ;
+file       : ('f' | 'file') STRING+ ;
+font       : ('font' | 'fo') STRING ;
+dpi        : ('dpi' | 'd') INT ;
+separator  : 'sep' STRING ;
+series     : 's' STRING ;
+skip       : 'skip' INT ;
+title      : 'ct' STRING ;
+titles     : 't' STRING STRING STRING ;
+xlabel     : 'xl' STRING ;
+xcol       : 'x' (INT | STRING)  ;
+xformat    : 'xf' STRING ;
+labels     : 'l' STRING STRING ;
+ylabel     : 'yl' STRING ;
+ycol       : 'y' (INT | STRING) ;
+width      : 'w' (rational | INT) ;
+height     : 'h' (rational | INT) ;
+timeAxis   : TIME ;
+timeFormat : 'tf' STRING ;
 
 marker
   : 'o' # CircleMarker
   | '+' # PlusMarker
   | '-' # LinesMarker
   ;
-
 
 separator_type
   : COMMA_CHAR # CommaSep
@@ -53,6 +58,8 @@ separator_type
 
 COMMA_CHAR : ',' ;
 TAB_CHAR   : 'tab' ;
+
+TIME : 'time' ;
 
 grid : GRID ;
 

@@ -17,7 +17,7 @@ class Program
             {
                 Console.Write("mplot - plotting DSL\n\n");
                 Console.Write("USAGE:\n");
-                Console.Write("mplot file...");
+                Console.Write("mplot file...\n");
                 return 0;
             }
             else
