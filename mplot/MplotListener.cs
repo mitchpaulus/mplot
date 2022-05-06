@@ -7,6 +7,8 @@ internal class MplotListener : MplotBaseListener
 {
     MplotQueue<Color> ColorStack = new(Color.Black);
 
+    public MplotQueue<int> LineWidthQueue = new(1);
+
     public string XLabel { get; set; }
     public string YLabel { get; set; }
 
@@ -20,6 +22,9 @@ internal class MplotListener : MplotBaseListener
     public int DefaultDpi = 96;
     public int PlotDpi = 96 * 4; // 96 * 4
     public int TextDpi = 96;
+
+    public double XMin { get; set; } = double.NaN;
+    public double XMax { get; set; } = double.NaN;
 
     public Rational Width { get; set; } = new Rational(6);
 
@@ -83,6 +88,26 @@ internal class MplotListener : MplotBaseListener
             int numerator = int.Parse(mixedFractionContext.numerator.Text);
 
             Height = new Rational(integerPortion * denominator, denominator) + new Rational(numerator, denominator);
+        }
+    }
+
+    public override void EnterXrange(MplotParser.XrangeContext context)
+    {
+
+        if (context.range().lowLimit != null)
+        {
+            if (context.range().lowLimit is MplotParser.IntegerContext integer)
+            {
+                XMin = int.Parse(integer.GetText());
+            }
+        }
+
+        if (context.range().highLimit != null)
+        {
+            if (context.range().highLimit is MplotParser.IntegerContext integer)
+            {
+                XMax = int.Parse(integer.GetText());
+            }
         }
     }
 
@@ -199,6 +224,35 @@ internal class MplotListener : MplotBaseListener
         Skip = int.Parse(context.INT().GetText());
     }
 
+    public override void EnterLineWidth(MplotParser.LineWidthContext context)
+    {
+        foreach (var integer in context.INT())
+        {
+            var integerValue = int.Parse(integer.GetText());
+            LineWidthQueue.Queue(integerValue);
+        }
+    }
+
+    public override void EnterKnownColor(MplotParser.KnownColorContext context)
+    {
+        if (context.RED() != null)
+        {
+            ColorStack.Queue(Color.Red);
+        }
+        else if (context.BLUE() != null)
+        {
+            ColorStack.Queue(Color.Blue);
+        }
+        else if (context.GREEN() != null)
+        {
+            ColorStack.Queue(Color.Green);
+        }
+        else
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public override void EnterGrid(MplotParser.GridContext context) => Grid = true;
 
     public override void EnterSeries(MplotParser.SeriesContext context)
@@ -206,15 +260,18 @@ internal class MplotListener : MplotBaseListener
         var xCol = Xcols.Pop();
         var yCol = Ycols.Pop();
 
-        string name = context.STRING().GetText().RemoveQuotes();
-        string filePath = FilePathStack.Pop();
+        foreach (var name in context.STRING().Select(node => node.GetText().RemoveQuotes()))
+        {
+            string filePath = FilePathStack.Pop();
 
-        var marker = MarkerStack.Pop();
-        Color lineColor = ColorStack.Pop();
+            var marker = MarkerStack.Pop();
+            Color lineColor = ColorStack.Pop();
+            var lineWidth = LineWidthQueue.Pop();
 
-        Series series = new Series(xCol, yCol, name, filePath, marker, Skip, lineColor);
+            Series series = new Series(xCol, yCol, name, filePath, marker, Skip, lineColor, lineWidth);
 
-        Series.Add(series);
+            Series.Add(series);
+        }
     }
 
     public string WriteGnuplot()
@@ -235,6 +292,13 @@ internal class MplotListener : MplotBaseListener
         lines.Add(Separator.ToGnuplot());
 
         if (Grid) lines.Add("set grid");
+
+        lines.Add("set key outside");
+
+        if ( !double.IsNaN(XMin) && !double.IsNaN(XMax))
+        {
+            lines.Add($"set xrange [{XMin}:{XMax}]");
+        }
 
         if (TimeAxis)
         {
@@ -312,8 +376,9 @@ public class Series
     private readonly Marker _marker;
     private readonly int _skip;
     private readonly Color _lineColor;
+    private readonly int _lineWidth;
 
-    public Series(ColumnSpecifier xCol, ColumnSpecifier yCol, string name, string filePath, Marker marker, int skip, Color lineColor)
+    public Series(ColumnSpecifier xCol, ColumnSpecifier yCol, string name, string filePath, Marker marker, int skip, Color lineColor, int lineWidth)
     {
         _xCol = xCol;
         _yCol = yCol;
@@ -322,19 +387,21 @@ public class Series
         _marker = marker;
         _skip = skip;
         _lineColor = lineColor;
+        _lineWidth = lineWidth;
     }
 
     public string ToGnuplot()
     {
         string skipText = _skip == 0 ? "" : $" skip {_skip}";
+        string lineWidth = _lineWidth == 1 ? "" : $"lw {_lineWidth}";
 
         if (_marker is LineMarker)
         {
-            return $"\"{_filePath}\" using {_xCol}:{_yCol}{skipText} with lines linecolor {_lineColor.ToGnuplot()} title \"{_name}\"";
+            return $"\"{_filePath}\" using {_xCol}:{_yCol}{skipText} with lines {lineWidth} linecolor {_lineColor.ToGnuplot()} title \"{_name}\"";
         }
         else
         {
-            return $"\"{_filePath}\" using {_xCol}:{_yCol}{skipText} with points linecolor {_lineColor.ToGnuplot()} title \"{_name}\"";
+            return $"\"{_filePath}\" using {_xCol}:{_yCol}{skipText} with points {lineWidth} linecolor {_lineColor.ToGnuplot()} title \"{_name}\"";
         }
     }
 }
