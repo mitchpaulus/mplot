@@ -24,26 +24,34 @@ element
   | timeAxis
   | timeFormat
   | xformat
+  | xrange
+  | knownColor
+  | lineWidth
   ;
 
 file       : ('f' | 'file') STRING+ ;
 font       : ('font' | 'fo') STRING ;
 dpi        : ('dpi' | 'd') INT ;
 separator  : 'sep' STRING ;
-series     : 's' STRING ;
+series     : 's' STRING+ ;
 skip       : 'skip' INT ;
 title      : 'ct' STRING ;
 titles     : 't' STRING STRING STRING ;
 xlabel     : 'xl' STRING ;
 xcol       : 'x' (INT | STRING)  ;
 xformat    : 'xf' STRING ;
+xrange     : 'xr' range ;
 labels     : 'l' STRING STRING ;
+lineWidth  : 'lw' INT+ ;
 ylabel     : 'yl' STRING ;
 ycol       : 'y' (INT | STRING) ;
 width      : 'w' (rational | INT) ;
 height     : 'h' (rational | INT) ;
 timeAxis   : TIME ;
 timeFormat : 'tf' STRING ;
+
+range : lowLimit=rational? COLON highLimit=rational? ;
+COLON : ':' ;
 
 marker
   : 'o' # CircleMarker
@@ -70,6 +78,12 @@ HEXCOLOR : '#' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT ;
 RGB : 'rgb' ;
 rgbColor : RGB INT INT INT ;
 
+RED : 'red' ;
+GREEN : 'green' ;
+BLUE : 'blue' ;
+
+knownColor : RED | GREEN | BLUE ;
+
 fragment HEX_DIGIT : '0'..'9' | 'a'..'f' | 'A'..'F' ;
 
 INT : [0-9]+ ;
@@ -77,6 +91,7 @@ INT : [0-9]+ ;
 rational
   : numerator=INT '/' denominator=INT  # Fraction
   | integer=INT '-' numerator=INT '/' denominator=INT  # MixedFraction
+  | INT # Integer
   ;
 
 WS : [ \t\n]+ -> skip ;
