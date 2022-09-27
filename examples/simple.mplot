@@ -1,0 +1,8 @@
+f "testdata.tsv"
+-
+t "My title" "X Label" "Y Label"
+g
+
+#004987
+skip 1
+s "series"
