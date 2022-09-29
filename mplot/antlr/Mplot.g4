@@ -96,5 +96,7 @@ rational
 
 WS : [ \t\n]+ -> skip ;
 
+COMMENT : '{-' .*? '-}' -> skip ;
+
 STRING : '"' (ESC|.)*? '"' ;
 fragment ESC : '\\"' | '\\\\' ;
