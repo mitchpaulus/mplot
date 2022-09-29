@@ -1,0 +1,22 @@
+f "file.tsv"
+font "Arial"
+dpi 300
+
+sep "," {- or -}
+tab
+,
+
+ct "Chart Title"
+
+xl "X Axis Label"
+yl "Y Axis Label"
+
+x 1 {- x column -}
+y 2 {- y column -}
+{- Can also do it by name -}
+
+g {- grid -}
+
+s "Series 1" "Series 2"
+
+time {- for time axis -}
