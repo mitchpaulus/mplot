@@ -17,6 +17,8 @@ internal class MplotListener : MplotBaseListener
 
     public bool Grid = false;
 
+    public string? OutputFile { get; set; }
+
     public string? Title { get; set; }
 
     public int DefaultDpi = 96;
@@ -25,6 +27,9 @@ internal class MplotListener : MplotBaseListener
 
     public double XMin { get; set; } = double.NaN;
     public double XMax { get; set; } = double.NaN;
+
+    public double YMin { get; set; } = double.NaN;
+    public double YMax { get; set; } = double.NaN;
 
     public Rational Width { get; set; } = new Rational(6);
 
@@ -53,6 +58,7 @@ internal class MplotListener : MplotBaseListener
     public MplotListener()
     {
         PlotDpi = DefaultDpi * 4;
+        OutputFile = null;
     }
 
     public string ParseXLabelContext(MplotParser.XlabelContext context) => context.STRING().GetText().RemoveQuotes();
@@ -101,22 +107,13 @@ internal class MplotListener : MplotBaseListener
 
     public override void EnterXrange(MplotParser.XrangeContext context)
     {
-
-        if (context.range().lowLimit != null)
-        {
-            if (context.range().lowLimit is MplotParser.IntegerContext integer)
-            {
-                XMin = int.Parse(integer.GetText());
-            }
-        }
-
-        if (context.range().highLimit != null)
-        {
-            if (context.range().highLimit is MplotParser.IntegerContext integer)
-            {
-                XMax = int.Parse(integer.GetText());
-            }
-        }
+        if (context.range().lowLimit != null)  XMin = new Rational(context.range().lowLimit);
+        if (context.range().highLimit != null) XMax = new Rational(context.range().highLimit);
+    }
+    public override void EnterYrange(MplotParser.YrangeContext context)
+    {
+        if (context.range().lowLimit != null)  YMin = new Rational(context.range().lowLimit);
+        if (context.range().highLimit != null) YMax = new Rational(context.range().highLimit);
     }
 
     public override void EnterWidth(MplotParser.WidthContext context)
@@ -222,6 +219,11 @@ internal class MplotListener : MplotBaseListener
         }
     }
 
+    public override void EnterOutput(MplotParser.OutputContext context)
+    {
+        OutputFile = context.STRING().GetText().RemoveQuotes();
+    }
+
     public override void EnterXformat(MplotParser.XformatContext context)
     {
         XFormat = context.STRING().GetText().RemoveQuotes();
@@ -303,7 +305,10 @@ internal class MplotListener : MplotBaseListener
 
         string fontName = FontName ?? "";
 
-        lines.Add($"set terminal pngcairo size {widthPixels},{heightPixels} font \"{fontName},{FontSize}\" fontscale {fontScale}\n");
+        lines.Add($"set terminal pngcairo size {widthPixels},{heightPixels} font \"{fontName},{FontSize}\" fontscale {fontScale}");
+
+        // TODO: escape characters
+        if (!string.IsNullOrWhiteSpace(OutputFile)) lines.Add($"set output \"{OutputFile}\"");
 
         if (!string.IsNullOrWhiteSpace(Title)) lines.Add($"set title \"{Title}\"");
         if (!string.IsNullOrWhiteSpace(XLabel)) lines.Add($"set xlabel \"{XLabel}\"");
@@ -315,10 +320,13 @@ internal class MplotListener : MplotBaseListener
 
         lines.Add("set key outside");
 
-        if ( !double.IsNaN(XMin) && !double.IsNaN(XMax))
-        {
-            lines.Add($"set xrange [{XMin}:{XMax}]");
-        }
+        if (!double.IsNaN(XMin) && !double.IsNaN(XMax)) lines.Add($"set xrange [{XMin}:{XMax}]");
+        else if (!double.IsNaN(XMin))                   lines.Add($"set xrange [{XMin}:*]");
+        else if (!double.IsNaN(XMax))                   lines.Add($"set xrange [*:{XMax}]");
+
+        if (!double.IsNaN(YMin) && !double.IsNaN(YMax)) lines.Add($"set yrange [{YMin}:{YMax}]");
+        else if (!double.IsNaN(YMin))                   lines.Add($"set yrange [{YMin}:*]");
+        else if (!double.IsNaN(YMax))                   lines.Add($"set yrange [*:{YMax}]");
 
         if (TimeAxis)
         {
@@ -463,13 +471,47 @@ public class CharactersSeparator : Separator
 
 public class Rational
 {
+
     public int Numerator { get; }
     public int Denominator { get; }
 
+    public Rational(MplotParser.RationalContext rationalContext)
+    {
+        if (rationalContext is MplotParser.FractionContext fraction)
+        {
+            Numerator = int.Parse(fraction.GetText());
+            Denominator = int.Parse(fraction.GetText());
+        }
+        else if (rationalContext is MplotParser.MixedFractionContext mixedFraction)
+        {
+            Numerator = int.Parse(mixedFraction.denominator.Text) * int.Parse(mixedFraction.integer.Text) + int.Parse(mixedFraction.numerator.Text);
+            Denominator = int.Parse(mixedFraction.denominator.Text);
+        }
+        else if (rationalContext is MplotParser.IntegerContext integerContext)
+        {
+            Numerator = int.Parse(integerContext.GetText());
+            Denominator = 1;
+        }
+        else
+        {
+            throw new NotSupportedException("Unhandled rational context");
+        }
+    }
+
     public Rational(int numerator, int denominator)
     {
-        Numerator = numerator;
-        Denominator = denominator;
+        // Store the rational in canonical form where denominator is positive
+        // TODO: Use GCD.
+        if (denominator < 0)
+        {
+            Numerator = -numerator;
+            Denominator = -denominator;
+        }
+        else
+        {
+            Numerator = numerator;
+            Denominator = denominator;
+        }
     }
 
     public Rational(int numerator)
@@ -537,6 +579,127 @@ public class Rational
     public static Rational operator/(int r1, Rational r2)
     {
         return new Rational(r1) / r2;
+    }
+
+    // Implement equality and inequality
+    public static bool operator ==(Rational r1, Rational r2)
+    {
+        return r1.Numerator * r2.Denominator == r2.Numerator * r1.Denominator;
+    }
+
+    public static bool operator !=(Rational r1, Rational r2)
+    {
+        return r1.Numerator * r2.Denominator != r2.Numerator * r1.Denominator;
+    }
+
+    public static bool operator ==(Rational r1, int r2)
+    {
+        return r1 == new Rational(r2);
+    }
+
+    public static bool operator !=(Rational r1, int r2)
+    {
+        return r1 != new Rational(r2);
+    }
+
+    public static bool operator ==(int r1, Rational r2)
+    {
+        return new Rational(r1) == r2;
+    }
+
+    public static bool operator !=(int r1, Rational r2)
+    {
+        return new Rational(r1) != r2;
+    }
+
+    protected bool Equals(Rational other) => Numerator * other.Denominator == other.Numerator * Denominator;
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        return Equals((Rational) obj);
+    }
+
+    // Implement Object.GetHashCode
+    public override int GetHashCode()
+    {
+        return Numerator.GetHashCode() ^ Denominator.GetHashCode();
+    }
+
+    // Implement greater than and less than
+    public static bool operator >(Rational r1, Rational r2)
+    {
+        return r1.Numerator * r2.Denominator > r2.Numerator * r1.Denominator;
+    }
+
+    public static bool operator <(Rational r1, Rational r2)
+    {
+        return r1.Numerator * r2.Denominator < r2.Numerator * r1.Denominator;
+    }
+
+    public static bool operator >(Rational r1, int r2)
+    {
+        return r1 > new Rational(r2);
+    }
+
+    public static bool operator <(Rational r1, int r2)
+    {
+        return r1 < new Rational(r2);
+    }
+
+    public static bool operator >(int r1, Rational r2)
+    {
+        return new Rational(r1) > r2;
+    }
+
+    public static bool operator <(int r1, Rational r2)
+    {
+        return new Rational(r1) < r2;
+    }
+
+    // Implement greater than or equal to and less than or equal to
+    public static bool operator >=(Rational r1, Rational r2)
+    {
+        return r1.Numerator * r2.Denominator >= r2.Numerator * r1.Denominator;
+    }
+
+    public static bool operator <=(Rational r1, Rational r2)
+    {
+        return r1.Numerator * r2.Denominator <= r2.Numerator * r1.Denominator;
+    }
+
+    public static bool operator >=(Rational r1, int r2)
+    {
+        return r1 >= new Rational(r2);
+    }
+
+    public static bool operator <=(Rational r1, int r2)
+    {
+        return r1 <= new Rational(r2);
+    }
+
+    public static bool operator >=(int r1, Rational r2)
+    {
+        return new Rational(r1) >= r2;
+    }
+
+    public static bool operator <=(int r1, Rational r2)
+    {
+        return new Rational(r1) <= r2;
+    }
+
+    // Implement implicit conversion from int to Rational
+    public static implicit operator Rational(int i)
+    {
+        return new Rational(i);
+    }
+
+    // Implement implicit conversion from Rational to double
+    public static implicit operator double(Rational r)
+    {
+        return (double)r.Numerator / r.Denominator;
     }
 
     public bool IsPositive()

@@ -25,10 +25,12 @@ element
   | timeFormat
   | xformat
   | xrange
+  | yrange
   | knownColor
   | lineWidth
   | font
   | fontSize
+  | output
   ;
 
 file       : ('f' | 'file') STRING+ ;
@@ -44,17 +46,20 @@ xlabel     : ('xl' | 'xlabel') STRING ;
 xcol       : ('x' | 'xcol') (INT | STRING)  ;
 xformat    : 'xf' STRING ;
 xrange     : ('xr' | 'xrange') range ;
+yrange     : ('yr' | 'yrange') range ;
 labels     : ('l' | 'labels') STRING STRING ;
 lineWidth  : ('lw' | 'linewidth') INT+ ;
 ylabel     : ('yl' | 'ylabel') STRING ;
 ycol       : ('y' | 'ycol') (INT | STRING) ;
 width      : ('w' | 'width') (rational | INT) ;
 height     : ('h' | 'height') (rational | INT) ;
+output     : ('out' | 'output') STRING ;
 timeAxis   : TIME ;
 timeFormat : 'tf' STRING ;
 
-range : lowLimit=rational? COLON highLimit=rational? ;
+range : lowLimit=rational? (COLON | TO) highLimit=rational? ;
 COLON : ':' ;
+TO : 'to' ;
 
 marker
   : 'o' # CircleMarker
