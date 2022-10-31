@@ -27,26 +27,29 @@ element
   | xrange
   | knownColor
   | lineWidth
+  | font
+  | fontSize
   ;
 
 file       : ('f' | 'file') STRING+ ;
 font       : ('font' | 'fo') STRING ;
+fontSize   : ('fs' | 'fontSize') INT ;
 dpi        : ('dpi' | 'd') INT ;
-separator  : 'sep' STRING ;
-series     : 's' STRING+ ;
+separator  : ('sep' | 'separator') STRING ;
+series     : ('s' | 'series') STRING+ ;
 skip       : 'skip' INT ;
-title      : 'ct' STRING ;
+title      : ('ct' | 'charttitle') STRING ;
 titles     : 't' STRING STRING STRING ;
-xlabel     : 'xl' STRING ;
-xcol       : 'x' (INT | STRING)  ;
+xlabel     : ('xl' | 'xlabel') STRING ;
+xcol       : ('x' | 'xcol') (INT | STRING)  ;
 xformat    : 'xf' STRING ;
-xrange     : 'xr' range ;
-labels     : 'l' STRING STRING ;
-lineWidth  : 'lw' INT+ ;
-ylabel     : 'yl' STRING ;
-ycol       : 'y' (INT | STRING) ;
-width      : 'w' (rational | INT) ;
-height     : 'h' (rational | INT) ;
+xrange     : ('xr' | 'xrange') range ;
+labels     : ('l' | 'labels') STRING STRING ;
+lineWidth  : ('lw' | 'linewidth') INT+ ;
+ylabel     : ('yl' | 'ylabel') STRING ;
+ycol       : ('y' | 'ycol') (INT | STRING) ;
+width      : ('w' | 'width') (rational | INT) ;
+height     : ('h' | 'height') (rational | INT) ;
 timeAxis   : TIME ;
 timeFormat : 'tf' STRING ;
 

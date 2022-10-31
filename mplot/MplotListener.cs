@@ -9,18 +9,18 @@ internal class MplotListener : MplotBaseListener
 
     public MplotQueue<int> LineWidthQueue = new(1);
 
-    public string XLabel { get; set; }
-    public string YLabel { get; set; }
+    public string? XLabel { get; set; }
+    public string? YLabel { get; set; }
 
     public MplotQueue<ColumnSpecifier> Ycols { get; set; } = new (new(2));
     public MplotQueue<ColumnSpecifier> Xcols { get; set; } = new (new(1));
 
     public bool Grid = false;
 
-    public string Title { get; set; }
+    public string? Title { get; set; }
 
     public int DefaultDpi = 96;
-    public int PlotDpi = 96 * 4; // 96 * 4
+    public readonly int PlotDpi; // 96 * 4
     public int TextDpi = 96;
 
     public double XMin { get; set; } = double.NaN;
@@ -38,7 +38,10 @@ internal class MplotListener : MplotBaseListener
 
     public MplotQueue<string> FilePathStack = new("data.tsv");
 
-    public string LastFilePath { get; set; }
+    public string? FontName { get; set; } = null;
+    public int FontSize { get; set; } = 10;
+
+    public string? LastFilePath { get; set; }
 
     public List<Series> Series = new List<Series>();
     public bool TimeAxis { get; set; } = false;
@@ -46,6 +49,11 @@ internal class MplotListener : MplotBaseListener
 
     public string XFormat { get; set; } = "";
 
+
+    public MplotListener()
+    {
+        PlotDpi = DefaultDpi * 4;
+    }
 
     public string ParseXLabelContext(MplotParser.XlabelContext context) => context.STRING().GetText().RemoveQuotes();
     public string ParseYLabelContext(MplotParser.YlabelContext context) => context.STRING().GetText().RemoveQuotes();
@@ -274,6 +282,16 @@ internal class MplotListener : MplotBaseListener
         }
     }
 
+    public override void EnterFont(MplotParser.FontContext context)
+    {
+        FontName = context.STRING().GetText().RemoveQuotes();
+    }
+
+    public override void EnterFontSize(MplotParser.FontSizeContext context)
+    {
+        FontSize = int.Parse(context.INT().GetText());
+    }
+
     public string WriteGnuplot()
     {
         List<string> lines = new();
@@ -283,7 +301,9 @@ internal class MplotListener : MplotBaseListener
 
         string fontScale = PlotDpi % TextDpi == 0 ? (PlotDpi / TextDpi).ToString() : ((double)PlotDpi / TextDpi).ToString("f3");
 
-        lines.Add($"set terminal pngcairo size {widthPixels},{heightPixels} font \"Arial,10\" fontscale {fontScale}\n");
+        string fontName = FontName ?? "";
+
+        lines.Add($"set terminal pngcairo size {widthPixels},{heightPixels} font \"{fontName},{FontSize}\" fontscale {fontScale}\n");
 
         if (!string.IsNullOrWhiteSpace(Title)) lines.Add($"set title \"{Title}\"");
         if (!string.IsNullOrWhiteSpace(XLabel)) lines.Add($"set xlabel \"{XLabel}\"");

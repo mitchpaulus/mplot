@@ -1,5 +1,6 @@
 f "file.tsv"
 font "Arial"
+fs 8
 dpi 300
 
 sep "," {- or -}
