@@ -55,7 +55,8 @@ width      : ('w' | 'width') (rational | INT) ;
 height     : ('h' | 'height') (rational | INT) ;
 output     : ('out' | 'output') STRING ;
 timeAxis   : TIME ;
-timeFormat : 'tf' STRING ;
+timeFormat : ('tf' | 'timeformat') STRING ;
+isoDate : 'isodate' ;
 
 range : lowLimit=rational? (COLON | TO) highLimit=rational? ;
 COLON : ':' ;

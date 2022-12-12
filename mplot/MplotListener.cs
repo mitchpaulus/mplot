@@ -143,6 +143,14 @@ internal class MplotListener : MplotBaseListener
         TimeAxis = true;
     }
 
+    public override void EnterIsoDate(MplotParser.IsoDateContext context)
+    {
+        TimeFormat = "%Y-%m-%d";
+        TimeAxis = true;
+    }
+
+    public override void EnterTimeAxis(MplotParser.TimeAxisContext context) => TimeAxis = true;
+
     public override void EnterCommaSep(MplotParser.CommaSepContext context) => Separator = new CommaSeparator();
 
     public override void EnterTabSep(MplotParser.TabSepContext context) => Separator = new TabSeparator();

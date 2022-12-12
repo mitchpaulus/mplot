@@ -33,4 +33,7 @@ s "Series 1" "Series 2"
 
 lw 2 {- line width -}
 
-time {- for time axis -}
+{- time axis settings -}
+time
+tf "%Y-%m-%d"
+isodate {- for "%Y-%m-%d" }
