@@ -31,6 +31,7 @@ element
   | font
   | fontSize
   | output
+  | isoDate
   ;
 
 file       : ('f' | 'file') STRING+ ;
