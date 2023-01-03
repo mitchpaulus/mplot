@@ -98,7 +98,22 @@ RED : 'red' ;
 GREEN : 'green' ;
 BLUE : 'blue' ;
 
-knownColor : RED | GREEN | BLUE ;
+CCLLC_BLUE : 'ccblue' ;
+CCLLC_GRAY : 'ccgray' ;
+CCLLC_MAROON : 'ccmaroon' ;
+CCLLC_GREEN  : 'ccgreen' ;
+CCLLC_YELLOW : 'ccyellow' ;
+
+knownColor
+  : RED          # RedColor
+  | GREEN        # GreenColor
+  | BLUE         # BlueColor
+  | CCLLC_BLUE   # CcllcBlueColor
+  | CCLLC_GRAY   # CcllcGray
+  | CCLLC_MAROON # CcllcMaroon
+  | CCLLC_GREEN  # CcllcGreen
+  | CCLLC_YELLOW # CcllcYellow
+  ;
 
 fragment HEX_DIGIT : '0'..'9' | 'a'..'f' | 'A'..'F' ;
 

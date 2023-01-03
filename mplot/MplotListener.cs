@@ -251,25 +251,14 @@ internal class MplotListener : MplotBaseListener
         }
     }
 
-    public override void EnterKnownColor(MplotParser.KnownColorContext context)
-    {
-        if (context.RED() != null)
-        {
-            ColorStack.Queue(Color.Red);
-        }
-        else if (context.BLUE() != null)
-        {
-            ColorStack.Queue(Color.Blue);
-        }
-        else if (context.GREEN() != null)
-        {
-            ColorStack.Queue(Color.Green);
-        }
-        else
-        {
-            throw new NotImplementedException();
-        }
-    }
+    public override void EnterRedColor(MplotParser.RedColorContext context) => ColorStack.Queue(Color.Red);
+    public override void EnterGreenColor(MplotParser.GreenColorContext context) => ColorStack.Queue(Color.Green);
+    public override void EnterBlueColor(MplotParser.BlueColorContext context) => ColorStack.Queue(Color.Blue);
+    public override void EnterCcllcBlueColor(MplotParser.CcllcBlueColorContext context) => ColorStack.Queue(Color.FromArgb(0, 73, 135));
+    public override void EnterCcllcGray(MplotParser.CcllcGrayContext context) => ColorStack.Queue(Color.FromArgb(84, 88, 90));
+    public override void EnterCcllcMaroon(MplotParser.CcllcMaroonContext context) => ColorStack.Queue(Color.FromArgb(80,0,0));
+    public override void EnterCcllcGreen(MplotParser.CcllcGreenContext context) => ColorStack.Queue(Color.FromArgb(25,145,58));
+    public override void EnterCcllcYellow(MplotParser.CcllcYellowContext context) => ColorStack.Queue(Color.FromArgb(253,196,0));
 
     public override void EnterGrid(MplotParser.GridContext context) => Grid = true;
 
