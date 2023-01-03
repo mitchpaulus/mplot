@@ -66,15 +66,21 @@ TO : 'to' ;
 marker
   : 'o' # CircleMarker
   | '+' # PlusMarker
-  | '-' # LinesMarker
+  | lines # LinesMarker
   ;
 
+lines : '-' | 'lines' | 'line' ;
+
 separator_type
-  : COMMA_CHAR # CommaSep
+  : commaSeparator # CommaSep
   | TAB_CHAR   # TabSep
   ;
 
+commaSeparator : COMMA_CHAR | COMMA_WORD | CSV ;
+
 COMMA_CHAR : ',' ;
+COMMA_WORD : 'comma' ;
+CSV : 'CSV' | 'csv' ;
 TAB_CHAR   : 'tab' ;
 
 TIME : 'time' ;
