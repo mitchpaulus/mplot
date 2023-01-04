@@ -32,6 +32,7 @@ element
   | fontSize
   | output
   | isoDate
+  | legendOption
   ;
 
 file       : ('f' | 'file') STRING+ ;
@@ -84,6 +85,13 @@ CSV : 'CSV' | 'csv' ;
 TAB_CHAR   : 'tab' ;
 
 TIME : 'time' ;
+
+legendOption : TOP | RIGHT | UPPER_RIGHT | UPPER_LEFT ;
+
+TOP : 'top' ;
+RIGHT : 'right' ;
+UPPER_RIGHT : 'ur' | 'upperright' ;
+UPPER_LEFT : 'ul' | 'upperleft' ;
 
 grid : GRID ;
 
