@@ -1,0 +1,34 @@
+name: Tests
+
+on:
+  push:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7
+    - name: Setup Java
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '11'
+
+    - name: Download ANTLR
+      run: curl --output antlr-4.11.1-complete.jar https://www.antlr.org/download/antlr-4.11.1-complete.jar
+
+    - name: Compile ANTLR grammars
+      run: |
+        export ANTLR_JAR="$(pwd)"/antlr-4.11.1-complete.jar
+        export CLASSPATH=.:"$(pwd)/antlr-4.11.1-complete.jar"
+        cd mplot/antlr/
+        ./compile_grammer
+
+    - name: Build
+      run: dotnet build
