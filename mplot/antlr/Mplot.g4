@@ -86,7 +86,12 @@ TAB_CHAR   : 'tab' ;
 
 TIME : 'time' ;
 
-legendOption : TOP | RIGHT | UPPER_RIGHT | UPPER_LEFT ;
+legendOption
+  : TOP  # TopLegend
+  | RIGHT # RightLegend
+  | UPPER_RIGHT # UpperRightLegend
+  | UPPER_LEFT  # UpperLeftLegend
+  ;
 
 TOP : 'top' ;
 RIGHT : 'right' ;

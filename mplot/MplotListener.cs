@@ -43,6 +43,8 @@ internal class MplotListener : MplotBaseListener
 
     public MplotQueue<string> FilePathStack = new("data.tsv");
 
+    public LegendPosition LegendPosition = new Empty();
+
     public string? FontName { get; set; } = null;
     public int FontSize { get; set; } = 10;
 
@@ -64,14 +66,14 @@ internal class MplotListener : MplotBaseListener
     public string ParseXLabelContext(MplotParser.XlabelContext context) => context.STRING().GetText().RemoveQuotes();
     public string ParseYLabelContext(MplotParser.YlabelContext context) => context.STRING().GetText().RemoveQuotes();
 
-    public override void EnterXlabel(MplotParser.XlabelContext context) => XLabel = ParseXLabelContext(context);
-    public override void EnterYlabel(MplotParser.YlabelContext context) => YLabel = ParseYLabelContext(context);
+    public override void EnterXlabel(MplotParser.XlabelContext context) => XLabel = ParseXLabelContext(context).Trim();
+    public override void EnterYlabel(MplotParser.YlabelContext context) => YLabel = ParseYLabelContext(context).Trim();
 
     public override void EnterTitles(MplotParser.TitlesContext context)
     {
-        Title =  context.STRING()[0].GetText().RemoveQuotes();
-        XLabel = context.STRING()[1].GetText().RemoveQuotes();
-        YLabel = context.STRING()[2].GetText().RemoveQuotes();
+        Title =  context.STRING()[0].GetText().RemoveQuotes().Trim();
+        XLabel = context.STRING()[1].GetText().RemoveQuotes().Trim();
+        YLabel = context.STRING()[2].GetText().RemoveQuotes().Trim();
     }
 
     public override void EnterFile(MplotParser.FileContext context)
@@ -260,6 +262,11 @@ internal class MplotListener : MplotBaseListener
     public override void EnterCcllcGreen(MplotParser.CcllcGreenContext context) => ColorStack.Queue(Color.FromArgb(25,145,58));
     public override void EnterCcllcYellow(MplotParser.CcllcYellowContext context) => ColorStack.Queue(Color.FromArgb(253,196,0));
 
+    public override void EnterTopLegend(MplotParser.TopLegendContext context) => LegendPosition = new Top();
+    public override void EnterRightLegend(MplotParser.RightLegendContext context) => LegendPosition = new Right();
+    public override void EnterUpperRightLegend(MplotParser.UpperRightLegendContext context) => LegendPosition = new InsideUpperRight();
+    public override void EnterUpperLeftLegend(MplotParser.UpperLeftLegendContext context) => LegendPosition = new InsideUpperLeft();
+
     public override void EnterGrid(MplotParser.GridContext context) => Grid = true;
 
     public override void EnterSeries(MplotParser.SeriesContext context)
@@ -267,7 +274,7 @@ internal class MplotListener : MplotBaseListener
         var xCol = Xcols.Pop();
         var yCol = Ycols.Pop();
 
-        foreach (var name in context.STRING().Select(node => node.GetText().RemoveQuotes()))
+        foreach (var name in context.STRING().Select(node => node.GetText().RemoveQuotes().Trim()))
         {
             string filePath = FilePathStack.Pop();
 
@@ -302,7 +309,7 @@ internal class MplotListener : MplotBaseListener
 
         string fontName = FontName ?? "";
 
-        lines.Add($"set terminal pngcairo size {widthPixels},{heightPixels} font \"{fontName},{FontSize}\" fontscale {fontScale}");
+        lines.Add($"set terminal pngcairo size {widthPixels},{heightPixels} font \"{fontName},{FontSize}\" fontscale {fontScale} pointscale {fontScale}");
 
         // TODO: escape characters
         if (!string.IsNullOrWhiteSpace(OutputFile)) lines.Add($"set output \"{OutputFile}\"");
@@ -315,7 +322,7 @@ internal class MplotListener : MplotBaseListener
 
         if (Grid) lines.Add("set grid");
 
-        lines.Add("set key outside");
+        lines.Add($"set key {LegendPosition.GnuPlotLegendPosition}");
 
         if (!double.IsNaN(XMin) && !double.IsNaN(XMax)) lines.Add($"set xrange [{XMin}:{XMax}]");
         else if (!double.IsNaN(XMin))                   lines.Add($"set xrange [{XMin}:*]");
@@ -358,6 +365,36 @@ internal class MplotListener : MplotBaseListener
         foreach (var line in lines) builder.Append(line + "\n");
         return builder.ToString();
     }
+}
+
+public abstract class LegendPosition
+{
+    public abstract string GnuPlotLegendPosition { get; }
+}
+
+public class Top : LegendPosition
+{
+    public override string GnuPlotLegendPosition => "outside center top";
+}
+
+public class Right : LegendPosition
+{
+    public override string GnuPlotLegendPosition => "outside right center";
+}
+
+public class InsideUpperRight : LegendPosition
+{
+    public override string GnuPlotLegendPosition => "inside right top";
+}
+
+public class InsideUpperLeft : LegendPosition
+{
+    public override string GnuPlotLegendPosition => "inside left top";
+}
+
+public class Empty : LegendPosition
+{
+    public override string GnuPlotLegendPosition => "";
 }
 
 public class IndexedItem<T>
@@ -419,15 +456,15 @@ public class Series
     {
         string skipText = _skip == 0 ? "" : $" skip {_skip}";
         string lineWidth = _lineWidth == 1 ? "" : $"lw {_lineWidth}";
+        string title = string.IsNullOrWhiteSpace(_name) ? "" : $" title \"{_name}\"";
 
-        if (_marker is LineMarker)
+        string plotType = _marker switch
         {
-            return $"\"{_filePath}\" using {_xCol}:{_yCol}{skipText} with lines {lineWidth} linecolor {_lineColor.ToGnuplot()} title \"{_name}\"";
-        }
-        else
-        {
-            return $"\"{_filePath}\" using {_xCol}:{_yCol}{skipText} with points {lineWidth} linecolor {_lineColor.ToGnuplot()} title \"{_name}\"";
-        }
+            LineMarker => "lines",
+            _ => "points"
+        };
+
+        return $"\"{_filePath}\" using {_xCol}:{_yCol}{skipText} with {plotType} {lineWidth} linecolor {_lineColor.ToGnuplot()}{title}";
     }
 }
 
