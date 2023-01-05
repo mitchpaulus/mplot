@@ -10,21 +10,26 @@ class Program
     {
         int i = 0;
 
-        List<string> files = new List<string>();
+        List<string> files = new();
         while (i < args.Length)
         {
             if (args[i] == "-h" || args[i] == "--help")
             {
                 Console.Write("mplot - plotting DSL\n\n");
                 Console.Write("USAGE:\n");
-                Console.Write("mplot file...\n");
+                Console.Write("mplot FILE\n");
+                Console.Write("mplot -h | --help\n");
+                Console.Write("mplot -V | --version\n");
                 return 0;
             }
-            else
+
+            if (args[i] is "-V" or "--version")
             {
-                files.Add(args[i]);
+                Console.Write("0.1.0\n");
+                return 0;
             }
 
+            files.Add(args[i]);
             i++;
         }
 
