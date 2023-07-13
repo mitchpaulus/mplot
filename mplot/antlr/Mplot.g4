@@ -59,6 +59,10 @@ output     : ('out' | 'output') STRING ;
 timeAxis   : TIME ;
 timeFormat : ('tf' | 'timeformat') STRING ;
 isoDate : 'isodate' ;
+seriesStyle : pointStyle | lineStyle ;
+
+pointStyle : 'point' | 'scatter' | 'xy' ;
+lineStyle : 'line' | '-' ;
 
 range : lowLimit=rational? (COLON | TO) highLimit=rational? ;
 COLON : ':' ;
@@ -67,10 +71,9 @@ TO : 'to' ;
 marker
   : 'o' # CircleMarker
   | '+' # PlusMarker
-  | lines # LinesMarker
+  | 'square' # SquareMarker
   ;
 
-lines : '-' | 'lines' | 'line' ;
 
 separator_type
   : commaSeparator # CommaSep

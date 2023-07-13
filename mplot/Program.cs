@@ -20,6 +20,58 @@ class Program
                 Console.Write("mplot FILE\n");
                 Console.Write("mplot -h | --help\n");
                 Console.Write("mplot -V | --version\n");
+                
+                Console.Write("\n");
+                Console.Write("Example syntax:\n");
+                Console.Write("f \"file.tsv\"\n");
+                Console.Write("font \"Arial\"\n");
+                Console.Write("w 6\n");
+                Console.Write("h 3-1/2 {- Rational numbers are used -}\n");
+                Console.Write("fs 8 {- fontsize -}\n");
+                Console.Write("dpi 300\n");
+                Console.Write("out \"plot.png\"\n");
+                Console.Write("\n");
+                Console.Write("{- data formats -}\n");
+                Console.Write("sep \",\" {- or -}\n");
+                Console.Write("tab\n");
+                Console.Write(",\n");
+                Console.Write("\n");
+                Console.Write("ct \"Chart Title\"\n");
+                Console.Write("\n");
+                Console.Write("xl \"X Axis Label\"\n");
+                Console.Write("yl \"Y Axis Label\"\n");
+                Console.Write("\n");
+                Console.Write("x 1 {- x column -}\n");
+                Console.Write("y 2 {- y column -}\n");
+                Console.Write("{- Can also do it by name -}\n");
+                Console.Write("\n");
+                Console.Write("g {- grid -}\n");
+                Console.Write("\n");
+                Console.Write("xr 0:100 {- x range -}\n");
+                Console.Write("xr :100\n");
+                Console.Write("xr 0:\n");
+                Console.Write("yr 0 to 10\n");
+                Console.Write("\n");
+                Console.Write("{- marker types -}\n");
+                Console.Write("o + -\n");
+                Console.Write("\n");
+                Console.Write("s \"Series 1\" \"Series 2\"\n");
+                Console.Write("\n");
+                Console.Write("lw 2 {- line width -}\n");
+                Console.Write("\n");
+                Console.Write("{- time axis settings -}\n");
+                Console.Write("time\n");
+                Console.Write("tf \"%Y-%m-%d\"\n");
+                Console.Write("isodate {- for \"%Y-%m-%d\" }\n");
+                Console.Write("\n");
+                Console.Write("{- legend locations -}\n");
+                Console.Write("top right ul upperleft ur upperright\n");
+                Console.Write("\n");
+                Console.Write("{- colors -}\n");
+                Console.Write("#000000 {- hex -}\n");
+                Console.Write("rgb 123 124 125 {- rgb -}\n");
+                Console.Write("red green blue ccblue ccgray ccmaroon ccgreen ccyellow {- named -}\n");
+                
                 return 0;
             }
 

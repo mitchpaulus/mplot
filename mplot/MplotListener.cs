@@ -25,6 +25,7 @@ internal class MplotListener : MplotBaseListener
     public readonly int PlotDpi; // 96 * 4
     public int TextDpi = 96;
 
+    public SeriesStyle PlotSeriesStyle { get; private set; } = SeriesStyle.Scatter;
     public double XMin { get; set; } = double.NaN;
     public double XMax { get; set; } = double.NaN;
 
@@ -162,7 +163,8 @@ internal class MplotListener : MplotBaseListener
         Separator = new CharactersSeparator(separatorText);
     }
 
-    public override void EnterLinesMarker(MplotParser.LinesMarkerContext context) => MarkerStack.Queue(new LineMarker());
+    public override void EnterPointStyle(MplotParser.PointStyleContext context) => PlotSeriesStyle = SeriesStyle.Scatter;
+    public override void EnterLineStyle(MplotParser.LineStyleContext context) => PlotSeriesStyle = SeriesStyle.Line;
 
     public override void EnterPlusMarker(MplotParser.PlusMarkerContext context) => MarkerStack.Queue(new PlusMarker());
     public override void EnterCircleMarker(MplotParser.CircleMarkerContext context) => MarkerStack.Queue(new CircleMarker());
@@ -282,7 +284,7 @@ internal class MplotListener : MplotBaseListener
             Color lineColor = ColorStack.Pop();
             var lineWidth = LineWidthQueue.Pop();
 
-            Series series = new Series(xCol, yCol, name, filePath, marker, Skip, lineColor, lineWidth);
+            Series series = new Series(xCol, yCol, name, filePath, marker, Skip, lineColor, lineWidth, PlotSeriesStyle);
 
             Series.Add(series);
         }
@@ -367,6 +369,27 @@ internal class MplotListener : MplotBaseListener
     }
 }
 
+public class SeriesStyle 
+{
+    public int Id { get; }
+    public List<string> Keywords { get; }
+    public string GnuplotStyle { get; }
+
+    public static Dictionary<string, SeriesStyle> Map = new();
+
+    public static SeriesStyle Scatter = new SeriesStyle(0, new List<string>() {"scatter", "point"}, "points");
+    public static SeriesStyle Line = new SeriesStyle(0, new List<string>() {"line", "-"}, "lines");
+
+    public SeriesStyle(int id, List<string> keywords, string gnuplotStyle)
+    {
+        Id = id;
+        Keywords = keywords;
+        GnuplotStyle = gnuplotStyle;
+
+        foreach (var s in keywords) Map[s] = this;
+    }
+}
+
 public abstract class LegendPosition
 {
     public abstract string GnuPlotLegendPosition { get; }
@@ -439,8 +462,9 @@ public class Series
     private readonly int _skip;
     private readonly Color _lineColor;
     private readonly int _lineWidth;
+    private readonly SeriesStyle _style;
 
-    public Series(ColumnSpecifier xCol, ColumnSpecifier yCol, string name, string filePath, Marker marker, int skip, Color lineColor, int lineWidth)
+    public Series(ColumnSpecifier xCol, ColumnSpecifier yCol, string name, string filePath, Marker marker, int skip, Color lineColor, int lineWidth, SeriesStyle style)
     {
         _xCol = xCol;
         _yCol = yCol;
@@ -450,6 +474,7 @@ public class Series
         _skip = skip;
         _lineColor = lineColor;
         _lineWidth = lineWidth;
+        _style = style;
     }
 
     public string ToGnuplot()
@@ -458,13 +483,7 @@ public class Series
         string lineWidth = _lineWidth == 1 ? "" : $"lw {_lineWidth}";
         string title = string.IsNullOrWhiteSpace(_name) ? "" : $" title \"{_name}\"";
 
-        string plotType = _marker switch
-        {
-            LineMarker => "lines",
-            _ => "points"
-        };
-
-        return $"\"{_filePath}\" using {_xCol}:{_yCol}{skipText} with {plotType} {lineWidth} linecolor {_lineColor.ToGnuplot()}{title}";
+        return $"\"{_filePath}\" using {_xCol}:{_yCol}{skipText} with {_style.GnuplotStyle} {lineWidth} linecolor {_lineColor.ToGnuplot()}{title}";
     }
 }
 
