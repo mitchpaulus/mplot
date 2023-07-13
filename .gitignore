@@ -2,6 +2,7 @@
 *.java
 *.interp
 *.tokens
+.idea/
 
 publish*/
 

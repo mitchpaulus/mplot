@@ -1,12 +1,16 @@
+`mplot` is my personal domain specific language for figure code generation.
+Very much a work in progress.
+
 ```
 f "file.tsv"
 font "Arial"
 w 6
 h 3-1/2 {- Rational numbers are used -}
-fs 8
+fs 8 {- fontsize -}
 dpi 300
 out "plot.png"
 
+{- data formats -}
 sep "," {- or -}
 tab
 ,
@@ -38,4 +42,12 @@ lw 2 {- line width -}
 time
 tf "%Y-%m-%d"
 isodate {- for "%Y-%m-%d" }
+
+{- legend locations -}
+top right ul upperleft ur upperright
+
+{- colors -}
+#000000 {- hex -}
+rgb 123 124 125 {- rgb -}
+red green blue ccblue ccgray ccmaroon ccgreen ccyellow {- named -}
 ```
