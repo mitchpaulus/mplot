@@ -33,6 +33,11 @@ element
   | output
   | isoDate
   | legendOption
+  | noLegend
+  | seriesStyle
+  | xtics
+  | ytics
+  | gnuplotLiteral
   ;
 
 file       : ('f' | 'file') STRING+ ;
@@ -60,6 +65,12 @@ timeAxis   : TIME ;
 timeFormat : ('tf' | 'timeformat') STRING ;
 isoDate : 'isodate' ;
 seriesStyle : pointStyle | lineStyle ;
+gnuplotLiteral : 'gnuplot' STRING+ ;
+
+noLegend : 'nokey' | 'nolegend' ;
+
+xtics : 'xtics' rational rational rational ;
+ytics : 'ytics' rational rational rational ;
 
 pointStyle : 'point' | 'scatter' | 'xy' ;
 lineStyle : 'line' | '-' ;

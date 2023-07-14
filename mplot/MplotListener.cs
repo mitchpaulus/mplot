@@ -17,6 +17,7 @@ internal class MplotListener : MplotBaseListener
 
     public bool Grid = false;
 
+    public List<string> GnuplotLiterals = new();
     public string? OutputFile { get; set; }
 
     public string? Title { get; set; }
@@ -25,13 +26,21 @@ internal class MplotListener : MplotBaseListener
     public readonly int PlotDpi; // 96 * 4
     public int TextDpi = 96;
 
+    public SpecifiedBool Legend = SpecifiedBool.Unset;
     public SeriesStyle PlotSeriesStyle { get; private set; } = SeriesStyle.Scatter;
     public double XMin { get; set; } = double.NaN;
     public double XMax { get; set; } = double.NaN;
 
+    public Rational? XTicMin = null;
+    public Rational? XTicMax = null;
+    public Rational? XTicIncrement = null;
+
     public double YMin { get; set; } = double.NaN;
     public double YMax { get; set; } = double.NaN;
 
+    public Rational? YTicMin = null;
+    public Rational? YTicMax = null;
+    public Rational? YTicIncrement = null;
     public Rational Width { get; set; } = new Rational(6);
 
     public Rational Height { get; set; } = new Rational(4);
@@ -77,14 +86,24 @@ internal class MplotListener : MplotBaseListener
         YLabel = context.STRING()[2].GetText().RemoveQuotes().Trim();
     }
 
-    public override void EnterFile(MplotParser.FileContext context)
-    {
-        FilePathStack.Queue(context.STRING().Select(node => node.GetText().RemoveQuotes()));
-    }
+    public override void EnterFile(MplotParser.FileContext context) => FilePathStack.Queue(context.STRING().Select(node => node.GetText().RemoveQuotes()));
 
-    public override void EnterTitle(MplotParser.TitleContext context)
+    public override void EnterTitle(MplotParser.TitleContext context) => Title = context.STRING().GetText().RemoveQuotes();
+
+    public override void EnterGnuplotLiteral(MplotParser.GnuplotLiteralContext context) => GnuplotLiterals.AddRange(context.STRING().Select(s => s.GetText()[1..^1]));
+
+    public override void EnterXtics(MplotParser.XticsContext context)
     {
-        Title = context.STRING().GetText().RemoveQuotes();
+        XTicMin = new Rational(context.rational(0));
+        XTicIncrement = new Rational(context.rational(1));
+        XTicMax = new Rational(context.rational(2));
+    }
+    
+    public override void EnterYtics(MplotParser.YticsContext context)
+    {
+        YTicMin = new Rational(context.rational(0));
+        YTicIncrement = new Rational(context.rational(1));
+        YTicMax = new Rational(context.rational(2));
     }
 
     public override void EnterHeight(MplotParser.HeightContext context)
@@ -118,6 +137,9 @@ internal class MplotListener : MplotBaseListener
         if (context.range().lowLimit != null)  YMin = new Rational(context.range().lowLimit);
         if (context.range().highLimit != null) YMax = new Rational(context.range().highLimit);
     }
+
+    public override void EnterNoLegend(MplotParser.NoLegendContext context) => Legend = SpecifiedBool.False;
+
 
     public override void EnterWidth(MplotParser.WidthContext context)
     {
@@ -313,6 +335,8 @@ internal class MplotListener : MplotBaseListener
 
         lines.Add($"set terminal pngcairo size {widthPixels},{heightPixels} font \"{fontName},{FontSize}\" fontscale {fontScale} pointscale {fontScale}");
 
+        lines.AddRange(GnuplotLiterals);
+
         // TODO: escape characters
         if (!string.IsNullOrWhiteSpace(OutputFile)) lines.Add($"set output \"{OutputFile}\"");
 
@@ -324,7 +348,9 @@ internal class MplotListener : MplotBaseListener
 
         if (Grid) lines.Add("set grid");
 
-        lines.Add($"set key {LegendPosition.GnuPlotLegendPosition}");
+        if (Legend == SpecifiedBool.False) lines.Add("set key off");
+        else if (Legend == SpecifiedBool.True) lines.Add($"set key {LegendPosition.GnuPlotLegendPosition}");
+        else lines.Add(Series.Count > 1 ? $"set key {LegendPosition.GnuPlotLegendPosition}" : "set key off");
 
         if (!double.IsNaN(XMin) && !double.IsNaN(XMax)) lines.Add($"set xrange [{XMin}:{XMax}]");
         else if (!double.IsNaN(XMin))                   lines.Add($"set xrange [{XMin}:*]");
@@ -333,6 +359,15 @@ internal class MplotListener : MplotBaseListener
         if (!double.IsNaN(YMin) && !double.IsNaN(YMax)) lines.Add($"set yrange [{YMin}:{YMax}]");
         else if (!double.IsNaN(YMin))                   lines.Add($"set yrange [{YMin}:*]");
         else if (!double.IsNaN(YMax))                   lines.Add($"set yrange [*:{YMax}]");
+
+        if (XTicMin is not null && XTicMax is not null && XTicIncrement is not null)
+        {
+            lines.Add( $"set xtics {XTicMin.ToDecimalString()}, {XTicIncrement.ToDecimalString()}, {XTicMax.ToDecimalString()}");
+        }
+        if (YTicMin is not null && YTicMax is not null && YTicIncrement is not null)
+        {
+            lines.Add( $"set ytics {YTicMin.ToDecimalString()}, {YTicIncrement.ToDecimalString()}, {YTicMax.ToDecimalString()}");
+        }
 
         if (TimeAxis)
         {
@@ -806,4 +841,11 @@ public class ColumnSpecifier
     }
 
     public override string ToString() => UseString ? $"\"{ColumnName}\"" : ColumnIndex.ToString();
+}
+
+public enum SpecifiedBool
+{
+    Unset = -1,
+    False = 0,
+    True = 1,
 }
