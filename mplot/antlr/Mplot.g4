@@ -17,6 +17,7 @@ element
   | width
   | height
   | file
+  | inlineData
   | marker
   | hexColor
   | rgbColor
@@ -38,9 +39,11 @@ element
   | xtics
   | ytics
   | gnuplotLiteral
+  | dpi
   ;
 
 file       : ('f' | 'file') STRING+ ;
+inlineData : INLINEDATA ;
 font       : ('font' | 'fo') STRING ;
 fontSize   : ('fs' | 'fontSize') INT ;
 dpi        : ('dpi' | 'd') INT ;
@@ -85,11 +88,21 @@ marker
   | 'square' # SquareMarker
   ;
 
+stringArray : (STRING | ASTERISK | CYCLE)+ ;
+intArray : (INT | ASTERISK | CYCLE)+ ;
+rationalArray : (rational | ASTERISK | CYCLE)+ ;
+colorArray : (hexColor | rgbColor | knownColor | ASTERISK | CYCLE)+ ;
 
 separator_type
   : commaSeparator # CommaSep
   | TAB_CHAR   # TabSep
   ;
+
+CYCLE : 'cycle' ;
+ASTERISK : '*' ;
+INLINEDATA : START .*? END ;
+fragment START : ('start' | 'Start' | 'START') [ \t]* '\n';
+fragment END : ('end' | 'End' | 'END') [ \t]* '\n';
 
 commaSeparator : COMMA_CHAR | COMMA_WORD | CSV ;
 

@@ -24,5 +24,3 @@ height     : 'h' (rational | INT) ;
 timeAxis   : TIME ;
 timeFormat : 'tf' STRING ;
 ```
-
-
