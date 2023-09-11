@@ -1,0 +1,9 @@
+f* "data.txt"
+s "Series 1" "Series 2" "Series 3"
+red rgb 0 255 0 cycle
+x * 1
+y 2 3 4
+xy - -
+csv
+xlabel "X label"
+ylabel "Y label"

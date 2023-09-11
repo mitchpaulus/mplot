@@ -27,7 +27,7 @@ element
   | xformat
   | xrange
   | yrange
-  | knownColor
+  | knownColorCycleAsterisk
   | lineWidth
   | font
   | fontSize
@@ -42,32 +42,32 @@ element
   | dpi
   ;
 
-file       : ('f' | 'file') STRING+ ;
+file       : ('f' | 'file') stringArray ;
 inlineData : INLINEDATA ;
 font       : ('font' | 'fo') STRING ;
 fontSize   : ('fs' | 'fontSize') INT ;
 dpi        : ('dpi' | 'd') INT ;
-separator  : ('sep' | 'separator') STRING ;
-series     : ('s' | 'series') STRING+ ;
-skip       : 'skip' INT ;
+separator  : ('sep' | 'separator') stringArray ;
+series     : ('s' | 'series') stringArray ;
+skip       : 'skip' intArray ;
 title      : ('ct' | 'charttitle') STRING ;
 titles     : 't' STRING STRING STRING ;
 xlabel     : ('xl' | 'xlabel') STRING ;
-xcol       : ('x' | 'xcol') (INT | STRING)  ;
+xcol       : ('x' | 'xcol') (INT | STRING | CYCLE | ASTERISK)+ ;
 xformat    : 'xf' STRING ;
 xrange     : ('xr' | 'xrange') range ;
 yrange     : ('yr' | 'yrange') range ;
 labels     : ('l' | 'labels') STRING STRING ;
-lineWidth  : ('lw' | 'linewidth') INT+ ;
+lineWidth  : ('lw' | 'linewidth') intArray ;
 ylabel     : ('yl' | 'ylabel') STRING ;
-ycol       : ('y' | 'ycol') (INT | STRING) ;
+ycol       : ('y' | 'ycol') (INT | STRING | CYCLE | ASTERISK)+ ;
 width      : ('w' | 'width') (rational | INT) ;
 height     : ('h' | 'height') (rational | INT) ;
 output     : ('out' | 'output') STRING ;
 timeAxis   : TIME ;
 timeFormat : ('tf' | 'timeformat') STRING ;
 isoDate : 'isodate' ;
-seriesStyle : pointStyle | lineStyle ;
+seriesStyle : (pointStyle | lineStyle | CYCLE | ASTERISK)+ ;
 gnuplotLiteral : 'gnuplot' STRING+ ;
 
 noLegend : 'nokey' | 'nolegend' ;
@@ -94,8 +94,8 @@ rationalArray : (rational | ASTERISK | CYCLE)+ ;
 colorArray : (hexColor | rgbColor | knownColor | ASTERISK | CYCLE)+ ;
 
 separator_type
-  : commaSeparator # CommaSep
-  | TAB_CHAR   # TabSep
+  : commaSeparator ASTERISK? # CommaSep
+  | TAB_CHAR ASTERISK?  # TabSep
   ;
 
 CYCLE : 'cycle' ;
@@ -129,10 +129,10 @@ grid : GRID ;
 
 GRID : 'grid' | 'g' ;
 
-hexColor : HEXCOLOR ;
+hexColor : HEXCOLOR (ASTERISK | CYCLE)? ;
 HEXCOLOR : '#' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT ;
-RGB : 'rgb' ;
-rgbColor : RGB INT INT INT ;
+RGB : 'rgb' | 'RGB' ;
+rgbColor : RGB INT INT INT (ASTERISK | CYCLE)? ;
 
 RED : 'red' ;
 GREEN : 'green' ;
@@ -154,6 +154,8 @@ knownColor
   | CCLLC_GREEN  # CcllcGreen
   | CCLLC_YELLOW # CcllcYellow
   ;
+
+knownColorCycleAsterisk : knownColor (ASTERISK | CYCLE)? ;
 
 fragment HEX_DIGIT : '0'..'9' | 'a'..'f' | 'A'..'F' ;
 

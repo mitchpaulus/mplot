@@ -21,4 +21,14 @@ public static class Extensions
 
         return $"\"0x{r}{g}{b}\"";
     }
+
+    public static void Update(this MplotArray<int> intArray, MplotParser.IntArrayContext intArrayContext)
+    {
+        intArray.Update(intArrayContext.INT().Select(node => int.Parse(node.GetText())).ToList(),  intArrayContext.CYCLE().Any(), intArrayContext.ASTERISK().Any()  );
+    }
+
+    public static void Update(this MplotArray<string> stringArray, MplotParser.StringArrayContext stringArrayContext)
+    {
+        stringArray.Update(stringArrayContext.STRING().Select(node =>  node.GetText().RemoveQuotes().Trim()).ToList(),  stringArrayContext.CYCLE().Any(), stringArrayContext.ASTERISK().Any());
+    }
 }

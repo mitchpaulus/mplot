@@ -1,19 +1,26 @@
 ﻿using System.Drawing;
 using System.Text;
+using Antlr4.Runtime.Tree;
 
 namespace mplot;
 
-internal class MplotListener : MplotBaseListener
+public class MplotListener : MplotBaseListener
 {
     MplotQueue<Color> ColorStack = new(Color.Black);
+    public MplotArray<Color> LineColorArray = new(Color.Black, MplotArrayMode.Repeat);
 
     public MplotQueue<int> LineWidthQueue = new(1);
+    public MplotArray<int> LineWidthArray = new(1, MplotArrayMode.Repeat);
 
     public string? XLabel { get; set; }
     public string? YLabel { get; set; }
 
     public MplotQueue<ColumnSpecifier> Ycols { get; set; } = new (new(2));
+
+    public MplotArray<ColumnSpecifier> YcolsArray { get; } = new MplotArray<ColumnSpecifier>( new ColumnSpecifier(2), MplotArrayMode.Repeat);
     public MplotQueue<ColumnSpecifier> Xcols { get; set; } = new (new(1));
+
+    public MplotArray<ColumnSpecifier> XcolsArray { get; } = new( new ColumnSpecifier(1), MplotArrayMode.Repeat);
 
     public bool Grid = false;
 
@@ -28,6 +35,9 @@ internal class MplotListener : MplotBaseListener
 
     public SpecifiedBool Legend = SpecifiedBool.Unset;
     public SeriesStyle PlotSeriesStyle { get; private set; } = SeriesStyle.Scatter;
+
+    public MplotArray<SeriesStyle> PlotSeriesStyleArray = new(SeriesStyle.Scatter, MplotArrayMode.Repeat);
+
     public double XMin { get; set; } = double.NaN;
     public double XMax { get; set; } = double.NaN;
 
@@ -47,11 +57,19 @@ internal class MplotListener : MplotBaseListener
 
     public int Skip = 0;
 
+    public MplotArray<int> SkipArray = new(0, MplotArrayMode.Repeat);
+
     public Separator Separator = new TabSeparator();
+
+    public MplotArray<Separator> SeparatorArray = new MplotArray<Separator>(new TabSeparator(), MplotArrayMode.Repeat);
 
     public MplotQueue<Marker> MarkerStack = new(new CircleMarker());
 
+    public MplotArray<Marker> MarkerArray = new(new CircleMarker(), MplotArrayMode.Repeat);
+
     public MplotQueue<string> FilePathStack = new("data.tsv");
+
+    public MplotArray<string> FilePathArray = new MplotArray<string>("data.tsv", MplotArrayMode.Repeat);
 
     public LegendPosition LegendPosition = new Empty();
 
@@ -60,11 +78,68 @@ internal class MplotListener : MplotBaseListener
 
     public string? LastFilePath { get; set; }
 
-    public List<Series> Series = new List<Series>();
+    public List<Series> Series = new();
+
+    public MplotArray<string> SeriesNameArray = new MplotArray<string>("Series", MplotArrayMode.Repeat);
     public bool TimeAxis { get; set; } = false;
     public string TimeFormat { get; set; } = "";
 
     public string XFormat { get; set; } = "";
+
+
+    public List<Series> GenSeries()
+    {
+        List<IMplotArray> requiredArrays = new List<IMplotArray>()
+        {
+            XcolsArray,
+            YcolsArray,
+            SeriesNameArray,
+            FilePathArray,
+            MarkerArray,
+            SkipArray,
+            LineColorArray,
+            LineWidthArray,
+            PlotSeriesStyleArray,
+        };
+
+        List<IMplotArray> normalLengthArrays = requiredArrays.Where(array => array.Mode() == MplotArrayMode.Normal).ToList();
+
+        if (!normalLengthArrays.Any())
+        {
+            StringBuilder b = new();
+            b.Append("At least one array for the series needs to be a countable array.\n");
+            throw new InvalidDataException(b.ToString());
+        }
+
+        IEnumerable<int> lengths = normalLengthArrays.Select(array => array.Length()).Distinct().ToList();
+
+        if (lengths.Count() != 1)
+        {
+            StringBuilder b = new();
+            b.Append("All series array lengths must be equal. Found:\n");
+            foreach (var l in lengths) b.Append($"{l}\n");
+            throw new InvalidDataException(b.ToString());
+        }
+
+        List<Series> series = new();
+        for (int i = 0; i < lengths.First(); i++)
+        {
+            Series s = new(
+            XcolsArray[i],
+            YcolsArray[i],
+                SeriesNameArray[i],
+                FilePathArray[i],
+                MarkerArray[i],
+                SkipArray[i],
+                LineColorArray[i],
+                LineWidthArray[i],
+                PlotSeriesStyleArray[i]);
+
+            series.Add(s);
+        }
+
+        return series;
+    }
 
 
     public MplotListener()
@@ -86,7 +161,11 @@ internal class MplotListener : MplotBaseListener
         YLabel = context.STRING()[2].GetText().RemoveQuotes().Trim();
     }
 
-    public override void EnterFile(MplotParser.FileContext context) => FilePathStack.Queue(context.STRING().Select(node => node.GetText().RemoveQuotes()));
+    public override void EnterFile(MplotParser.FileContext context)
+    {
+        FilePathStack.Queue(context.stringArray().STRING().Select(node => node.GetText().RemoveQuotes()));
+        FilePathArray.Update(context.stringArray());
+    }
 
     public override void EnterTitle(MplotParser.TitleContext context) => Title = context.STRING().GetText().RemoveQuotes();
 
@@ -98,7 +177,7 @@ internal class MplotListener : MplotBaseListener
         XTicIncrement = new Rational(context.rational(1));
         XTicMax = new Rational(context.rational(2));
     }
-    
+
     public override void EnterYtics(MplotParser.YticsContext context)
     {
         YTicMin = new Rational(context.rational(0));
@@ -176,20 +255,61 @@ internal class MplotListener : MplotBaseListener
 
     public override void EnterTimeAxis(MplotParser.TimeAxisContext context) => TimeAxis = true;
 
-    public override void EnterCommaSep(MplotParser.CommaSepContext context) => Separator = new CommaSeparator();
-
-    public override void EnterTabSep(MplotParser.TabSepContext context) => Separator = new TabSeparator();
-    public override void EnterSeparator(MplotParser.SeparatorContext context)
+    public override void EnterCommaSep(MplotParser.CommaSepContext context)
     {
-        string separatorText = context.STRING().GetText().RemoveQuotes();
-        Separator = new CharactersSeparator(separatorText);
+        CommaSeparator commaSeparator = new CommaSeparator();
+        Separator = commaSeparator;
+        SeparatorArray.Add(commaSeparator);
+        if (context.ASTERISK() is not null) SeparatorArray.SetMode(MplotArrayMode.Repeat);
     }
 
-    public override void EnterPointStyle(MplotParser.PointStyleContext context) => PlotSeriesStyle = SeriesStyle.Scatter;
-    public override void EnterLineStyle(MplotParser.LineStyleContext context) => PlotSeriesStyle = SeriesStyle.Line;
+    public override void EnterTabSep(MplotParser.TabSepContext context)
+    {
+        TabSeparator tabSeparator = new();
+        Separator = tabSeparator;
+        SeparatorArray.Add(tabSeparator);
+        if (context.ASTERISK() is not null) SeparatorArray.SetMode(MplotArrayMode.Repeat);
+    }
 
-    public override void EnterPlusMarker(MplotParser.PlusMarkerContext context) => MarkerStack.Queue(new PlusMarker());
-    public override void EnterCircleMarker(MplotParser.CircleMarkerContext context) => MarkerStack.Queue(new CircleMarker());
+    public override void EnterSeparator(MplotParser.SeparatorContext context)
+    {
+        var separatorText = context.stringArray().STRING().Select(s => s.GetText().RemoveQuotes()).ToList();
+        CharactersSeparator charactersSeparator = new(separatorText[0]);
+        Separator = charactersSeparator;
+
+        SeparatorArray.Update(separatorText.Select(s => (Separator)new CharactersSeparator(s)).ToList(), context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
+    }
+
+    public override void EnterPointStyle(MplotParser.PointStyleContext context)
+    {
+        PlotSeriesStyle = SeriesStyle.Scatter;
+        PlotSeriesStyleArray.Add(SeriesStyle.Scatter);
+    }
+
+    public override void EnterLineStyle(MplotParser.LineStyleContext context)
+    {
+        PlotSeriesStyle = SeriesStyle.Line;
+        PlotSeriesStyleArray.Add(SeriesStyle.Line);
+    }
+
+    public override void EnterPlusMarker(MplotParser.PlusMarkerContext context)
+    {
+        PlusMarker plusMarker = new();
+        MarkerStack.Queue(plusMarker);
+        MarkerArray.Add(plusMarker);
+    }
+
+    public override void EnterCircleMarker(MplotParser.CircleMarkerContext context)
+    {
+        CircleMarker circleMarker = new();
+        MarkerStack.Queue(circleMarker);
+        MarkerArray.Add(circleMarker);
+    }
+
+    public override void EnterSquareMarker(MplotParser.SquareMarkerContext context)
+    {
+
+    }
 
     public override void EnterLabels(MplotParser.LabelsContext context)
     {
@@ -206,6 +326,9 @@ internal class MplotListener : MplotBaseListener
         // Get Color from RGB
         Color color = Color.FromArgb(r, g, b);
         ColorStack.Queue(color);
+        LineColorArray.Add(color);
+        if (context.ASTERISK() is not null)  LineColorArray.SetMode(MplotArrayMode.Repeat);
+        if (context.CYCLE() is not null) LineColorArray.SetMode(MplotArrayMode.Cycle);
     }
 
     public override void EnterHexColor(MplotParser.HexColorContext context)
@@ -215,41 +338,71 @@ internal class MplotListener : MplotBaseListener
         // Get Color from Hex in form #RRGGBB
         Color color = ColorTranslator.FromHtml(hex);
         ColorStack.Queue(color);
+        LineColorArray.Add(color);
+
+        if (context.ASTERISK() is not null)  LineColorArray.SetMode(MplotArrayMode.Repeat);
+        if (context.CYCLE() is not null) LineColorArray.SetMode(MplotArrayMode.Cycle);
     }
 
     public override void EnterYcol(MplotParser.YcolContext context)
     {
-        if (context.INT() != null)
+        foreach (var child in context.children)
         {
-            var integer = int.Parse(context.INT().GetText());
-            Ycols.Queue(new ColumnSpecifier(integer));
-        }
-        else if (context.STRING() != null)
-        {
-            var text = context.STRING().GetText().RemoveQuotes();
-            Ycols.Queue(new ColumnSpecifier(text));
-        }
-        else
-        {
-            throw new NotImplementedException("Y col context type not implemented yet.");
+            if (child is not ITerminalNode node) continue;
+
+            if (node.Symbol.Type == MplotParser.INT)
+            {
+                var integer = int.Parse(node.GetText());
+                ColumnSpecifier columnSpecifier = new(integer);
+                Ycols.Queue(columnSpecifier);
+                YcolsArray.Add(columnSpecifier);
+            }
+            else if (node.Symbol.Type == MplotParser.STRING)
+            {
+                var text = node.GetText().RemoveQuotes();
+                ColumnSpecifier columnSpecifier = new ColumnSpecifier(text);
+                Ycols.Queue(columnSpecifier);
+                YcolsArray.Add(columnSpecifier);
+            }
+            else if (node.Symbol.Type == MplotParser.ASTERISK)
+            {
+                YcolsArray.SetMode(MplotArrayMode.Repeat);
+            }
+            else if (node.Symbol.Type == MplotParser.CYCLE)
+            {
+                YcolsArray.SetMode(MplotArrayMode.Cycle);
+            }
         }
     }
 
     public override void EnterXcol(MplotParser.XcolContext context)
     {
-        if (context.INT() != null)
+        foreach (IParseTree? child in context.children)
         {
-            var integer = int.Parse(context.INT().GetText());
-            Xcols.Queue(new ColumnSpecifier(integer));
-        }
-        else if (context.STRING() != null)
-        {
-            var text = context.STRING().GetText().RemoveQuotes();
-            Xcols.Queue(new ColumnSpecifier(text));
-        }
-        else
-        {
-            throw new NotImplementedException("Y col context type not implemented yet.");
+            if (child is not ITerminalNode node) continue;
+
+            if (node.Symbol.Type == MplotParser.INT)
+            {
+                var integer = int.Parse(node.GetText());
+                ColumnSpecifier columnSpecifier = new(integer);
+                Xcols.Queue(columnSpecifier);
+                XcolsArray.Add(columnSpecifier);
+            }
+            else if (node.Symbol.Type == MplotParser.STRING)
+            {
+                var text = node.GetText().RemoveQuotes();
+                ColumnSpecifier columnSpecifier = new ColumnSpecifier(text);
+                Xcols.Queue(columnSpecifier);
+                XcolsArray.Add(columnSpecifier);
+            }
+            else if (node.Symbol.Type == MplotParser.ASTERISK)
+            {
+                XcolsArray.SetMode(MplotArrayMode.Repeat);
+            }
+            else if (node.Symbol.Type == MplotParser.CYCLE)
+            {
+                XcolsArray.SetMode(MplotArrayMode.Cycle);
+            }
         }
     }
 
@@ -265,26 +418,79 @@ internal class MplotListener : MplotBaseListener
 
     public override void EnterSkip(MplotParser.SkipContext context)
     {
-        Skip = int.Parse(context.INT().GetText());
+        var ints = context.intArray().INT().Select(node => int.Parse(node.GetText())).ToList();
+        if (ints.Any())
+        {
+            Skip = ints[0];
+        }
+        SkipArray.Update(context.intArray());
     }
 
     public override void EnterLineWidth(MplotParser.LineWidthContext context)
     {
-        foreach (var integer in context.INT())
+        foreach (var integer in context.intArray().INT())
         {
             var integerValue = int.Parse(integer.GetText());
             LineWidthQueue.Queue(integerValue);
         }
+
+        LineWidthArray.Update(context.intArray());
     }
 
-    public override void EnterRedColor(MplotParser.RedColorContext context) => ColorStack.Queue(Color.Red);
-    public override void EnterGreenColor(MplotParser.GreenColorContext context) => ColorStack.Queue(Color.Green);
-    public override void EnterBlueColor(MplotParser.BlueColorContext context) => ColorStack.Queue(Color.Blue);
-    public override void EnterCcllcBlueColor(MplotParser.CcllcBlueColorContext context) => ColorStack.Queue(Color.FromArgb(0, 73, 135));
-    public override void EnterCcllcGray(MplotParser.CcllcGrayContext context) => ColorStack.Queue(Color.FromArgb(84, 88, 90));
-    public override void EnterCcllcMaroon(MplotParser.CcllcMaroonContext context) => ColorStack.Queue(Color.FromArgb(80,0,0));
-    public override void EnterCcllcGreen(MplotParser.CcllcGreenContext context) => ColorStack.Queue(Color.FromArgb(25,145,58));
-    public override void EnterCcllcYellow(MplotParser.CcllcYellowContext context) => ColorStack.Queue(Color.FromArgb(253,196,0));
+    public override void EnterKnownColorCycleAsterisk(MplotParser.KnownColorCycleAsteriskContext context)
+    {
+        if (context.CYCLE() is not null) LineColorArray.SetMode(MplotArrayMode.Cycle);
+        if (context.ASTERISK() is not null) LineColorArray.SetMode(MplotArrayMode.Repeat);
+    }
+
+    // TODO: Add to arrays.
+    public override void EnterRedColor(MplotParser.RedColorContext context)
+    {
+        ColorStack.Queue(Color.Red);
+        LineColorArray.Add(Color.Red);
+    }
+
+    public override void EnterGreenColor(MplotParser.GreenColorContext context)
+    {
+        ColorStack.Queue(Color.Green);
+        LineColorArray.Add(Color.Green);
+    }
+
+    public override void EnterBlueColor(MplotParser.BlueColorContext context)
+    {
+        ColorStack.Queue(Color.Blue);
+        LineColorArray.Add(Color.Blue);
+    }
+
+    public override void EnterCcllcBlueColor(MplotParser.CcllcBlueColorContext context)
+    {
+        ColorStack.Queue(Color.FromArgb(0, 73, 135));
+        LineColorArray.Add(Color.FromArgb(0, 73, 135));
+    }
+
+    public override void EnterCcllcGray(MplotParser.CcllcGrayContext context)
+    {
+        ColorStack.Queue(Color.FromArgb(84, 88, 90));
+        LineColorArray.Add(Color.FromArgb(84, 88, 90));
+    }
+
+    public override void EnterCcllcMaroon(MplotParser.CcllcMaroonContext context)
+    {
+        ColorStack.Queue(Color.FromArgb(80, 0, 0));
+        LineColorArray.Add(Color.FromArgb(80, 0, 0));
+    }
+
+    public override void EnterCcllcGreen(MplotParser.CcllcGreenContext context)
+    {
+        ColorStack.Queue(Color.FromArgb(25, 145, 58));
+        LineColorArray.Add(Color.FromArgb(25, 145, 58));
+    }
+
+    public override void EnterCcllcYellow(MplotParser.CcllcYellowContext context)
+    {
+        ColorStack.Queue(Color.FromArgb(253, 196, 0));
+        LineColorArray.Add(Color.FromArgb(253, 196, 0));
+    }
 
     public override void EnterTopLegend(MplotParser.TopLegendContext context) => LegendPosition = new Top();
     public override void EnterRightLegend(MplotParser.RightLegendContext context) => LegendPosition = new Right();
@@ -298,7 +504,10 @@ internal class MplotListener : MplotBaseListener
         var xCol = Xcols.Pop();
         var yCol = Ycols.Pop();
 
-        foreach (var name in context.STRING().Select(node => node.GetText().RemoveQuotes().Trim()))
+        var names = context.stringArray().STRING().Select(node => node.GetText().RemoveQuotes().Trim()).ToList();
+        SeriesNameArray.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
+
+        foreach (var name in names)
         {
             string filePath = FilePathStack.Pop();
 
@@ -380,19 +589,21 @@ internal class MplotListener : MplotBaseListener
             lines.Add($"set format x \"{XFormat}\"");
         }
 
-        if (Series.Any())
+        var seriesList = GenSeries();
+
+        if (seriesList.Any())
         {
-            if (Series.Count == 1)
+            if (seriesList.Count == 1)
             {
-                Series series = Series[0];
+                Series series = seriesList[0];
                 lines.Add($"plot {series.ToGnuplot()}");
             }
             else
             {
                 lines.Add("plot \\");
-                foreach (IndexedItem<Series> series in Series.WithIndex(1))
+                foreach (IndexedItem<Series> series in seriesList.WithIndex(1))
                 {
-                    string end = series.Index == Series.Count ? "" : ", \\";
+                    string end = series.Index == seriesList.Count ? "" : ", \\";
                     lines.Add( "  " + series.Item.ToGnuplot() + end);
                 }
             }
@@ -404,7 +615,7 @@ internal class MplotListener : MplotBaseListener
     }
 }
 
-public class SeriesStyle 
+public class SeriesStyle
 {
     public int Id { get; }
     public List<string> Keywords { get; }
@@ -825,7 +1036,7 @@ public class ColumnSpecifier
 {
     public bool UseString { get; }
     public string ColumnName { get; }
-    public int ColumnIndex { get; }
+    public int OneBasedColumnIndex { get; }
 
     public ColumnSpecifier(string columnName)
     {
@@ -833,14 +1044,14 @@ public class ColumnSpecifier
         ColumnName = columnName;
     }
 
-    public ColumnSpecifier(int columnIndex)
+    public ColumnSpecifier(int oneBasedColumnIndex)
     {
         UseString = false;
-        ColumnIndex = columnIndex;
+        OneBasedColumnIndex = oneBasedColumnIndex;
         ColumnName = "";
     }
 
-    public override string ToString() => UseString ? $"\"{ColumnName}\"" : ColumnIndex.ToString();
+    public override string ToString() => UseString ? $"\"{ColumnName}\"" : OneBasedColumnIndex.ToString();
 }
 
 public enum SpecifiedBool
