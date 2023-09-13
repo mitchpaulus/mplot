@@ -7,20 +7,20 @@ namespace mplot;
 public class MplotListener : MplotBaseListener
 {
     MplotQueue<Color> ColorStack = new(Color.Black);
-    public MplotArray<Color> LineColorArray = new(Color.Black, MplotArrayMode.Repeat);
+    public MplotArray<Color> LineColorArray = new(Color.Black, MplotArrayMode.Repeat, "Line color");
 
     public MplotQueue<int> LineWidthQueue = new(1);
-    public MplotArray<int> LineWidthArray = new(1, MplotArrayMode.Repeat);
+    public MplotArray<int> LineWidthArray = new(1, MplotArrayMode.Repeat, "Line width");
 
     public string? XLabel { get; set; }
     public string? YLabel { get; set; }
 
     public MplotQueue<ColumnSpecifier> Ycols { get; set; } = new (new(2));
 
-    public MplotArray<ColumnSpecifier> YcolsArray { get; } = new MplotArray<ColumnSpecifier>( new ColumnSpecifier(2), MplotArrayMode.Repeat);
+    public MplotArray<ColumnSpecifier> YcolsArray { get; } = new MplotArray<ColumnSpecifier>( new ColumnSpecifier(2), MplotArrayMode.Repeat, "Y col specifier");
     public MplotQueue<ColumnSpecifier> Xcols { get; set; } = new (new(1));
 
-    public MplotArray<ColumnSpecifier> XcolsArray { get; } = new( new ColumnSpecifier(1), MplotArrayMode.Repeat);
+    public MplotArray<ColumnSpecifier> XcolsArray { get; } = new( new ColumnSpecifier(1), MplotArrayMode.Repeat, "X col specifier");
 
     public bool Grid = false;
 
@@ -36,7 +36,7 @@ public class MplotListener : MplotBaseListener
     public SpecifiedBool Legend = SpecifiedBool.Unset;
     public SeriesStyle PlotSeriesStyle { get; private set; } = SeriesStyle.Scatter;
 
-    public MplotArray<SeriesStyle> PlotSeriesStyleArray = new(SeriesStyle.Scatter, MplotArrayMode.Repeat);
+    public MplotArray<SeriesStyle> PlotSeriesStyleArray = new(SeriesStyle.Scatter, MplotArrayMode.Repeat, "Series style");
 
     public double XMin { get; set; } = double.NaN;
     public double XMax { get; set; } = double.NaN;
@@ -57,19 +57,19 @@ public class MplotListener : MplotBaseListener
 
     public int Skip = 0;
 
-    public MplotArray<int> SkipArray = new(0, MplotArrayMode.Repeat);
+    public MplotArray<int> SkipArray = new(0, MplotArrayMode.Repeat, "Skip");
 
     public Separator Separator = new TabSeparator();
 
-    public MplotArray<Separator> SeparatorArray = new MplotArray<Separator>(new TabSeparator(), MplotArrayMode.Repeat);
+    public MplotArray<Separator> SeparatorArray = new MplotArray<Separator>(new TabSeparator(), MplotArrayMode.Repeat, "Separator");
 
     public MplotQueue<Marker> MarkerStack = new(new CircleMarker());
 
-    public MplotArray<Marker> MarkerArray = new(new CircleMarker(), MplotArrayMode.Repeat);
+    public MplotArray<Marker> MarkerArray = new(new CircleMarker(), MplotArrayMode.Repeat, "Marker");
 
     public MplotQueue<string> FilePathStack = new("data.tsv");
 
-    public MplotArray<string> FilePathArray = new MplotArray<string>("data.tsv", MplotArrayMode.Repeat);
+    public MplotArray<string> FilePathArray = new MplotArray<string>("data.tsv", MplotArrayMode.Repeat, "File path");
 
     public LegendPosition LegendPosition = new Empty();
 
@@ -80,7 +80,7 @@ public class MplotListener : MplotBaseListener
 
     public List<Series> Series = new();
 
-    public MplotArray<string> SeriesNameArray = new MplotArray<string>("Series", MplotArrayMode.Repeat);
+    public MplotArray<string> SeriesNameArray = new MplotArray<string>("Series", MplotArrayMode.Repeat, "Series name");
     public bool TimeAxis { get; set; } = false;
     public string TimeFormat { get; set; } = "";
 
@@ -117,7 +117,7 @@ public class MplotListener : MplotBaseListener
         {
             StringBuilder b = new();
             b.Append("All series array lengths must be equal. Found:\n");
-            foreach (var l in lengths) b.Append($"{l}\n");
+            foreach (var a in normalLengthArrays) b.Append($"{a.Name()}\t{a.Length()}\n");
             throw new InvalidDataException(b.ToString());
         }
 
@@ -278,6 +278,12 @@ public class MplotListener : MplotBaseListener
         Separator = charactersSeparator;
 
         SeparatorArray.Update(separatorText.Select(s => (Separator)new CharactersSeparator(s)).ToList(), context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
+    }
+
+    public override void EnterSeriesStyle(MplotParser.SeriesStyleContext context)
+    {
+        if (context.CYCLE() is not null) PlotSeriesStyleArray.SetMode(MplotArrayMode.Cycle);
+        if (context.ASTERISK() is not null) PlotSeriesStyleArray.SetMode(MplotArrayMode.Repeat);
     }
 
     public override void EnterPointStyle(MplotParser.PointStyleContext context)

@@ -4,6 +4,7 @@ namespace mplot;
 
 public class MplotArray<T> : IMplotArray
 {
+    public string Name() => _name;
     private readonly List<T>? _defaultElements;
     private readonly MplotArrayMode _defaultMode = MplotArrayMode.Repeat;
 
@@ -17,25 +18,29 @@ public class MplotArray<T> : IMplotArray
     public void SetMode(MplotArrayMode mode) => _mode = mode;
     private readonly List<T> _elements = new();
     private bool _useDefault;
+    private string _name;
 
     public int Length => _elements.Count;
 
-    public MplotArray()
+    public MplotArray(string name)
     {
+        _name = name;
         _useDefault = false;
     }
 
-    public MplotArray(List<T> elements, MplotArrayMode mode)
+    public MplotArray(List<T> elements, MplotArrayMode mode, string name)
     {
         _defaultElements = elements;
         _defaultMode = mode;
+        _name = name;
         _useDefault = true;
     }
 
-    public MplotArray(T element, MplotArrayMode mode)
+    public MplotArray(T element, MplotArrayMode mode, string name)
     {
         _defaultElements = new List<T> { element };
         _defaultMode = mode;
+        _name = name;
         _useDefault = true;
     }
 
@@ -88,6 +93,7 @@ public interface IMplotArray
 {
     int Length();
     MplotArrayMode Mode();
+    string Name();
 }
 
 public enum MplotArrayMode
