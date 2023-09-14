@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using System.Text;
 using Antlr4.Runtime.Tree;
+using OneOf;
 
 namespace mplot;
 
@@ -618,6 +619,28 @@ public class MplotListener : MplotBaseListener
         StringBuilder builder = new();
         foreach (var line in lines) builder.Append(line + "\n");
         return builder.ToString();
+    }
+}
+
+public class FileSource
+{
+    public FileSource(string filepath)
+    {
+        Filepath = filepath;
+    }
+
+    public string Filepath { get; private set; }
+}
+
+public class InlineDataSource
+{
+    public string Contents { get; private set; }
+}
+
+public class DataSource : OneOfBase<FileSource, InlineDataSource>
+{
+    protected DataSource(OneOf<FileSource, InlineDataSource> input) : base(input)
+    {
     }
 }
 
