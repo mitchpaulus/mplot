@@ -13,6 +13,8 @@ public class MplotListener : MplotBaseListener
     public MplotQueue<int> LineWidthQueue = new(1);
     public MplotArray<int> LineWidthArray = new(1, MplotArrayMode.Repeat, "Line width");
 
+    private int _currentVar = 1;
+
     public string? XLabel { get; set; }
     public string? YLabel { get; set; }
 
@@ -70,7 +72,7 @@ public class MplotListener : MplotBaseListener
 
     public MplotQueue<string> FilePathStack = new("data.tsv");
 
-    public MplotArray<string> FilePathArray = new MplotArray<string>("data.tsv", MplotArrayMode.Repeat, "File path");
+    public MplotArray<DataSource> FilePathArray = new MplotArray<DataSource>(new FileSource("data.tsv"), MplotArrayMode.Repeat, "File path");
 
     public LegendPosition LegendPosition = new Empty();
 
@@ -165,7 +167,11 @@ public class MplotListener : MplotBaseListener
     public override void EnterFile(MplotParser.FileContext context)
     {
         FilePathStack.Queue(context.stringArray().STRING().Select(node => node.GetText().RemoveQuotes()));
-        FilePathArray.Update(context.stringArray());
+
+        bool repeat = context.stringArray().ASTERISK() is not null;
+        bool cycle =  context.stringArray().CYCLE() is not null;
+
+        FilePathArray.Update(context.stringArray().STRING().Select(node => (DataSource)new FileSource(node.GetText().RemoveQuotes())).ToList(), cycle, repeat);
     }
 
     public override void EnterTitle(MplotParser.TitleContext context) => Title = context.STRING().GetText().RemoveQuotes();
@@ -522,10 +528,32 @@ public class MplotListener : MplotBaseListener
             Color lineColor = ColorStack.Pop();
             var lineWidth = LineWidthQueue.Pop();
 
-            Series series = new Series(xCol, yCol, name, filePath, marker, Skip, lineColor, lineWidth, PlotSeriesStyle);
+            Series series = new Series(xCol, yCol, name, new FileSource(filePath), marker, Skip, lineColor, lineWidth, PlotSeriesStyle);
 
             Series.Add(series);
         }
+    }
+
+    public override void EnterInlineData(MplotParser.InlineDataContext context)
+    {
+        string content = context.INLINEDATA().GetText();
+
+        int indexOfFirstNewline = content.IndexOf('\n');
+        int finalIndex = content.Length - 1;
+
+        for (int i = finalIndex; i > -1; i--)
+        {
+            if (content[i] != ' ' && content[i] != '\t')
+            {
+                finalIndex = i - 3;
+                break;
+            }
+        }
+
+        string data = content[(indexOfFirstNewline+1)..finalIndex];
+
+        FilePathArray.Add(new InlineDataSource(data, "var" + _currentVar));
+        _currentVar++;
     }
 
     public override void EnterFont(MplotParser.FontContext context)
@@ -596,7 +624,14 @@ public class MplotListener : MplotBaseListener
             lines.Add($"set format x \"{XFormat}\"");
         }
 
-        var seriesList = GenSeries();
+        List<Series> seriesList = GenSeries();
+
+        foreach (var source in seriesList.Where(series => series.FilePath.IsT1).Select(series => series.FilePath.AsT1))
+        {
+            lines.Add($"${source.VariableName}<<EOF");
+            lines.AddRange(source.Contents.SplitLines());
+            lines.Add("EOF");
+        }
 
         if (seriesList.Any())
         {
@@ -634,7 +669,14 @@ public class FileSource
 
 public class InlineDataSource
 {
+    public string VariableName { get; }
     public string Contents { get; private set; }
+
+    public InlineDataSource(string contents, string variableName)
+    {
+        VariableName = variableName;
+        Contents = contents;
+    }
 }
 
 public class DataSource : OneOfBase<FileSource, InlineDataSource>
@@ -642,6 +684,10 @@ public class DataSource : OneOfBase<FileSource, InlineDataSource>
     protected DataSource(OneOf<FileSource, InlineDataSource> input) : base(input)
     {
     }
+
+    public static implicit operator DataSource(FileSource fileSource) => new(fileSource);
+    public static implicit operator DataSource(InlineDataSource inlineDataSource) => new(inlineDataSource);
+
 }
 
 public class SeriesStyle
@@ -732,19 +778,19 @@ public class Series
     private readonly ColumnSpecifier _xCol;
     private readonly ColumnSpecifier _yCol;
     private readonly string _name;
-    private readonly string _filePath;
+    public DataSource FilePath { get; }
     private readonly Marker _marker;
     private readonly int _skip;
     private readonly Color _lineColor;
     private readonly int _lineWidth;
     private readonly SeriesStyle _style;
 
-    public Series(ColumnSpecifier xCol, ColumnSpecifier yCol, string name, string filePath, Marker marker, int skip, Color lineColor, int lineWidth, SeriesStyle style)
+    public Series(ColumnSpecifier xCol, ColumnSpecifier yCol, string name, DataSource filePath, Marker marker, int skip, Color lineColor, int lineWidth, SeriesStyle style)
     {
         _xCol = xCol;
         _yCol = yCol;
         _name = name;
-        _filePath = filePath;
+        FilePath = filePath;
         _marker = marker;
         _skip = skip;
         _lineColor = lineColor;
@@ -758,7 +804,10 @@ public class Series
         string lineWidth = _lineWidth == 1 ? "" : $"lw {_lineWidth}";
         string title = string.IsNullOrWhiteSpace(_name) ? "" : $" title \"{_name}\"";
 
-        return $"\"{_filePath}\" using {_xCol}:{_yCol}{skipText} with {_style.GnuplotStyle} {lineWidth} linecolor {_lineColor.ToGnuplot()}{title}";
+        string source = FilePath.Match(fileSource => $"\"{fileSource.Filepath}\"",
+            inlineDataSource => "$" + inlineDataSource.VariableName);
+
+        return $"{source} using {_xCol}:{_yCol}{skipText} with {_style.GnuplotStyle} {lineWidth} linecolor {_lineColor.ToGnuplot()}{title}";
     }
 }
 

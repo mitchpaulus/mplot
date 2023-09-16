@@ -22,6 +22,16 @@ public static class Extensions
         return $"\"0x{r}{g}{b}\"";
     }
 
+    public static IEnumerable<string> SplitLines(this string input)
+    {
+        using StringReader sr = new(input);
+        string? line;
+        while ((line = sr.ReadLine()) != null)
+        {
+            yield return line;
+        }
+    }
+
     public static void Update(this MplotArray<int> intArray, MplotParser.IntArrayContext intArrayContext)
     {
         intArray.Update(intArrayContext.INT().Select(node => int.Parse(node.GetText())).ToList(),  intArrayContext.CYCLE().Any(), intArrayContext.ASTERISK().Any()  );
