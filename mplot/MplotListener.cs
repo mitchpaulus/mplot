@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.IO.IsolatedStorage;
 using System.Text;
 using Antlr4.Runtime.Tree;
 using OneOf;
@@ -64,7 +65,7 @@ public class MplotListener : MplotBaseListener
 
     public Separator Separator = new TabSeparator();
 
-    public MplotArray<Separator> SeparatorArray = new MplotArray<Separator>(new TabSeparator(), MplotArrayMode.Repeat, "Separator");
+    public MplotArray<Separator2> SeparatorArray = new(new List<Separator2>() {  new AutoSeparator() } , MplotArrayMode.Repeat, "Separator");
 
     public MplotQueue<Marker> MarkerStack = new(new CircleMarker());
 
@@ -72,7 +73,7 @@ public class MplotListener : MplotBaseListener
 
     public MplotQueue<string> FilePathStack = new("data.tsv");
 
-    public MplotArray<DataSource> FilePathArray = new MplotArray<DataSource>(new FileSource("data.tsv"), MplotArrayMode.Repeat, "File path");
+    public MplotArray<DataSource> FilePathArray = new(new FileSource("data.tsv"), MplotArrayMode.Repeat, "File path");
 
     public LegendPosition LegendPosition = new Empty();
 
@@ -103,6 +104,7 @@ public class MplotListener : MplotBaseListener
             LineColorArray,
             LineWidthArray,
             PlotSeriesStyleArray,
+            SeparatorArray,
         };
 
         List<IMplotArray> normalLengthArrays = requiredArrays.Where(array => array.Mode() == MplotArrayMode.Normal).ToList();
@@ -136,7 +138,9 @@ public class MplotListener : MplotBaseListener
                 SkipArray[i],
                 LineColorArray[i],
                 LineWidthArray[i],
-                PlotSeriesStyleArray[i]);
+                PlotSeriesStyleArray[i],
+                SeparatorArray[i]
+            );
 
             series.Add(s);
         }
@@ -284,7 +288,7 @@ public class MplotListener : MplotBaseListener
         CharactersSeparator charactersSeparator = new(separatorText[0]);
         Separator = charactersSeparator;
 
-        SeparatorArray.Update(separatorText.Select(s => (Separator)new CharactersSeparator(s)).ToList(), context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
+        SeparatorArray.Update(separatorText.Select(s => (Separator2)new CharactersSeparator(s)).ToList(), context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
     }
 
     public override void EnterSeriesStyle(MplotParser.SeriesStyleContext context)
@@ -528,7 +532,7 @@ public class MplotListener : MplotBaseListener
             Color lineColor = ColorStack.Pop();
             var lineWidth = LineWidthQueue.Pop();
 
-            Series series = new Series(xCol, yCol, name, new FileSource(filePath), marker, Skip, lineColor, lineWidth, PlotSeriesStyle);
+            Series series = new Series(xCol, yCol, name, new FileSource(filePath), marker, Skip, lineColor, lineWidth, PlotSeriesStyle, new TabSeparator());
 
             Series.Add(series);
         }
@@ -588,8 +592,6 @@ public class MplotListener : MplotBaseListener
         if (!string.IsNullOrWhiteSpace(XLabel)) lines.Add($"set xlabel \"{XLabel}\"");
         if (!string.IsNullOrWhiteSpace(YLabel)) lines.Add($"set ylabel \"{YLabel}\"");
 
-        lines.Add(Separator.ToGnuplot());
-
         if (Grid) lines.Add("set grid");
 
         if (Legend == SpecifiedBool.False) lines.Add("set key off");
@@ -623,7 +625,7 @@ public class MplotListener : MplotBaseListener
         {
             lines.Add($"set format x \"{XFormat}\"");
         }
-
+        
         List<Series> seriesList = GenSeries();
 
         foreach (var source in seriesList.Where(series => series.FilePath.IsT1).Select(series => series.FilePath.AsT1))
@@ -635,6 +637,25 @@ public class MplotListener : MplotBaseListener
 
         if (seriesList.Any())
         {
+            // We still don't probably handle the case when series from different sources have different separators.
+            var sepLine = SeparatorArray[0].Match(
+                autoSep =>
+                {
+                    if (!seriesList[0].FilePath.TryPickT0(out var file, out _)) return "set datafile separator tab";
+
+                    var lower = file.Filepath.ToLower();
+                    if (lower.EndsWith(".csv")) return "set datafile separator comma";
+                    if (lower.EndsWith(".tsv")) return "set datafile separator tab";
+                    if (lower.EndsWith(".txt")) return "";
+                    return "set datafile separator tab";
+                },
+                tabSep => "set datafile separator tab",
+                commaSep => "set datafile separator comma",
+                separator => separator.ToGnuplot()
+            );
+            
+            lines.Add(sepLine);
+            
             if (seriesList.Count == 1)
             {
                 Series series = seriesList[0];
@@ -687,6 +708,9 @@ public class DataSource : OneOfBase<FileSource, InlineDataSource>
 
     public static implicit operator DataSource(FileSource fileSource) => new(fileSource);
     public static implicit operator DataSource(InlineDataSource inlineDataSource) => new(inlineDataSource);
+
+    public bool IsFileSource => IsT0;
+    public bool IsInlindeDataSource => IsT1;
 
 }
 
@@ -784,8 +808,9 @@ public class Series
     private readonly Color _lineColor;
     private readonly int _lineWidth;
     private readonly SeriesStyle _style;
+    public Separator2 Separator { get; }
 
-    public Series(ColumnSpecifier xCol, ColumnSpecifier yCol, string name, DataSource filePath, Marker marker, int skip, Color lineColor, int lineWidth, SeriesStyle style)
+    public Series(ColumnSpecifier xCol, ColumnSpecifier yCol, string name, DataSource filePath, Marker marker, int skip, Color lineColor, int lineWidth, SeriesStyle style, Separator2 separator)
     {
         _xCol = xCol;
         _yCol = yCol;
@@ -796,6 +821,7 @@ public class Series
         _lineColor = lineColor;
         _lineWidth = lineWidth;
         _style = style;
+        Separator = separator;
     }
 
     public string ToGnuplot()
@@ -809,6 +835,23 @@ public class Series
 
         return $"{source} using {_xCol}:{_yCol}{skipText} with {_style.GnuplotStyle} {lineWidth} linecolor {_lineColor.ToGnuplot()}{title}";
     }
+}
+
+public class Separator2 : OneOfBase<AutoSeparator, TabSeparator, CommaSeparator, CharactersSeparator>
+{
+    public Separator2(OneOf<AutoSeparator, TabSeparator, CommaSeparator, CharactersSeparator> input) : base(input)
+    {
+    }
+
+    public static implicit operator Separator2(AutoSeparator _) => new(_);
+    public static implicit operator Separator2(TabSeparator _) => new(_);
+    public static implicit operator Separator2(CommaSeparator _) => new(_);
+    public static implicit operator Separator2(CharactersSeparator _) => new(_);
+    
+}
+
+public class AutoSeparator
+{
 }
 
 public abstract class Separator
