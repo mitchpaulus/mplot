@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Text;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 
@@ -11,6 +13,7 @@ class Program
         int i = 0;
 
         List<string> files = new();
+        bool compile = false;
         while (i < args.Length)
         {
             if (args[i] == "-h" || args[i] == "--help")
@@ -20,7 +23,7 @@ class Program
                 Console.Write("mplot FILE\n");
                 Console.Write("mplot -h | --help\n");
                 Console.Write("mplot -V | --version\n");
-                
+
                 Console.Write("\n");
                 Console.Write("Example syntax:\n");
                 Console.Write("f \"file.tsv\"\n");
@@ -71,7 +74,7 @@ class Program
                 Console.Write("#000000 {- hex -}\n");
                 Console.Write("rgb 123 124 125 {- rgb -}\n");
                 Console.Write("red green blue ccblue ccgray ccmaroon ccgreen ccyellow {- named -}\n");
-                
+
                 return 0;
             }
 
@@ -81,7 +84,15 @@ class Program
                 return 0;
             }
 
-            files.Add(args[i]);
+            if (args[i] is "-c")
+            {
+                compile = true;
+            }
+            else
+            {
+                files.Add(args[i]);
+            }
+
             i++;
         }
 
@@ -121,7 +132,43 @@ class Program
         {
             walker.Walk(listener, parsedFile);
             string writeGnuplot = listener.WriteGnuplot();
-            Console.Write(writeGnuplot);
+
+            if (compile)
+            {
+                // Attempt to pipe string into gnuplot
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "gnuplot.exe" : "gnuplot";
+                startInfo.RedirectStandardInput = true;
+                startInfo.UseShellExecute = false;
+                startInfo.CreateNoWindow = true;
+
+                using Process process = new Process();
+                process.StartInfo = startInfo;
+
+                try
+                {
+                    process.Start();
+
+                    using (StreamWriter w = process.StandardInput)
+                    {
+                        if (w.BaseStream.CanWrite)
+                        {
+                            w.Write(writeGnuplot);
+                        }
+                    }
+
+                    process.WaitForExit();
+                }
+                catch (Exception e)
+                {
+                    Console.Error.Write($"There was an error compiling in gnuplot.\n{e.Message}\n");
+                    return process.ExitCode;
+                }
+            }
+            else
+            {
+                Console.Write(writeGnuplot);
+            }
         }
         catch (Exception e)
         {
