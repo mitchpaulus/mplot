@@ -77,7 +77,7 @@ xtics : 'xtics' rational rational rational ;
 ytics : 'ytics' rational rational rational ;
 
 pointStyle : 'point' | 'scatter' | 'xy' ;
-lineStyle : 'line' | '-' ;
+lineStyle : 'line' | MINUS ;
 
 range : lowLimit=rational? (COLON | TO) highLimit=rational? ;
 COLON : ':' ;
@@ -168,7 +168,7 @@ INT : [0-9]+ ;
 
 rational
   : numerator=INT '/' denominator=INT  # Fraction
-  | integer=INT '-' numerator=INT '/' denominator=INT  # MixedFraction
+  | integer=INT MINUS numerator=INT '/' denominator=INT  # MixedFraction
   | INT # Integer
   ;
 
@@ -178,3 +178,22 @@ COMMENT : '{-' .*? '-}' -> skip ;
 
 STRING : '"' (ESC|.)*? '"' ;
 fragment ESC : '\\"' | '\\\\' ;
+
+LESSTHAN : '<' ;
+GREATERTHAN : '>' ;
+LESSOREQUAL : '<=' ;
+GREATEROREQUAL : '>=' ;
+EQUAL : '=' ;
+FORWARDSLASH : '/' ;
+PLUS : '+' ;
+MINUS : '-' ;
+
+// expression
+//    : expression (ASTERISK | FORWARDSLASH) expression # MulDiv
+//    | expression (PLUS | MINUS) expression # AddSub
+//    | expression (LESSTHAN | GREATERTHAN | LESSOREQUAL | GREATEROREQUAL | EQUAL) expression # Comparison
+//    | expression AND expression # And
+//    | expression OR expression # Or
+//    | INT
+//    | rational
+//    ;
