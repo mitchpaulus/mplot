@@ -40,6 +40,7 @@ element
   | ytics
   | gnuplotLiteral
   | dpi
+  | commandSource
   ;
 
 file       : ('f' | 'file') stringArray ;

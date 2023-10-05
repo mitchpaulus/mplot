@@ -9,12 +9,12 @@ public static class AutoSeriesType
     {
         using Stream s = source.Match(
             fs => new FileStream(fs.Filepath, FileMode.Open),
-            inlineDataSource => (Stream)new MemoryStream(Encoding.UTF8.GetBytes(inlineDataSource.Contents))
+            inlineDataSource => (Stream)new MemoryStream(Encoding.UTF8.GetBytes(inlineDataSource.Contents)),
+            cmdDataSource => new MemoryStream(Encoding.UTF8.GetBytes(cmdDataSource.Execute().Output))
         );
         
         // if (sep.)
         
-
         return SeriesStyle.Scatter;
     }
 }

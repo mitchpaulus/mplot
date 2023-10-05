@@ -563,7 +563,9 @@ public class MplotListener : MplotBaseListener
     public override void EnterCommandSource(MplotParser.CommandSourceContext context)
     {
         var arguments = context.STRING().Select(s => s.GetText().RemoveQuotes()).ToList();
-
+        var cmdDataSource = new CommandDataSource(arguments, _currentVar);
+        _currentVar++;
+        FilePathArray.Add(cmdDataSource);
     }
 
     public override void EnterFont(MplotParser.FontContext context)
@@ -634,11 +636,23 @@ public class MplotListener : MplotBaseListener
         
         List<Series> seriesList = GenSeries();
 
-        foreach (var source in seriesList.Where(series => series.FilePath.IsT1).Select(series => series.FilePath.AsT1))
+        foreach (var source in seriesList.Where(series => series.FilePath.IsInlindeDataSource).Select(series => series.FilePath.AsT1))
         {
             lines.Add($"${source.VariableName}<<EOF");
             lines.AddRange(source.Contents.SplitLines());
             lines.Add("EOF");
+        }
+
+        foreach (var source in seriesList.Where(s => s.FilePath.IsCmdDataSource).Select(s => s.FilePath.AsT2))
+        {
+            var cmdOutput = source.Execute();
+            if (!cmdOutput.Success)
+            {
+                throw new InvalidOperationException(cmdOutput.ErrorMsg);
+            }
+
+            var enc = new UTF8Encoding(false);
+            File.WriteAllText(source.TmpFilePath(), cmdOutput.Output, enc);
         }
 
         if (seriesList.Any())
@@ -813,8 +827,11 @@ public class Series
         string lineWidth = _lineWidth == 1 ? "" : $"lw {_lineWidth}";
         string title = string.IsNullOrWhiteSpace(_name) ? "" : $" title \"{_name}\"";
 
-        string source = FilePath.Match(fileSource => $"\"{fileSource.Filepath}\"",
-            inlineDataSource => "$" + inlineDataSource.VariableName);
+        string source = FilePath.Match(
+            fileSource => $"\"{fileSource.Filepath}\"",
+            inlineDataSource => "$" + inlineDataSource.VariableName,
+            cmdDataSource => $"\"{cmdDataSource.TmpFilePath()}\""
+        );
 
         return $"{source} using {_xCol}:{_yCol}{skipText} with {_style.GnuplotStyle} {lineWidth} linecolor {_lineColor.ToGnuplot()}{title}";
     }
