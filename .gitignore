@@ -3,6 +3,7 @@
 *.interp
 *.tokens
 .idea/
+examples/cmd.png
 
 publish*/
 

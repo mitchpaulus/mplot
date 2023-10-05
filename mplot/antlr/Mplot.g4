@@ -40,6 +40,7 @@ element
   | ytics
   | gnuplotLiteral
   | dpi
+  | commandSource
   ;
 
 file       : ('f' | 'file') stringArray ;
@@ -103,6 +104,10 @@ ASTERISK : '*' ;
 INLINEDATA : START .*? END ;
 fragment START : ('start' | 'Start' | 'START') [ \t]* '\n';
 fragment END : ('end' | 'End' | 'END') [ \t]* '\n';
+
+CMD : 'cmd' | 'command' ;
+
+commandSource : CMD STRING+ ;
 
 commaSeparator : COMMA_CHAR | COMMA_WORD | CSV ;
 
