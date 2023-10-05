@@ -714,6 +714,19 @@ public class DataSource : OneOfBase<FileSource, InlineDataSource>
 
 }
 
+public class AutoSeriesEnum : OneOfBase<AutoSeries, SeriesStyle>
+{
+    protected AutoSeriesEnum(OneOf<AutoSeries, SeriesStyle> input) : base(input)
+    {
+    }
+}
+
+public class AutoSeries
+{
+    
+
+}
+
 public class SeriesStyle
 {
     public int Id { get; }
