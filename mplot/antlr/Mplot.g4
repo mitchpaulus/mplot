@@ -41,6 +41,7 @@ element
   | gnuplotLiteral
   | dpi
   | commandSource
+  | filter
   ;
 
 file       : ('f' | 'file') stringArray ;
@@ -70,6 +71,7 @@ timeFormat : ('tf' | 'timeformat') STRING ;
 isoDate : 'isodate' ;
 seriesStyle : (pointStyle | lineStyle | CYCLE | ASTERISK)+ ;
 gnuplotLiteral : 'gnuplot' STRING+ ;
+filter : 'filter' ASTERISK? expression ;
 
 noLegend : 'nokey' | 'nolegend' ;
 
@@ -77,7 +79,7 @@ xtics : 'xtics' rational rational rational ;
 ytics : 'ytics' rational rational rational ;
 
 pointStyle : 'point' | 'scatter' | 'xy' ;
-lineStyle : 'line' | MINUS ;
+lineStyle : 'line' ;
 
 range : lowLimit=rational? (COLON | TO) highLimit=rational? ;
 COLON : ':' ;
@@ -85,7 +87,7 @@ TO : 'to' ;
 
 marker
   : 'o' # CircleMarker
-  | '+' # PlusMarker
+  | 'plus' # PlusMarker
   | 'square' # SquareMarker
   ;
 
@@ -188,12 +190,29 @@ FORWARDSLASH : '/' ;
 PLUS : '+' ;
 MINUS : '-' ;
 
-// expression
-//    : expression (ASTERISK | FORWARDSLASH) expression # MulDiv
-//    | expression (PLUS | MINUS) expression # AddSub
-//    | expression (LESSTHAN | GREATERTHAN | LESSOREQUAL | GREATEROREQUAL | EQUAL) expression # Comparison
-//    | expression AND expression # And
-//    | expression OR expression # Or
-//    | INT
-//    | rational
-//    ;
+
+EXPRESSIONCOL : '$' INT ;
+EXPRESSIONCOLX : '$x' ;
+EXPRESSIONCOLY : '$y' ;
+
+expression : expressionItem+ ;
+
+FLOAT : [0-9]+ '.' [0-9]+ ;
+
+expressionItem
+    : INT
+    | FLOAT
+    | STRING
+    | EXPRESSIONCOL
+    | EXPRESSIONCOLX
+    | EXPRESSIONCOLY
+    | PLUS
+    | MINUS
+    | ASTERISK
+    | FORWARDSLASH
+    | LESSTHAN
+    | GREATERTHAN
+    | LESSOREQUAL
+    | GREATEROREQUAL
+    | EQUAL
+    ;
