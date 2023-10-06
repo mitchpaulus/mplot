@@ -38,4 +38,10 @@ public class Tests
         string writeGnuplot = listener.WriteGnuplot();
         Console.Write(writeGnuplot);
     }
+
+    [Test]
+    public void EvaluationTest()
+    {
+        
+    }
 }

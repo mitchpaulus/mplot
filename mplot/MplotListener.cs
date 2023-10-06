@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using System.IO.IsolatedStorage;
 using System.Text;
 using Antlr4.Runtime.Tree;
 using OneOf;
@@ -633,7 +632,7 @@ public class MplotListener : MplotBaseListener
         {
             lines.Add($"set format x \"{XFormat}\"");
         }
-        
+
         List<Series> seriesList = GenSeries();
 
         foreach (var source in seriesList.Where(series => series.FilePath.IsInlindeDataSource).Select(series => series.FilePath.AsT1))
@@ -658,24 +657,11 @@ public class MplotListener : MplotBaseListener
         if (seriesList.Any())
         {
             // We still don't probably handle the case when series from different sources have different separators.
-            var sepLine = SeparatorArray[0].Match(
-                autoSep =>
-                {
-                    if (!seriesList[0].FilePath.TryPickT0(out var file, out _)) return "set datafile separator tab";
-
-                    var lower = file.Filepath.ToLower();
-                    if (lower.EndsWith(".csv")) return "set datafile separator comma";
-                    if (lower.EndsWith(".tsv")) return "set datafile separator tab";
-                    if (lower.EndsWith(".txt")) return "";
-                    return "set datafile separator tab";
-                },
-                tabSep => "set datafile separator tab",
-                commaSep => "set datafile separator comma",
-                separator => separator.ToGnuplot()
-            );
+            var knownSep = SeparatorArray[0].Determine(seriesList[0].FilePath);
+            var sepLine = knownSep.ToGnuplot();
             
             lines.Add(sepLine);
-            
+
             if (seriesList.Count == 1)
             {
                 Series series = seriesList[0];
@@ -707,7 +693,7 @@ public class AutoSeriesEnum : OneOfBase<AutoSeries, SeriesStyle>
 
 public class AutoSeries
 {
-    
+
 
 }
 
@@ -837,56 +823,71 @@ public class Series
     }
 }
 
-public class Separator2 : OneOfBase<AutoSeparator, TabSeparator, CommaSeparator, CharactersSeparator>
-{
-    public Separator2(OneOf<AutoSeparator, TabSeparator, CommaSeparator, CharactersSeparator> input) : base(input)
-    {
-    }
-
-    public static implicit operator Separator2(AutoSeparator _) => new(_);
-    public static implicit operator Separator2(TabSeparator _) => new(_);
-    public static implicit operator Separator2(CommaSeparator _) => new(_);
-    public static implicit operator Separator2(CharactersSeparator _) => new(_);
-    
-}
-
 public class AutoSeparator
 {
+    public Separator Determine(DataSource source)
+    {
+        if (source.TryPickT0(out FileSource file, out var rest))
+        {
+            var lower = file.Filepath.ToLower();
+            if (lower.EndsWith(".csv")) return new CommaSeparator();
+            if (lower.EndsWith(".tsv")) return new TabSeparator();
+        }
+
+        using Stream stream = source.Stream();
+        using StreamReader reader = new StreamReader(stream, Encoding.UTF8);
+
+        var firstLine = reader.ReadLine();
+        if (firstLine is null) return new TabSeparator();
+        if (firstLine.Any(c => c == '\t')) return new TabSeparator();
+
+        var secondLine = reader.ReadLine();
+        if (secondLine is null) return new TabSeparator();
+
+        // Check if the number of commas in the first line is the same as the second.
+        int firstLineCommas = firstLine.Count(c => c == ',');
+        int secondLineCommas = secondLine.Count(c => c == ',');
+        if (firstLineCommas == secondLineCommas) return new CommaSeparator();
+
+        return new TabSeparator();
+    }
 }
 
 public abstract class Separator
 {
     public abstract string ToGnuplot();
+    public abstract List<string> Split(string s);
 }
 
-public class TabSeparator : Separator
+public class TabSeparator : Separator 
 {
     public override string ToGnuplot()
     {
         return "set datafile separator tab";
     }
+
+    public override List<string> Split(string s)
+    {
+        return s.Split('\t').ToList();
+    }
 }
 
 public class CommaSeparator : Separator
 {
-    public override string ToGnuplot()
-    {
-        return "set datafile separator comma";
-    }
+    public override string ToGnuplot() => "set datafile separator comma";
+    public override List<string> Split(string s) => s.Split(',').ToList();
 }
 
 public class CharactersSeparator : Separator
 {
-    private readonly string _sep;
+    public string Sep { get; }
 
     public CharactersSeparator(string sep)
     {
-        _sep = sep;
+        Sep = sep;
     }
-    public override string ToGnuplot()
-    {
-        return $"set datafile separator \"{_sep}\"";
-    }
+    public override string ToGnuplot() => $"set datafile separator \"{Sep}\"";
+    public override List<string> Split(string s) => s.Split(Sep).ToList();
 }
 
 public class Rational
@@ -1173,6 +1174,23 @@ public class ColumnSpecifier
     }
 
     public override string ToString() => UseString ? $"\"{ColumnName}\"" : OneBasedColumnIndex.ToString();
+
+    public int ColMatchZeroBased(List<string> line)
+    {
+        if (!UseString) return OneBasedColumnIndex - 1;
+
+        int col = 0;
+        foreach (var field in line)
+        {
+            if (string.Equals(field, ColumnName, StringComparison.OrdinalIgnoreCase))
+            {
+                return col;
+            }
+            col++;
+        }
+
+        return -1;
+    }
 }
 
 public enum SpecifiedBool

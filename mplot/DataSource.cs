@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 using OneOf;
 
 namespace mplot;
@@ -17,6 +18,16 @@ public class DataSource : OneOfBase<FileSource, InlineDataSource, CommandDataSou
     public bool IsFileSource => IsT0;
     public bool IsInlindeDataSource => IsT1;
     public bool IsCmdDataSource => IsT2;
+
+    public Stream Stream()
+    {
+        Stream s = Match(
+            fs => new FileStream(fs.Filepath, FileMode.Open),
+            inlineDataSource => (Stream) new MemoryStream(Encoding.UTF8.GetBytes(inlineDataSource.Contents)),
+            cmdDataSource => new MemoryStream(Encoding.UTF8.GetBytes(cmdDataSource.Execute().Output))
+        );
+        return s;
+    }
 }
 
 public class FileSource
