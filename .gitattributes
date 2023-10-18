@@ -1,0 +1,12 @@
+.cs text eol=lf
+.csproj text eol=lf
+.g4 text eol=lf
+.gnuplot text eol=lf
+.md text eol=lf
+.mplot text eol=lf
+.sh text eol=lf
+.sln text eol=lf
+.tsv text eol=lf
+.txt text eol=lf
+compile_grammer text eol=lf
+compile_java text eol=lf
