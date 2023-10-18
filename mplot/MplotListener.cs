@@ -62,8 +62,6 @@ public class MplotListener : MplotBaseListener
 
     public MplotArray<int> SkipArray = new(0, MplotArrayMode.Repeat, "Skip");
 
-    public Separator Separator = new TabSeparator();
-
     public MplotArray<Separator2> SeparatorArray = new(new List<Separator2>() {  new AutoSeparator() } , MplotArrayMode.Repeat, "Separator");
 
     public MplotQueue<Marker> MarkerStack = new(new CircleMarker());
@@ -268,7 +266,6 @@ public class MplotListener : MplotBaseListener
     public override void EnterCommaSep(MplotParser.CommaSepContext context)
     {
         CommaSeparator commaSeparator = new CommaSeparator();
-        Separator = commaSeparator;
         SeparatorArray.Add(commaSeparator);
         if (context.ASTERISK() is not null) SeparatorArray.SetMode(MplotArrayMode.Repeat);
     }
@@ -276,7 +273,13 @@ public class MplotListener : MplotBaseListener
     public override void EnterTabSep(MplotParser.TabSepContext context)
     {
         TabSeparator tabSeparator = new();
-        Separator = tabSeparator;
+        SeparatorArray.Add(tabSeparator);
+        if (context.ASTERISK() is not null) SeparatorArray.SetMode(MplotArrayMode.Repeat);
+    }
+
+    public override void EnterWhitespaceSep(MplotParser.WhitespaceSepContext context)
+    {
+        WhiteSpaceSeparator tabSeparator = new();
         SeparatorArray.Add(tabSeparator);
         if (context.ASTERISK() is not null) SeparatorArray.SetMode(MplotArrayMode.Repeat);
     }
@@ -285,7 +288,6 @@ public class MplotListener : MplotBaseListener
     {
         var separatorText = context.stringArray().STRING().Select(s => s.GetText().RemoveQuotes()).ToList();
         CharactersSeparator charactersSeparator = new(separatorText[0]);
-        Separator = charactersSeparator;
 
         SeparatorArray.Update(separatorText.Select(s => (Separator2)new CharactersSeparator(s)).ToList(), context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
     }
@@ -703,16 +705,19 @@ public class SeriesStyle
     public List<string> Keywords { get; }
     public string GnuplotStyle { get; }
 
+    public bool IsScatter { get; }
+
     public static Dictionary<string, SeriesStyle> Map = new();
 
-    public static SeriesStyle Scatter = new SeriesStyle(0, new List<string>() {"scatter", "point"}, "points");
-    public static SeriesStyle Line = new SeriesStyle(0, new List<string>() {"line", "-"}, "lines");
+    public static SeriesStyle Scatter = new(0, new List<string> {"scatter", "point"}, "points", true);
+    public static SeriesStyle Line = new(1, new List<string> {"line", "-"}, "lines", false);
 
-    public SeriesStyle(int id, List<string> keywords, string gnuplotStyle)
+    public SeriesStyle(int id, List<string> keywords, string gnuplotStyle, bool isScatter)
     {
         Id = id;
         Keywords = keywords;
         GnuplotStyle = gnuplotStyle;
+        IsScatter = isScatter;
 
         foreach (var s in keywords) Map[s] = this;
     }
@@ -762,23 +767,35 @@ public class IndexedItem<T>
 
 public abstract class Marker
 {
-
+    public abstract string ToGnuplot();
 }
 
 
 public class CircleMarker : Marker
 {
-
-
-
-
+    public override string ToGnuplot() => "pt 6";
 }
 
-public class PlusMarker : Marker { }
+public class PlusMarker : Marker
+{
+    public override string ToGnuplot() => "pt 1";
+}
 
-public class LineMarker : Marker { }
+public class LineMarker : Marker
+{
+    public override string ToGnuplot()
+    {
+        return "";
+    }
+}
 
-public class XMarker : Marker { }
+public class XMarker : Marker
+{
+    public override string ToGnuplot()
+    {
+        return "";
+    }
+}
 
 public class Series
 {
@@ -819,7 +836,9 @@ public class Series
             cmdDataSource => $"\"{cmdDataSource.TmpFilePath()}\""
         );
 
-        return $"{source} using {_xCol}:{_yCol}{skipText} with {_style.GnuplotStyle} {lineWidth} linecolor {_lineColor.ToGnuplot()}{title}";
+        string markerText = _style.IsScatter ? " " + _marker.ToGnuplot() + " " : " ";
+
+        return $"{source} using {_xCol}:{_yCol}{skipText} with {_style.GnuplotStyle}{markerText}{lineWidth} linecolor {_lineColor.ToGnuplot()}{title}";
     }
 }
 
@@ -888,6 +907,13 @@ public class CharactersSeparator : Separator
     }
     public override string ToGnuplot() => $"set datafile separator \"{Sep}\"";
     public override List<string> Split(string s) => s.Split(Sep).ToList();
+}
+
+public class WhiteSpaceSeparator : Separator
+{
+    public override string ToGnuplot() => $"set datafile separator whitespace";
+
+    public override List<string> Split(string s) => s.Split(null).ToList();
 }
 
 public class Rational

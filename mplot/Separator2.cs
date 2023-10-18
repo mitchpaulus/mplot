@@ -12,6 +12,7 @@ public class Separator2 : OneOfBase<AutoSeparator, Separator>
     public static implicit operator Separator2(TabSeparator _) => new(_);
     public static implicit operator Separator2(CommaSeparator _) => new(_);
     public static implicit operator Separator2(CharactersSeparator _) => new(_);
+    public static implicit operator Separator2(WhiteSpaceSeparator _) => new(_);
 
     public bool IsAuto => IsT0;
     public bool IsKnownSep => IsT1;

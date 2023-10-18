@@ -86,7 +86,7 @@ COLON : ':' ;
 TO : 'to' ;
 
 marker
-  : 'o' # CircleMarker
+  : ('o' | 'circle') # CircleMarker
   | 'plus' # PlusMarker
   | 'square' # SquareMarker
   ;
@@ -99,6 +99,7 @@ colorArray : (hexColor | rgbColor | knownColor | ASTERISK | CYCLE)+ ;
 separator_type
   : commaSeparator ASTERISK? # CommaSep
   | TAB_CHAR ASTERISK?  # TabSep
+  | WHITESPACESEP ASTERISK? # WhitespaceSep
   ;
 
 CYCLE : 'cycle' ;
@@ -117,6 +118,7 @@ COMMA_CHAR : ',' ;
 COMMA_WORD : 'comma' ;
 CSV : 'CSV' | 'csv' ;
 TAB_CHAR   : 'tab' ;
+WHITESPACESEP : 'ws' | 'whitespace' ;
 
 TIME : 'time' ;
 
