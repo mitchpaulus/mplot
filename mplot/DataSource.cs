@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using OfficeOpenXml;
 using OneOf;
 
 namespace mplot;
@@ -99,10 +100,13 @@ public class CommandDataSource
         {
             var process = Process.Start(psi);
             if (process == null)
+            {
                 return (false, string.Empty, $"Starting the process with arguments {string.Join(", ", Arguments)} resulted in null.");
-
-            process.WaitForExit();
+            }
+            
+            // Read MUST happen before wait, otherwise deadlock.
             var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
             _output = output;
             return (true, output, string.Empty);
         }
@@ -110,5 +114,74 @@ public class CommandDataSource
         {
             return (false, string.Empty, $"There was an exception executing the process: {e.Message}");
         }
+    }
+}
+
+public class ExcelFileDataSource
+{
+    public ExcelFileDataSource(string filePath, string worksheet, string cell)
+    {
+        FilePath = filePath;
+        Worksheet = worksheet;
+        Cell = cell;
+    }
+
+    public string FilePath { get; set; }
+    public string Worksheet { get; set; }
+    public string Cell { get; set; }
+
+
+    public Stream GetTsvStream()
+    {
+        using ExcelPackage package = new ExcelPackage(FilePath);
+        var workbook = package.Workbook;
+
+        foreach (var sheet in workbook.Worksheets)
+        {
+            if (sheet.Name != Worksheet) continue;
+
+            var upperLeftRange = sheet.Cells[Cell];
+            // Read left to right until blank on first row, expect this to be header, or at least set number of cols.
+
+            var startCol = upperLeftRange.Start.Column; 
+            var endCol = upperLeftRange.Start.Column;
+            var firstRow = upperLeftRange.Start.Row;
+
+            var currentRange = upperLeftRange;
+
+            while (!string.IsNullOrWhiteSpace(currentRange.Text))
+            {
+                endCol++;
+                currentRange = sheet.Cells[firstRow, endCol];
+            }
+
+            StringBuilder b = new StringBuilder();
+            var currentRow = firstRow;
+
+            bool validRow = false;
+            List<string> fields = new();
+            do
+            {
+                validRow = false;
+                for (int c = startCol; c <= endCol; c++)
+                {
+                    string s = sheet.Cells[currentRow, c].Text;
+                    if (!string.IsNullOrWhiteSpace(s)) validRow = true;
+                    fields.Add(s);
+                }
+
+                if (!validRow) continue;
+                
+                b.Append(string.Join("\t", fields));
+                b.Append('\n');
+                fields.Clear();
+                
+            } while (validRow);
+            
+            string content = b.ToString();
+            return new MemoryStream(Encoding.UTF8.GetBytes(content));
+        }
+
+        return new MemoryStream();
     }
 }
