@@ -1,0 +1,3 @@
+cmd "awk" "{ print $1, $2 }" "cmd_test_data.txt"
+sep " "
+out "cmd2.png"
