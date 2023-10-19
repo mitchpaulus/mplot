@@ -103,7 +103,7 @@ public class CommandDataSource
             {
                 return (false, string.Empty, $"Starting the process with arguments {string.Join(", ", Arguments)} resulted in null.");
             }
-            
+
             // Read MUST happen before wait, otherwise deadlock.
             var output = process.StandardOutput.ReadToEnd();
             process.WaitForExit();
@@ -143,7 +143,7 @@ public class ExcelFileDataSource
             var upperLeftRange = sheet.Cells[Cell];
             // Read left to right until blank on first row, expect this to be header, or at least set number of cols.
 
-            var startCol = upperLeftRange.Start.Column; 
+            var startCol = upperLeftRange.Start.Column;
             var endCol = upperLeftRange.Start.Column;
             var firstRow = upperLeftRange.Start.Row;
 
@@ -171,17 +171,36 @@ public class ExcelFileDataSource
                 }
 
                 if (!validRow) continue;
-                
+
                 b.Append(string.Join("\t", fields));
                 b.Append('\n');
                 fields.Clear();
-                
+
             } while (validRow);
-            
+
             string content = b.ToString();
             return new MemoryStream(Encoding.UTF8.GetBytes(content));
         }
 
         return new MemoryStream();
+    }
+}
+
+public interface IDataSource
+{
+    public List<string> Get(int colOneBased);
+    public List<string> Get(string name);
+}
+
+public class TestDataSource : IDataSource
+{
+    public List<string> Get(int colOneBased)
+    {
+        return new List<int>() { 1, 2, 3 }.Select(i => (i * colOneBased).ToString()).ToList();
+    }
+
+    public List<string> Get(string name)
+    {
+        return new List<int>() { 1, 2, 3 }.Select(i => (i * name.Length).ToString()).ToList();
     }
 }

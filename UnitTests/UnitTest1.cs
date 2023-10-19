@@ -3,6 +3,7 @@ using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using mplot;
 using NUnit.Framework;
+using OneOf;
 
 namespace UnitTests;
 
@@ -42,6 +43,23 @@ public class Tests
     [Test]
     public void EvaluationTest()
     {
-        
+        Evaluator eval = new Evaluator(new TestDataSource());
+
+        var colSpec1 = new Atom( new ExpressionColSpec( new ColNumSpec(1)));
+        var colSpec2 = new Atom( new ExpressionColSpec( new ColNumSpec(2)));
+
+        List<Atom> atoms = new List<Atom>()
+        {
+            colSpec1,
+            colSpec2,
+            new(OneOf<Operator, ExpressionColSpec>.FromT0(Operator.Add))
+        };
+
+        var result = eval.Evaluate(atoms);
+
+        if (result is DoubleArray dArray)
+        {
+            foreach (var d in dArray.Array) Console.Write(d + "\n");
+        }
     }
 }
