@@ -25,7 +25,10 @@ public static class Extensions
     public static IEnumerable<string> SplitLines(this string input)
     {
         using StringReader sr = new(input);
-        return SplitLines(sr);
+        while (sr.ReadLine() is { } line)
+        {
+            yield return line;
+        }
     }
     
     public static IEnumerable<string> SplitLines(this TextReader input)
