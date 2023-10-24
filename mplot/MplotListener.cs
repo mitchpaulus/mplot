@@ -324,6 +324,13 @@ public class MplotListener : MplotBaseListener
         MarkerArray.Add(circleMarker);
     }
 
+    public override void EnterFilledCircleMarker(MplotParser.FilledCircleMarkerContext context)
+    {
+        FilledCircleMarker filledCircleMarker = new();
+        MarkerStack.Queue(filledCircleMarker);
+        MarkerArray.Add(filledCircleMarker);
+    }
+
     public override void EnterSquareMarker(MplotParser.SquareMarkerContext context)
     {
 
@@ -774,6 +781,11 @@ public abstract class Marker
 public class CircleMarker : Marker
 {
     public override string ToGnuplot() => "pt 6";
+}
+
+public class FilledCircleMarker : Marker
+{
+    public override string ToGnuplot() => "pt 7";
 }
 
 public class PlusMarker : Marker

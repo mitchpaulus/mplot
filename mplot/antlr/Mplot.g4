@@ -89,6 +89,7 @@ marker
   : ('o' | 'circle') # CircleMarker
   | 'plus' # PlusMarker
   | 'square' # SquareMarker
+  | ('filledcircle' | 'fcircle' | 'fillcircle') # FilledCircleMarker
   ;
 
 stringArray : (STRING | ASTERISK | CYCLE)+ ;
