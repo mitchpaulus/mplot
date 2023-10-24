@@ -124,58 +124,59 @@ class Program
 
         var parsedFile = parser.mplot();
 
-        MplotListener listener = new MplotListener();
-
-        ParseTreeWalker walker = new ParseTreeWalker();
-
-        try
+        foreach (var plot in parsedFile.plot())
         {
-            walker.Walk(listener, parsedFile);
-            string writeGnuplot = listener.WriteGnuplot();
+            MplotListener listener = new MplotListener();
+            ParseTreeWalker walker = new ParseTreeWalker();
 
-            if (compile)
+            try
             {
-                // Attempt to pipe string into gnuplot
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "gnuplot.exe" : "gnuplot";
-                startInfo.RedirectStandardInput = true;
-                startInfo.UseShellExecute = false;
-                startInfo.CreateNoWindow = true;
+                walker.Walk(listener, plot);
+                string writeGnuplot = listener.WriteGnuplot();
 
-                using Process process = new Process();
-                process.StartInfo = startInfo;
-
-                try
+                if (compile)
                 {
-                    process.Start();
+                    // Attempt to pipe string into gnuplot
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "gnuplot.exe" : "gnuplot";
+                    startInfo.RedirectStandardInput = true;
+                    startInfo.UseShellExecute = false;
+                    startInfo.CreateNoWindow = true;
 
-                    using (StreamWriter w = process.StandardInput)
+                    using Process process = new Process();
+                    process.StartInfo = startInfo;
+
+                    try
                     {
-                        if (w.BaseStream.CanWrite)
+                        process.Start();
+
+                        using (StreamWriter w = process.StandardInput)
                         {
-                            w.Write(writeGnuplot);
+                            if (w.BaseStream.CanWrite)
+                            {
+                                w.Write(writeGnuplot);
+                            }
                         }
+
+                        process.WaitForExit();
                     }
-
-                    process.WaitForExit();
+                    catch (Exception e)
+                    {
+                        Console.Error.Write($"There was an error compiling in gnuplot.\n{e.Message}\n");
+                        return process.ExitCode;
+                    }
                 }
-                catch (Exception e)
+                else
                 {
-                    Console.Error.Write($"There was an error compiling in gnuplot.\n{e.Message}\n");
-                    return process.ExitCode;
+                    Console.Write(writeGnuplot);
                 }
             }
-            else
+            catch (Exception e)
             {
-                Console.Write(writeGnuplot);
+                Console.Error.Write(e.Message + "\n");
+                return 1;
             }
         }
-        catch (Exception e)
-        {
-            Console.Error.Write(e.Message + "\n");
-            return 1;
-        }
-
 
         return 0;
     }

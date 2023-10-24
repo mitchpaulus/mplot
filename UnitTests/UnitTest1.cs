@@ -17,8 +17,8 @@ public class Tests
     [Test]
     public void Test1()
     {
-        string filename = "/home/mitch/repos/mplot/tests/test1.mplot";
-
+        // string filename = "/home/mitch/repos/mplot/tests/test1.mplot";
+        string filename = "C:\\Users\\mpaulus\\source\\repos\\mplot\\tests\\test_inline.mplot";
 
         string contents = File.ReadAllText(filename, Encoding.UTF8);
 

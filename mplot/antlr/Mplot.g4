@@ -1,6 +1,8 @@
 grammar Mplot;
 
-mplot : element* EOF ;
+mplot : plot (PLOTSEP plot)* EOF ;
+
+plot : element* ;
 
 element
   : xlabel
@@ -193,6 +195,7 @@ FORWARDSLASH : '/' ;
 PLUS : '+' ;
 MINUS : '-' ;
 
+PLOTSEP : '---' '-'* ;
 
 EXPRESSIONCOL : '$' INT ;
 EXPRESSIONCOLX : '$x' ;
