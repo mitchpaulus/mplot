@@ -25,6 +25,22 @@ public class Evaluator
                 {
                     Operations.Add(dataStack);
                 }
+                else if (op.Id == Operator.Subtract.Id)
+                {
+                    Operations.Subtract(dataStack);
+                }
+                else if (op.Id == Operator.Multiply.Id)
+                {
+                    Operations.Multiply(dataStack);
+                }
+                else if (op.Id == Operator.Divide.Id)
+                {
+                    Operations.Divide(dataStack);
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
             }
             else
             {
@@ -86,6 +102,9 @@ public class Operator
     public static Operator LessThan = new(1);
     public static Operator GreaterThan = new(2);
     public static Operator Add = new(3);
+    public static Operator Subtract = new(4);
+    public static Operator Multiply = new(5);
+    public static Operator Divide = new(6);
 
     public Operator(int id)
     {
@@ -176,6 +195,94 @@ public static class Operations
         for (int i = 0; i < array1.Length; i++)
         {
             newArray.Add(doubleArray1[i] + doubleArray2[i]);
+        }
+
+        stack.Push(new DoubleArray(newArray));
+
+        return true;
+    }
+
+    public static bool Subtract(Stack<ExpressionArray> stack)
+    {
+        if (stack.Count < 2) return false;
+
+        var array1 = stack.Pop();
+        if (array1 is BoolArray) return false;
+
+        var array2 = stack.Pop();
+        if (array2 is BoolArray) return false;
+
+        if (array1.Length != array2.Length) return false;
+
+        var doubleArray1 = array1.ToDoubleArray();
+        var doubleArray2 = array2.ToDoubleArray();
+
+        var newArray = new List<double>();
+
+        for (int i = 0; i < array1.Length; i++)
+        {
+            newArray.Add(doubleArray1[i] - doubleArray2[i]);
+        }
+
+        stack.Push(new DoubleArray(newArray));
+
+        return true;
+    }
+
+    public static bool Multiply(Stack<ExpressionArray> stack)
+    {
+        if (stack.Count < 2) return false;
+
+        var array1 = stack.Pop();
+        if (array1 is BoolArray) return false;
+
+        var array2 = stack.Pop();
+        if (array2 is BoolArray) return false;
+
+        if (array1.Length != array2.Length) return false;
+
+        var doubleArray1 = array1.ToDoubleArray();
+        var doubleArray2 = array2.ToDoubleArray();
+
+        var newArray = new List<double>();
+
+        for (int i = 0; i < array1.Length; i++)
+        {
+            newArray.Add(doubleArray1[i] * doubleArray2[i]);
+        }
+
+        stack.Push(new DoubleArray(newArray));
+
+        return true;
+    }
+
+    public static bool Divide(Stack<ExpressionArray> stack)
+    {
+        if (stack.Count < 2) return false;
+
+        var array1 = stack.Pop();
+        if (array1 is BoolArray) return false;
+
+        var array2 = stack.Pop();
+        if (array2 is BoolArray) return false;
+
+        if (array1.Length != array2.Length) return false;
+
+        var doubleArray1 = array1.ToDoubleArray();
+        var doubleArray2 = array2.ToDoubleArray();
+
+        var newArray = new List<double>();
+
+        for (int i = 0; i < array1.Length; i++)
+        {
+            if (doubleArray2[i] == 0)
+            {
+                newArray.Add(0);
+            }
+            else
+            {
+                newArray.Add(doubleArray1[i] / doubleArray2[i]);
+            }
         }
 
         stack.Push(new DoubleArray(newArray));
