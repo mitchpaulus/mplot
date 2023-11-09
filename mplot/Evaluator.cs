@@ -5,15 +5,12 @@ namespace mplot;
 
 public class Evaluator
 {
-    private readonly IDataSource _source;
-
-    public Evaluator(IDataSource source)
+    public Evaluator()
     {
-        _source = source;
     }
 
 
-    public ExpressionArray Evaluate(List<Atom> atoms)
+    public static ExpressionArray Evaluate(List<Atom> atoms, IDataSource source)
     {
         Stack<ExpressionArray> dataStack = new();
 
@@ -45,8 +42,8 @@ public class Evaluator
             else
             {
                 List<string> array = colSpec.Match(
-                    colNumSpec => _source.Get(colNumSpec.OneBasedColumn),
-                    nameColSpec => _source.Get(nameColSpec.Name)
+                    colNumSpec => source.Get(colNumSpec.OneBasedColumn),
+                    nameColSpec => source.Get(nameColSpec.Name)
                 );
                 dataStack.Push(new StringArray(array));
             }

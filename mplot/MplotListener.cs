@@ -123,9 +123,21 @@ public class MplotListener : MplotBaseListener
             throw new InvalidDataException(b.ToString());
         }
 
+
         List<Series> series = new();
         for (int i = 0; i < lengths.First(); i++)
         {
+            Stream stream = FilePathArray[i].Stream();
+            StreamReader reader = new(stream, Encoding.UTF8);
+            var contents = reader.ReadToEnd();
+
+            Separator2 sep2 = SeparatorArray[i];
+            Separator sep = sep2.Determine(FilePathArray[i]);
+
+            SimpleDelimitedTextDataSource source = new(contents, SkipArray[i], sep);
+
+            var xResult = Evaluator.Evaluate(new List<Atom>(), source);
+
             Series s = new(
             XcolsArray[i],
             YcolsArray[i],
@@ -668,7 +680,7 @@ public class MplotListener : MplotBaseListener
             // We still don't probably handle the case when series from different sources have different separators.
             var knownSep = SeparatorArray[0].Determine(seriesList[0].FilePath);
             var sepLine = knownSep.ToGnuplot();
-            
+
             lines.Add(sepLine);
 
             if (seriesList.Count == 1)
@@ -890,7 +902,7 @@ public abstract class Separator
     public abstract List<string> Split(string s);
 }
 
-public class TabSeparator : Separator 
+public class TabSeparator : Separator
 {
     public override string ToGnuplot()
     {

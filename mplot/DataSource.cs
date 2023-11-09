@@ -204,3 +204,66 @@ public class TestDataSource : IDataSource
         return new List<int>() { 1, 2, 3 }.Select(i => (i * name.Length).ToString()).ToList();
     }
 }
+
+public class SimpleDelimitedTextDataSource : IDataSource
+{
+    private readonly string _contents;
+    private readonly int _skip;
+    private readonly Separator _separator;
+
+    public SimpleDelimitedTextDataSource(string contents, int skip, Separator separator)
+    {
+        _contents = contents;
+        _skip = skip;
+        _separator = separator;
+    }
+
+    public List<string> Get(int colOneBased)
+    {
+        var lines = _contents.SplitLines();
+        List<string> result = new();
+        foreach (var line in lines.Skip(_skip))
+        {
+            var fields = _separator.Split(line);
+            if (fields.Count < colOneBased)
+            {
+                throw new Exception($"Column {colOneBased} does not exist in the data source.");
+            }
+            result.Add(fields[colOneBased - 1]);
+        }
+        return result;
+    }
+
+    public List<string> Get(string name)
+    {
+        List<string> lines = _contents.SplitLines().ToList();
+        List<string> result = new();
+        if (!lines.Any()) return result;
+        List<string> header = _separator.Split(lines[0]);
+        int colOneBased = -1;
+        for (int i = 0; i < header.Count; i++)
+        {
+            if (header[i] == name)
+            {
+                colOneBased = i + 1;
+                break;
+            }
+        }
+
+        if (colOneBased == -1)
+        {
+            throw new Exception($"Column '{name}' does not exist in the data source.");
+        }
+
+        foreach (var line in lines.Skip(_skip))
+        {
+            var fields = _separator.Split(line);
+            if (fields.Count < colOneBased)
+            {
+                throw new Exception($"Column {colOneBased} does not exist in the data source.");
+            }
+            result.Add(fields[colOneBased - 1]);
+        }
+        return result;
+    }
+}

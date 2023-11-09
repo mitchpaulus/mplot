@@ -43,7 +43,7 @@ public class Tests
     [Test]
     public void EvaluationTest()
     {
-        Evaluator eval = new Evaluator(new TestDataSource());
+        TestDataSource testDataSource = new TestDataSource();
 
         var colSpec1 = new Atom( new ExpressionColSpec( new ColNumSpec(1)));
         var colSpec2 = new Atom( new ExpressionColSpec( new ColNumSpec(2)));
@@ -55,7 +55,7 @@ public class Tests
             new(OneOf<Operator, ExpressionColSpec>.FromT0(Operator.Add))
         };
 
-        var result = eval.Evaluate(atoms);
+        ExpressionArray result = Evaluator.Evaluate(atoms, testDataSource);
 
         if (result is DoubleArray dArray)
         {
