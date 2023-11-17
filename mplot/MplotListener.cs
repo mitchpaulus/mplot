@@ -25,6 +25,8 @@ public class MplotListener : MplotBaseListener
 
     public MplotArray<ColumnSelector> XcolsArray { get; } = new(new ColumnSpecifier(1), MplotArrayMode.Repeat, "X col specifier");
 
+    private MplotArray<Maybe<List<MplotToken>>> Filters { get; } = new(NoneMarker.None, MplotArrayMode.Repeat, "Filter expression");
+
     public bool Grid = false;
 
     public List<string> GnuplotLiterals = new();
@@ -107,6 +109,7 @@ public class MplotListener : MplotBaseListener
             LineWidthArray,
             PlotSeriesStyleArray,
             SeparatorArray,
+            Filters,
         };
 
         List<IMplotArray> normalLengthArrays = requiredArrays.Where(array => array.Mode() == MplotArrayMode.Normal).ToList();
@@ -141,6 +144,22 @@ public class MplotListener : MplotBaseListener
 
             string xColSpecifier = XcolsArray[i].Match(specifier => specifier.ToString(), Evaluator.EvaluateGnuplot);
             string yColSpecifier = YcolsArray[i].Match(specifier => specifier.ToString(), Evaluator.EvaluateGnuplot);
+
+            Maybe<List<MplotToken>> filter = Filters[i];
+
+            if (filter.TryPickT0(out List<MplotToken> tokens, out NoneMarker _))
+            {
+                var filterExpString = Evaluator.EvaluateGnuplot(tokens);
+
+                var colSpecifier = xColSpecifier;
+                var newXSpecifier = XcolsArray[i].Match(
+                    columnSpecifier => columnSpecifier.ToGnuplotExp(),
+                    _ => colSpecifier
+                );
+
+                // Wrap the x value in a ternary condition
+                xColSpecifier = $"({filterExpString} ? {newXSpecifier} : NaN)";
+            }
 
             Series s = new(
                 xColSpecifier,
@@ -189,6 +208,14 @@ public class MplotListener : MplotBaseListener
         bool cycle =  context.stringArray().CYCLE() is not null;
 
         FilePathArray.Update(context.stringArray().STRING().Select(node => (DataSource)new FileSource(node.GetText().RemoveQuotes())).ToList(), cycle, repeat);
+    }
+
+    public override void EnterFilter(MplotParser.FilterContext context)
+    {
+        if (context.ASTERISK() is not null) Filters.SetMode(MplotArrayMode.Repeat);
+        ExpressionListener l = new();
+        _walker.Walk(l, context.expression());
+        Filters.Add(l.Tokens);
     }
 
     public override void EnterTitle(MplotParser.TitleContext context) => Title = context.STRING().GetText().RemoveQuotes();
@@ -1224,9 +1251,16 @@ public class ColumnSelector : OneOfBase<ColumnSpecifier, List<MplotToken>>
 public class ColumnSpecifier
 {
     public bool UseString { get; }
+    /// <summary>
+    /// Column name should not be surrounded with quotes
+    /// </summary>
     public string ColumnName { get; }
     public int OneBasedColumnIndex { get; }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="columnName">columnName should not be surrounded with quotes</param>
     public ColumnSpecifier(string columnName)
     {
         UseString = true;
@@ -1241,6 +1275,8 @@ public class ColumnSpecifier
     }
 
     public override string ToString() => UseString ? $"\"{ColumnName}\"" : OneBasedColumnIndex.ToString();
+
+    public string ToGnuplotExp() => UseString ? $"column(\"{ColumnName}\")" : $"${OneBasedColumnIndex}";
 
     public int ColMatchZeroBased(List<string> line)
     {
@@ -1271,4 +1307,19 @@ public enum ColType
 {
     Standard,
     Expression,
+}
+
+public enum NoneMarker
+{
+    None
+}
+
+public class Maybe<T> : OneOfBase<T, NoneMarker>
+{
+    protected Maybe(OneOf<T, NoneMarker> input) : base(input)
+    {
+    }
+
+    public static implicit operator Maybe<T>(T _) => new(_);
+    public static implicit operator Maybe<T>(NoneMarker _) => new(_);
 }
