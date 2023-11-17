@@ -18,7 +18,7 @@ public class Tests
     public void Test1()
     {
         // string filename = "/home/mitch/repos/mplot/tests/test1.mplot";
-        string filename = "C:\\Users\\mpaulus\\source\\repos\\mplot\\tests\\test_inline.mplot";
+        string filename = "C:\\Users\\mpaulus\\source\\repos\\mplot\\tests\\expressions.mplot";
 
         string contents = File.ReadAllText(filename, Encoding.UTF8);
 
@@ -57,6 +57,33 @@ public class Tests
 
         ExpressionArray result = Evaluator.Evaluate(atoms, testDataSource);
 
+        if (result is DoubleArray dArray)
+        {
+            foreach (var d in dArray.Array) Console.Write(d + "\n");
+        }
+    }
+
+    [Test]
+    public void EvaluationTest2()
+    {
+        TestDataSource testDataSource = new TestDataSource();
+
+        string expression = "$1 $2 +";
+        AntlrInputStream inputStream = new AntlrInputStream(expression);
+        MplotLexer lexer = new(inputStream);
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+        MplotParser parser = new MplotParser(tokenStream);
+        var expressionTree = parser.expression();
+        ExpressionListener expListener = new ExpressionListener();
+        ParseTreeWalker walker = new ParseTreeWalker();
+        walker.Walk(expListener, expressionTree);
+
+        foreach (var token in expListener.Tokens)
+        {
+            Console.Write($"{token.TokenType}: {token.Contents}\n");
+        }
+
+        var result = Evaluator.Evaluate(expListener.Tokens, testDataSource);
         if (result is DoubleArray dArray)
         {
             foreach (var d in dArray.Array) Console.Write(d + "\n");

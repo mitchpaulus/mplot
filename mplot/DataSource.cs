@@ -188,6 +188,9 @@ public class ExcelFileDataSource
 
 public interface IDataSource
 {
+    /// <summary>
+    /// Get the data related to the one-based column
+    /// </summary>
     public List<string> Get(int colOneBased);
     public List<string> Get(string name);
 }
@@ -218,6 +221,9 @@ public class SimpleDelimitedTextDataSource : IDataSource
         _separator = separator;
     }
 
+    /// <summary>
+    /// Get data for one-based column
+    /// </summary>
     public List<string> Get(int colOneBased)
     {
         var lines = _contents.SplitLines();

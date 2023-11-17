@@ -18,7 +18,7 @@ public class MplotArray<T> : IMplotArray
     public void SetMode(MplotArrayMode mode) => _mode = mode;
     private readonly List<T> _elements = new();
     private bool _useDefault;
-    private string _name;
+    private readonly string _name;
 
     public int Length => _elements.Count;
 

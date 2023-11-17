@@ -15,7 +15,9 @@ element
   | titles
   | skip
   | xcol
+  | xexp
   | ycol
+  | yexp
   | width
   | height
   | file
@@ -58,6 +60,8 @@ title      : ('ct' | 'charttitle') STRING ;
 titles     : 't' STRING STRING STRING ;
 xlabel     : ('xl' | 'xlabel') STRING ;
 xcol       : ('x' | 'xcol') (INT | STRING | CYCLE | ASTERISK)+ ;
+xexp       : 'xexp' ASTERISK? expression ;
+yexp       : 'yexp' ASTERISK? expression ;
 xformat    : 'xf' STRING ;
 xrange     : ('xr' | 'xrange') range ;
 yrange     : ('yr' | 'yrange') range ;
@@ -76,6 +80,8 @@ gnuplotLiteral : 'gnuplot' STRING+ ;
 filter : 'filter' ASTERISK? expression ;
 
 noLegend : 'nokey' | 'nolegend' ;
+
+firstAsterisk : ASTERISK ;
 
 xtics : 'xtics' rational rational rational ;
 ytics : 'ytics' rational rational rational ;
@@ -205,20 +211,24 @@ expression : expressionItem+ ;
 
 FLOAT : [0-9]+ '.' [0-9]+ ;
 
+EXPRESSIONIDENTIFIER : '\\' [a-zA-Z_]+ ;
+
 expressionItem
-    : INT
-    | FLOAT
-    | STRING
-    | EXPRESSIONCOL
-    | EXPRESSIONCOLX
-    | EXPRESSIONCOLY
-    | PLUS
-    | MINUS
-    | ASTERISK
-    | FORWARDSLASH
-    | LESSTHAN
-    | GREATERTHAN
-    | LESSOREQUAL
-    | GREATEROREQUAL
-    | EQUAL
+    : INT # IntExp
+    | FLOAT # FloatExp
+    | STRING # StringExp
+    | EXPRESSIONCOL # ExpressionColExp
+    | EXPRESSIONCOLX # ExpressionColXExp
+    | EXPRESSIONCOLY # ExpressionColYExp
+    | PLUS # PlusExp
+    | MINUS # MinusExp
+    | ASTERISK # AsteriskExp
+    | FORWARDSLASH # ForwardSlashExp
+    | LESSTHAN # LessThanExp
+    | GREATERTHAN # GreaterThanExp
+    | LESSOREQUAL # LessOrEqualExp
+    | GREATEROREQUAL # GreaterOrEqualExp
+    | EQUAL # EqualExp
+    | EXPRESSIONIDENTIFIER # ExpressionIdentifierExp
+    | CYCLE # CycleExp
     ;
