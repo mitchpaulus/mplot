@@ -1,5 +1,5 @@
 set terminal pngcairo size 2304,1536 font ",10" fontscale 4 pointscale 4
-set key off
+set key 
 set xrange [0:8]
 set yrange [0:9]
 $var1<<EOF

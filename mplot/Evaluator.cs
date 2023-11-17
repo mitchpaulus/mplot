@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using Antlr4.Runtime.Atn;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using OneOf;
@@ -8,6 +10,58 @@ public class Evaluator
 {
     public Evaluator()
     {
+    }
+
+    public static string EvaluateGnuplot(List<MplotToken> tokens)
+    {
+        Stack<string> expStack = new();
+
+        foreach (var token in tokens)
+        {
+            if (token.TokenType == ExpressionTokenType.PLUS)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} + {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.MINUS)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} - {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.ASTERISK)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} * {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.FORWARDSLASH)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} / {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.STRING)
+            {
+                expStack.Push($"column(\"{token.Contents.RemoveQuotes()}\"");
+            }
+            else if (token.TokenType == ExpressionTokenType.EXPRESSIONCOL)
+            {
+                // This is '$' INT, example: $2. Passed as is to Gnuplot
+                expStack.Push(token.Contents);
+            }
+            else
+            {
+                throw new NotImplementedException($"Token type {token.TokenType} not implemented yet");
+            }
+        }
+
+        return expStack.Pop();
     }
 
     public static ExpressionArray Evaluate(List<MplotToken> atoms, IDataSource source)
@@ -171,6 +225,7 @@ public abstract class ExpressionArray
     public abstract int Length { get; }
 
     public abstract DoubleArray ToDoubleArray();
+    public abstract List<string> ToStringList();
 }
 
 
@@ -190,6 +245,8 @@ public class StringArray : ExpressionArray
     {
         return new DoubleArray(Array.Select(double.Parse).ToList());
     }
+
+    public override List<string> ToStringList() => Array;
 }
 
 public class DoubleArray : ExpressionArray
@@ -203,6 +260,11 @@ public class DoubleArray : ExpressionArray
     public override DoubleArray ToDoubleArray()
     {
         return this;
+    }
+
+    public override List<string> ToStringList()
+    {
+        return Array.Select(d => d.ToString(CultureInfo.InvariantCulture)).ToList();
     }
 
     public DoubleArray(List<double> array)
@@ -221,6 +283,12 @@ public class BoolArray : ExpressionArray
         throw new NotImplementedException();
     }
 
+    public override List<string> ToStringList()
+    {
+        // Not sure what to do here
+        return _array.Select(b => b ? "1" : "0").ToList();
+    }
+
     public BoolArray(List<bool> array)
     {
         _array = array;
@@ -233,6 +301,10 @@ public class IntArray : ExpressionArray
 
     public override int Length => _array.Count;
     public override DoubleArray ToDoubleArray() => new(_array.Select(i => (double) i).ToList());
+    public override List<string> ToStringList()
+    {
+        return _array.Select(i => i.ToString()).ToList();
+    }
 
     public IntArray(List<int> array)
     {

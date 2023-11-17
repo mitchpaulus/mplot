@@ -79,8 +79,6 @@ public class MplotListener : MplotBaseListener
 
     public string? LastFilePath { get; set; }
 
-    public List<Series> Series = new();
-
     public MplotArray<string> SeriesNameArray = new MplotArray<string>("Series", MplotArrayMode.Repeat, "Series name");
     public bool TimeAxis { get; set; } = false;
     public string TimeFormat { get; set; } = "";
@@ -141,12 +139,8 @@ public class MplotListener : MplotBaseListener
             Separator2 sep2 = SeparatorArray[i];
             Separator sep = sep2.Determine(FilePathArray[i]);
 
-            SimpleDelimitedTextDataSource source = new(contents, SkipArray[i], sep);
-
-            var xResult = Evaluator.Evaluate(new List<Atom>(), source);
-
-            ColumnSpecifier xColSpecifier = XcolsArray[i].Match(specifier => specifier, list => throw new NotImplementedException());
-            ColumnSpecifier yColSpecifier = YcolsArray[i].Match(specifier => specifier, list => throw new NotImplementedException());
+            string xColSpecifier = XcolsArray[i].Match(specifier => specifier.ToString(), Evaluator.EvaluateGnuplot);
+            string yColSpecifier = YcolsArray[i].Match(specifier => specifier.ToString(), Evaluator.EvaluateGnuplot);
 
             Series s = new(
                 xColSpecifier,
@@ -461,18 +455,16 @@ public class MplotListener : MplotBaseListener
     {
         ExpressionListener l = new();
         _walker.Walk(l, context.expression());
-        _xExps.Add(l.Tokens);
+        XcolsArray.Add(l.Tokens);
         if (context.ASTERISK() is not null) XcolsArray.SetMode(MplotArrayMode.Repeat);
-        _xColTypes.Add(ColType.Expression);
     }
 
     public override void EnterYexp(MplotParser.YexpContext context)
     {
         ExpressionListener l = new();
         _walker.Walk(l, context.expression());
-        _yExps.Add(l.Tokens);
+        YcolsArray.Add(l.Tokens);
         if (context.ASTERISK() is not null) YcolsArray.SetMode(MplotArrayMode.Repeat);
-        _yColTypes.Add(ColType.Expression);
     }
 
     public override void EnterOutput(MplotParser.OutputContext context)
@@ -570,24 +562,8 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterSeries(MplotParser.SeriesContext context)
     {
-        var xCol = Xcols.Pop();
-        var yCol = Ycols.Pop();
-
         var names = context.stringArray().STRING().Select(node => node.GetText().RemoveQuotes().Trim()).ToList();
         SeriesNameArray.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
-
-        foreach (var name in names)
-        {
-            string filePath = FilePathStack.Pop();
-
-            var marker = MarkerStack.Pop();
-            Color lineColor = ColorStack.Pop();
-            var lineWidth = LineWidthQueue.Pop();
-
-            Series series = new Series(xCol, yCol, name, new FileSource(filePath), marker, Skip, lineColor, lineWidth, PlotSeriesStyle, new TabSeparator());
-
-            Series.Add(series);
-        }
     }
 
     public override void EnterInlineData(MplotParser.InlineDataContext context)
@@ -653,10 +629,11 @@ public class MplotListener : MplotBaseListener
         if (!string.IsNullOrWhiteSpace(YLabel)) lines.Add($"set ylabel \"{YLabel}\"");
 
         if (Grid) lines.Add("set grid");
+        List<Series> seriesList = GenSeries();
 
         if (Legend == SpecifiedBool.False) lines.Add("set key off");
         else if (Legend == SpecifiedBool.True) lines.Add($"set key {LegendPosition.GnuPlotLegendPosition}");
-        else lines.Add(Series.Count > 1 ? $"set key {LegendPosition.GnuPlotLegendPosition}" : "set key off");
+        else lines.Add(seriesList.Count > 1 ? $"set key {LegendPosition.GnuPlotLegendPosition}" : "set key off");
 
         if (!double.IsNaN(XMin) && !double.IsNaN(XMax)) lines.Add($"set xrange [{XMin}:{XMax}]");
         else if (!double.IsNaN(XMin))                   lines.Add($"set xrange [{XMin}:*]");
@@ -686,7 +663,6 @@ public class MplotListener : MplotBaseListener
             lines.Add($"set format x \"{XFormat}\"");
         }
 
-        List<Series> seriesList = GenSeries();
 
         foreach (var source in seriesList.Where(series => series.FilePath.IsInlindeDataSource).Select(series => series.FilePath.AsT1))
         {
@@ -855,8 +831,8 @@ public class XMarker : Marker
 
 public class Series
 {
-    private readonly ColumnSpecifier _xCol;
-    private readonly ColumnSpecifier _yCol;
+    private readonly string _xCol;
+    private readonly string _yCol;
     private readonly string _name;
     public DataSource FilePath { get; }
     private readonly Marker _marker;
@@ -866,7 +842,7 @@ public class Series
     private readonly SeriesStyle _style;
     public Separator2 Separator { get; }
 
-    public Series(ColumnSpecifier xCol, ColumnSpecifier yCol, string name, DataSource filePath, Marker marker, int skip, Color lineColor, int lineWidth, SeriesStyle style, Separator2 separator)
+    public Series(string xCol, string yCol, string name, DataSource filePath, Marker marker, int skip, Color lineColor, int lineWidth, SeriesStyle style, Separator2 separator)
     {
         _xCol = xCol;
         _yCol = yCol;
@@ -917,14 +893,15 @@ public class AutoSeparator
         if (firstLine.Any(c => c == '\t')) return new TabSeparator();
 
         var secondLine = reader.ReadLine();
-        if (secondLine is null) return new TabSeparator();
+        if (secondLine is null) return new WhiteSpaceSeparator();
 
         // Check if the number of commas in the first line is the same as the second.
         int firstLineCommas = firstLine.Count(c => c == ',');
         int secondLineCommas = secondLine.Count(c => c == ',');
-        if (firstLineCommas == secondLineCommas) return new CommaSeparator();
 
-        return new TabSeparator();
+        if (firstLineCommas == secondLineCommas && firstLineCommas > 0) return new CommaSeparator();
+
+        return new WhiteSpaceSeparator();
     }
 }
 

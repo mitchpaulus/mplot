@@ -15,7 +15,9 @@ element
   | titles
   | skip
   | xcol
+  | xexp
   | ycol
+  | yexp
   | width
   | height
   | file
