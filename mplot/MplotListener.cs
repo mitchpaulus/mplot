@@ -20,10 +20,10 @@ public class MplotListener : MplotBaseListener
 
     public MplotQueue<ColumnSpecifier> Ycols { get; set; } = new (new(2));
 
-    public MplotArray<ColumnSpecifier> YcolsArray { get; } = new MplotArray<ColumnSpecifier>( new ColumnSpecifier(2), MplotArrayMode.Repeat, "Y col specifier");
+    public MplotArray<ColumnSelector> YcolsArray { get; } = new (new ColumnSpecifier(2), MplotArrayMode.Repeat, "Y col specifier");
     public MplotQueue<ColumnSpecifier> Xcols { get; set; } = new (new(1));
 
-    public MplotArray<ColumnSpecifier> XcolsArray { get; } = new( new ColumnSpecifier(1), MplotArrayMode.Repeat, "X col specifier");
+    public MplotArray<ColumnSelector> XcolsArray { get; } = new(new ColumnSpecifier(1), MplotArrayMode.Repeat, "X col specifier");
 
     public bool Grid = false;
 
@@ -87,6 +87,13 @@ public class MplotListener : MplotBaseListener
 
     public string XFormat { get; set; } = "";
 
+    private readonly ParseTreeWalker _walker = new();
+
+    private readonly List<List<MplotToken>> _xExps = new();
+    private readonly List<List<MplotToken>> _yExps = new();
+
+    private readonly List<ColType> _xColTypes = new();
+    private readonly List<ColType> _yColTypes = new();
 
     public List<Series> GenSeries()
     {
@@ -138,9 +145,12 @@ public class MplotListener : MplotBaseListener
 
             var xResult = Evaluator.Evaluate(new List<Atom>(), source);
 
+            ColumnSpecifier xColSpecifier = XcolsArray[i].Match(specifier => specifier, list => throw new NotImplementedException());
+            ColumnSpecifier yColSpecifier = YcolsArray[i].Match(specifier => specifier, list => throw new NotImplementedException());
+
             Series s = new(
-            XcolsArray[i],
-            YcolsArray[i],
+                xColSpecifier,
+                yColSpecifier,
                 SeriesNameArray[i],
                 FilePathArray[i],
                 MarkerArray[i],
@@ -393,6 +403,7 @@ public class MplotListener : MplotBaseListener
                 ColumnSpecifier columnSpecifier = new(integer);
                 Ycols.Queue(columnSpecifier);
                 YcolsArray.Add(columnSpecifier);
+                _yColTypes.Add(ColType.Standard);
             }
             else if (node.Symbol.Type == MplotParser.STRING)
             {
@@ -400,6 +411,7 @@ public class MplotListener : MplotBaseListener
                 ColumnSpecifier columnSpecifier = new ColumnSpecifier(text);
                 Ycols.Queue(columnSpecifier);
                 YcolsArray.Add(columnSpecifier);
+                _yColTypes.Add(ColType.Standard);
             }
             else if (node.Symbol.Type == MplotParser.ASTERISK)
             {
@@ -424,6 +436,7 @@ public class MplotListener : MplotBaseListener
                 ColumnSpecifier columnSpecifier = new(integer);
                 Xcols.Queue(columnSpecifier);
                 XcolsArray.Add(columnSpecifier);
+                _xColTypes.Add(ColType.Standard);
             }
             else if (node.Symbol.Type == MplotParser.STRING)
             {
@@ -431,6 +444,7 @@ public class MplotListener : MplotBaseListener
                 ColumnSpecifier columnSpecifier = new ColumnSpecifier(text);
                 Xcols.Queue(columnSpecifier);
                 XcolsArray.Add(columnSpecifier);
+                _xColTypes.Add(ColType.Standard);
             }
             else if (node.Symbol.Type == MplotParser.ASTERISK)
             {
@@ -441,6 +455,24 @@ public class MplotListener : MplotBaseListener
                 XcolsArray.SetMode(MplotArrayMode.Cycle);
             }
         }
+    }
+
+    public override void EnterXexp(MplotParser.XexpContext context)
+    {
+        ExpressionListener l = new();
+        _walker.Walk(l, context.expression());
+        _xExps.Add(l.Tokens);
+        if (context.ASTERISK() is not null) XcolsArray.SetMode(MplotArrayMode.Repeat);
+        _xColTypes.Add(ColType.Expression);
+    }
+
+    public override void EnterYexp(MplotParser.YexpContext context)
+    {
+        ExpressionListener l = new();
+        _walker.Walk(l, context.expression());
+        _yExps.Add(l.Tokens);
+        if (context.ASTERISK() is not null) YcolsArray.SetMode(MplotArrayMode.Repeat);
+        _yColTypes.Add(ColType.Expression);
     }
 
     public override void EnterOutput(MplotParser.OutputContext context)
@@ -1204,6 +1236,14 @@ public class Rational
     }
 }
 
+public class ColumnSelector : OneOfBase<ColumnSpecifier, List<MplotToken>>
+{
+    protected ColumnSelector(OneOf<ColumnSpecifier, List<MplotToken>> _) : base(_) { }
+
+    public static implicit operator ColumnSelector(ColumnSpecifier _) => new(_);
+    public static implicit operator ColumnSelector(List<MplotToken> _) => new(_);
+}
+
 public class ColumnSpecifier
 {
     public bool UseString { get; }
@@ -1248,4 +1288,10 @@ public enum SpecifiedBool
     Unset = -1,
     False = 0,
     True = 1,
+}
+
+public enum ColType
+{
+    Standard,
+    Expression,
 }

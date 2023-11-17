@@ -1,4 +1,5 @@
 using Antlr4.Runtime.Atn;
+using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using OneOf;
 
 namespace mplot;
@@ -9,6 +10,62 @@ public class Evaluator
     {
     }
 
+    public static ExpressionArray Evaluate(List<MplotToken> atoms, IDataSource source)
+    {
+        Stack<ExpressionArray> dataStack = new();
+
+        foreach (var token in atoms)
+        {
+            if (token.TokenType == ExpressionTokenType.PLUS)
+            {
+                Operations.Add(dataStack);
+            }
+            else if (token.TokenType == ExpressionTokenType.MINUS)
+            {
+                Operations.Subtract(dataStack);
+            }
+            else if (token.TokenType == ExpressionTokenType.ASTERISK)
+            {
+                Operations.Multiply(dataStack);
+            }
+            else if (token.TokenType == ExpressionTokenType.FORWARDSLASH)
+            {
+                Operations.Divide(dataStack);
+            }
+            else if (token.TokenType == ExpressionTokenType.EXPRESSIONCOL)
+            {
+                var dataArray = source.Get(int.Parse(token.Contents[1..]));
+                dataStack.Push(new StringArray(dataArray));
+            }
+            else if (token.TokenType == ExpressionTokenType.STRING)
+            {
+                var dataArray = source.Get(token.Contents.RemoveQuotes());
+                dataStack.Push(new StringArray(dataArray));
+            }
+            else if (token.TokenType == ExpressionTokenType.LESSTHAN)
+            {
+                Operations.Comparison(dataStack, token.TokenType);
+            }
+            else if (token.TokenType == ExpressionTokenType.GREATERTHAN)
+            {
+                Operations.Comparison(dataStack, token.TokenType);
+            }
+            else if (token.TokenType == ExpressionTokenType.LESSOREQUAL)
+            {
+                Operations.Comparison(dataStack, token.TokenType);
+            }
+            else if (token.TokenType == ExpressionTokenType.GREATEROREQUAL)
+            {
+                Operations.Comparison(dataStack, token.TokenType);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        return dataStack.Pop();
+    }
 
     public static ExpressionArray Evaluate(List<Atom> atoms, IDataSource source)
     {
@@ -170,6 +227,19 @@ public class BoolArray : ExpressionArray
     }
 }
 
+public class IntArray : ExpressionArray
+{
+    private readonly List<int> _array;
+
+    public override int Length => _array.Count;
+    public override DoubleArray ToDoubleArray() => new(_array.Select(i => (double) i).ToList());
+
+    public IntArray(List<int> array)
+    {
+        _array = array;
+    }
+}
+
 public static class Operations
 {
     public static bool Add(Stack<ExpressionArray> stack)
@@ -283,6 +353,42 @@ public static class Operations
         }
 
         stack.Push(new DoubleArray(newArray));
+
+        return true;
+    }
+
+    public static bool Comparison(Stack<ExpressionArray> stack, ExpressionTokenType type)
+    {
+        if (stack.Count < 2) return false;
+
+        var array1 = stack.Pop();
+        if (array1 is BoolArray) return false;
+
+        var array2 = stack.Pop();
+        if (array2 is BoolArray) return false;
+
+        if (array1.Length != array2.Length) return false;
+
+        var doubleArray1 = array1.ToDoubleArray();
+        var doubleArray2 = array2.ToDoubleArray();
+
+        var newArray = new List<bool>();
+
+        Func<double, double, bool> comparer = type switch
+        {
+            ExpressionTokenType.LESSTHAN => (a, b) => a < b,
+            ExpressionTokenType.GREATERTHAN => (a, b) => a > b,
+            ExpressionTokenType.LESSOREQUAL => (a, b) => a <= b,
+            ExpressionTokenType.GREATEROREQUAL => (a, b) => a >= b,
+            _ => throw new NotImplementedException()
+        };
+
+        for (int i = 0; i < array1.Length; i++)
+        {
+            newArray.Add(comparer(doubleArray1[i], doubleArray2[i]));
+        }
+
+        stack.Push(new BoolArray(newArray));
 
         return true;
     }

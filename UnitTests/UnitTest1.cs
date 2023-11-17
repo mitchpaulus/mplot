@@ -62,4 +62,31 @@ public class Tests
             foreach (var d in dArray.Array) Console.Write(d + "\n");
         }
     }
+
+    [Test]
+    public void EvaluationTest2()
+    {
+        TestDataSource testDataSource = new TestDataSource();
+
+        string expression = "$1 $2 +";
+        AntlrInputStream inputStream = new AntlrInputStream(expression);
+        MplotLexer lexer = new(inputStream);
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+        MplotParser parser = new MplotParser(tokenStream);
+        var expressionTree = parser.expression();
+        ExpressionListener expListener = new ExpressionListener();
+        ParseTreeWalker walker = new ParseTreeWalker();
+        walker.Walk(expListener, expressionTree);
+
+        foreach (var token in expListener.Tokens)
+        {
+            Console.Write($"{token.TokenType}: {token.Contents}\n");
+        }
+
+        var result = Evaluator.Evaluate(expListener.Tokens, testDataSource);
+        if (result is DoubleArray dArray)
+        {
+            foreach (var d in dArray.Array) Console.Write(d + "\n");
+        }
+    }
 }
