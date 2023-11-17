@@ -1,4 +1,4 @@
-f* "data.txt"
+f* "test1.txt"
 s "Series 1" "Series 2" "Series 3"
 red rgb 0 255 0 cycle
 x * 1
