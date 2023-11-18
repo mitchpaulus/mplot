@@ -55,6 +55,49 @@ public class Evaluator
                 // This is '$' INT, example: $2. Passed as is to Gnuplot
                 expStack.Push(token.Contents);
             }
+            else if (token.TokenType == ExpressionTokenType.INT)
+            {
+                expStack.Push(token.Contents);
+            }
+            else if (token.TokenType == ExpressionTokenType.FLOAT)
+            {
+                expStack.Push(token.Contents);
+            }
+            else if (token.TokenType == ExpressionTokenType.LESSTHAN)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} < {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.GREATERTHAN)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} > {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.LESSOREQUAL)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} <= {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.GREATEROREQUAL)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} >= {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.EQUAL)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} == {arg2})");
+            }
             else
             {
                 throw new NotImplementedException($"Token type {token.TokenType} not implemented yet");
