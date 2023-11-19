@@ -7,24 +7,16 @@ namespace mplot;
 
 public class MplotListener : MplotBaseListener
 {
-    MplotQueue<Color> ColorStack = new(Color.Black);
     public MplotArray<Color> LineColorArray = new(Color.Black, MplotArrayMode.Repeat, "Line color");
 
-    public MplotQueue<int> LineWidthQueue = new(1);
     public MplotArray<int> LineWidthArray = new(1, MplotArrayMode.Repeat, "Line width");
 
     private int _currentVar = 1;
 
     public string? XLabel { get; set; }
     public string? YLabel { get; set; }
-
-    public MplotQueue<ColumnSpecifier> Ycols { get; set; } = new (new(2));
-
     public MplotArray<ColumnSelector> YcolsArray { get; } = new (new ColumnSpecifier(2), MplotArrayMode.Repeat, "Y col specifier");
-    public MplotQueue<ColumnSpecifier> Xcols { get; set; } = new (new(1));
-
     public MplotArray<ColumnSelector> XcolsArray { get; } = new(new ColumnSpecifier(1), MplotArrayMode.Repeat, "X col specifier");
-
     private MplotArray<Maybe<List<MplotToken>>> Filters { get; } = new(NoneMarker.None, MplotArrayMode.Repeat, "Filter expression");
 
     public bool Grid = false;
@@ -88,12 +80,6 @@ public class MplotListener : MplotBaseListener
     public string XFormat { get; set; } = "";
 
     private readonly ParseTreeWalker _walker = new();
-
-    private readonly List<List<MplotToken>> _xExps = new();
-    private readonly List<List<MplotToken>> _yExps = new();
-
-    private readonly List<ColType> _xColTypes = new();
-    private readonly List<ColType> _yColTypes = new();
 
     public List<Series> GenSeries()
     {
@@ -393,7 +379,6 @@ public class MplotListener : MplotBaseListener
 
         // Get Color from RGB
         Color color = Color.FromArgb(r, g, b);
-        ColorStack.Queue(color);
         LineColorArray.Add(color);
         if (context.ASTERISK() is not null)  LineColorArray.SetMode(MplotArrayMode.Repeat);
         if (context.CYCLE() is not null) LineColorArray.SetMode(MplotArrayMode.Cycle);
@@ -405,7 +390,6 @@ public class MplotListener : MplotBaseListener
 
         // Get Color from Hex in form #RRGGBB
         Color color = ColorTranslator.FromHtml(hex);
-        ColorStack.Queue(color);
         LineColorArray.Add(color);
 
         if (context.ASTERISK() is not null)  LineColorArray.SetMode(MplotArrayMode.Repeat);
@@ -422,17 +406,13 @@ public class MplotListener : MplotBaseListener
             {
                 var integer = int.Parse(node.GetText());
                 ColumnSpecifier columnSpecifier = new(integer);
-                Ycols.Queue(columnSpecifier);
                 YcolsArray.Add(columnSpecifier);
-                _yColTypes.Add(ColType.Standard);
             }
             else if (node.Symbol.Type == MplotParser.STRING)
             {
                 var text = node.GetText().RemoveQuotes();
                 ColumnSpecifier columnSpecifier = new ColumnSpecifier(text);
-                Ycols.Queue(columnSpecifier);
                 YcolsArray.Add(columnSpecifier);
-                _yColTypes.Add(ColType.Standard);
             }
             else if (node.Symbol.Type == MplotParser.ASTERISK)
             {
@@ -455,17 +435,13 @@ public class MplotListener : MplotBaseListener
             {
                 var integer = int.Parse(node.GetText());
                 ColumnSpecifier columnSpecifier = new(integer);
-                Xcols.Queue(columnSpecifier);
                 XcolsArray.Add(columnSpecifier);
-                _xColTypes.Add(ColType.Standard);
             }
             else if (node.Symbol.Type == MplotParser.STRING)
             {
                 var text = node.GetText().RemoveQuotes();
                 ColumnSpecifier columnSpecifier = new ColumnSpecifier(text);
-                Xcols.Queue(columnSpecifier);
                 XcolsArray.Add(columnSpecifier);
-                _xColTypes.Add(ColType.Standard);
             }
             else if (node.Symbol.Type == MplotParser.ASTERISK)
             {
@@ -514,16 +490,7 @@ public class MplotListener : MplotBaseListener
         SkipArray.Update(context.intArray());
     }
 
-    public override void EnterLineWidth(MplotParser.LineWidthContext context)
-    {
-        foreach (var integer in context.intArray().INT())
-        {
-            var integerValue = int.Parse(integer.GetText());
-            LineWidthQueue.Queue(integerValue);
-        }
-
-        LineWidthArray.Update(context.intArray());
-    }
+    public override void EnterLineWidth(MplotParser.LineWidthContext context) => LineWidthArray.Update(context.intArray());
 
     public override void EnterKnownColorCycleAsterisk(MplotParser.KnownColorCycleAsteriskContext context)
     {
@@ -534,49 +501,41 @@ public class MplotListener : MplotBaseListener
     // TODO: Add to arrays.
     public override void EnterRedColor(MplotParser.RedColorContext context)
     {
-        ColorStack.Queue(Color.Red);
         LineColorArray.Add(Color.Red);
     }
 
     public override void EnterGreenColor(MplotParser.GreenColorContext context)
     {
-        ColorStack.Queue(Color.Green);
         LineColorArray.Add(Color.Green);
     }
 
     public override void EnterBlueColor(MplotParser.BlueColorContext context)
     {
-        ColorStack.Queue(Color.Blue);
         LineColorArray.Add(Color.Blue);
     }
 
     public override void EnterCcllcBlueColor(MplotParser.CcllcBlueColorContext context)
     {
-        ColorStack.Queue(Color.FromArgb(0, 73, 135));
         LineColorArray.Add(Color.FromArgb(0, 73, 135));
     }
 
     public override void EnterCcllcGray(MplotParser.CcllcGrayContext context)
     {
-        ColorStack.Queue(Color.FromArgb(84, 88, 90));
         LineColorArray.Add(Color.FromArgb(84, 88, 90));
     }
 
     public override void EnterCcllcMaroon(MplotParser.CcllcMaroonContext context)
     {
-        ColorStack.Queue(Color.FromArgb(80, 0, 0));
         LineColorArray.Add(Color.FromArgb(80, 0, 0));
     }
 
     public override void EnterCcllcGreen(MplotParser.CcllcGreenContext context)
     {
-        ColorStack.Queue(Color.FromArgb(25, 145, 58));
         LineColorArray.Add(Color.FromArgb(25, 145, 58));
     }
 
     public override void EnterCcllcYellow(MplotParser.CcllcYellowContext context)
     {
-        ColorStack.Queue(Color.FromArgb(253, 196, 0));
         LineColorArray.Add(Color.FromArgb(253, 196, 0));
     }
 
