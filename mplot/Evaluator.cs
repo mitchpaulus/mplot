@@ -98,6 +98,20 @@ public class Evaluator
                 string arg1 = expStack.Pop();
                 expStack.Push($"({arg1} == {arg2})");
             }
+            else if (token.TokenType == ExpressionTokenType.AND)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} && {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.OR)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} || {arg2})");
+            }
             else
             {
                 throw new NotImplementedException($"Token type {token.TokenType} not implemented yet");
