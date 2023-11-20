@@ -18,7 +18,7 @@ public class Tests
     public void Test1()
     {
         // string filename = "/home/mitch/repos/mplot/tests/test1.mplot";
-        string filename = "C:\\Users\\mpaulus\\source\\repos\\mplot\\tests\\expressions.mplot";
+        string filename = "C:\\Users\\mpaulus\\source\\repos\\mplot\\tests\\and_or.mplot";
 
         string contents = File.ReadAllText(filename, Encoding.UTF8);
 

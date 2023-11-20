@@ -557,15 +557,24 @@ public class MplotListener : MplotBaseListener
         string content = context.INLINEDATA().GetText();
 
         int indexOfFirstNewline = content.IndexOf('\n');
-        int finalIndex = content.Length - 1;
 
+        // Check for an asterisk on the start token
+        if (content[..indexOfFirstNewline].Contains('*'))
+        {
+            FilePathArray.SetMode(MplotArrayMode.Repeat);
+        }
+
+        int finalIndex = content.Length - 1;
         for (int i = finalIndex; i > -1; i--)
         {
-            if (content[i] != ' ' && content[i] != '\t')
-            {
-                finalIndex = i - 3;
-                break;
-            }
+            var character = content[i];
+            // Also check for asterisk on the end token
+            if (character == '*') FilePathArray.SetMode(MplotArrayMode.Repeat);
+            if (character is ' ' or '\t' or '*' or '\n') continue;
+
+            // 3 is for the 3 characters of 'END'
+            finalIndex = i - 3;
+            break;
         }
 
         string data = content[(indexOfFirstNewline+1)..finalIndex];
@@ -651,11 +660,16 @@ public class MplotListener : MplotBaseListener
             lines.Add($"set format x \"{XFormat}\"");
         }
 
+        HashSet<string> varNamesUsed = new();
         foreach (var source in seriesList.Where(series => series.FilePath.IsInlindeDataSource).Select(series => series.FilePath.AsT1))
         {
+            if (varNamesUsed.Contains(source.VariableName)) continue;
+
             lines.Add($"${source.VariableName}<<EOF");
             lines.AddRange(source.Contents.SplitLines());
             lines.Add("EOF");
+
+            varNamesUsed.Add(source.VariableName);
         }
 
         foreach (var source in seriesList.Where(s => s.FilePath.IsCmdDataSource).Select(s => s.FilePath.AsT2))

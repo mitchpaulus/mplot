@@ -114,8 +114,8 @@ separator_type
 CYCLE : 'cycle' ;
 ASTERISK : '*' ;
 INLINEDATA : START .*? END ;
-fragment START : ('start' | 'Start' | 'START') [ \t]* '\n';
-fragment END : ('end' | 'End' | 'END') [ \t]* '\n';
+fragment START : ('start' | 'Start' | 'START') [ \t*]* '\n';
+fragment END : ('end' | 'End' | 'END') [ \t*]* '\n';
 
 CMD : 'cmd' | 'command' ;
 
