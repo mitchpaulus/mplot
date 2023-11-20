@@ -14,17 +14,23 @@ class Program
 
         List<string> files = new();
         bool compile = false;
+        bool toGnuplotFile = false;
+
         while (i < args.Length)
         {
             if (args[i] == "-h" || args[i] == "--help")
             {
                 Console.Write("mplot - plotting DSL\n\n");
                 Console.Write("USAGE:\n");
-                Console.Write("mplot FILE\n");
+                Console.Write("mplot [-g] FILE\n");
                 Console.Write("mplot -h | --help\n");
                 Console.Write("mplot -V | --version\n");
-
-                Console.Write("\n");
+                Console.Write('\n');
+                Console.Write("OPTIONS\n");
+                Console.Write(" -c  Pipe directly to gnuplot to compile.\n");
+                Console.Write(" -g  Write directly to gnuplot file of same name.\n");
+                Console.Write('\n');
+                Console.Write('\n');
                 Console.Write("Example syntax:\n");
                 Console.Write("f \"file.tsv\"\n");
                 Console.Write("font \"Arial\"\n");
@@ -87,6 +93,10 @@ class Program
             if (args[i] is "-c")
             {
                 compile = true;
+            }
+            else if (args[i] is "-g")
+            {
+                toGnuplotFile = true;
             }
             else
             {
@@ -165,6 +175,15 @@ class Program
                         Console.Error.Write($"There was an error compiling in gnuplot.\n{e.Message}\n");
                         return process.ExitCode;
                     }
+                }
+                else if (toGnuplotFile)
+                {
+                    var gnuplotFilename = fileInfo.FullName.EndsWith(".mplot")
+                        ? fileInfo.FullName[..^5] + "gnuplot"
+                        : fileInfo.FullName + ".gnuplot";
+
+                    Encoding e = new UTF8Encoding(false);
+                    File.WriteAllText(gnuplotFilename, writeGnuplot, e);
                 }
                 else
                 {
