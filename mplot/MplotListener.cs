@@ -58,11 +58,7 @@ public class MplotListener : MplotBaseListener
 
     public MplotArray<Separator2> SeparatorArray = new(new List<Separator2>() {  new AutoSeparator() } , MplotArrayMode.Repeat, "Separator");
 
-    public MplotQueue<Marker> MarkerStack = new(new CircleMarker());
-
     public MplotArray<Marker> MarkerArray = new(new CircleMarker(), MplotArrayMode.Repeat, "Marker");
-
-    public MplotQueue<string> FilePathStack = new("data.tsv");
 
     public MplotArray<DataSource> FilePathArray = new(new FileSource("data.tsv"), MplotArrayMode.Repeat, "File path");
 
@@ -188,11 +184,8 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterFile(MplotParser.FileContext context)
     {
-        FilePathStack.Queue(context.stringArray().STRING().Select(node => node.GetText().RemoveQuotes()));
-
         bool repeat = context.stringArray().ASTERISK() is not null;
         bool cycle =  context.stringArray().CYCLE() is not null;
-
         FilePathArray.Update(context.stringArray().STRING().Select(node => (DataSource)new FileSource(node.GetText().RemoveQuotes())).ToList(), cycle, repeat);
     }
 
@@ -342,21 +335,18 @@ public class MplotListener : MplotBaseListener
     public override void EnterPlusMarker(MplotParser.PlusMarkerContext context)
     {
         PlusMarker plusMarker = new();
-        MarkerStack.Queue(plusMarker);
         MarkerArray.Add(plusMarker);
     }
 
     public override void EnterCircleMarker(MplotParser.CircleMarkerContext context)
     {
         CircleMarker circleMarker = new();
-        MarkerStack.Queue(circleMarker);
         MarkerArray.Add(circleMarker);
     }
 
     public override void EnterFilledCircleMarker(MplotParser.FilledCircleMarkerContext context)
     {
         FilledCircleMarker filledCircleMarker = new();
-        MarkerStack.Queue(filledCircleMarker);
         MarkerArray.Add(filledCircleMarker);
     }
 
