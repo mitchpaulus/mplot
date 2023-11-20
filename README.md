@@ -26,6 +26,11 @@ y 2 {- y column -}
 
 g {- grid -}
 
+START
+1 2
+3 4
+END
+
 xr 0:100 {- x range -}
 xr :100
 xr 0:

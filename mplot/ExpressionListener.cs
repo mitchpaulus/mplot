@@ -80,6 +80,16 @@ public class ExpressionListener : MplotBaseListener
         Tokens.Add(new(ExpressionTokenType.EQUAL, context.GetText()));
     }
 
+    public override void EnterAndExp(MplotParser.AndExpContext context)
+    {
+        Tokens.Add(new(ExpressionTokenType.AND, context.GetText()));
+    }
+
+    public override void EnterOrExp(MplotParser.OrExpContext context)
+    {
+        Tokens.Add(new(ExpressionTokenType.OR, context.GetText()));
+    }
+
     public override void EnterExpressionIdentifierExp(MplotParser.ExpressionIdentifierExpContext context)
     {
         Tokens.Add(new(ExpressionTokenType.EXPRESSIONIDENTIFIER, context.GetText()));
@@ -120,6 +130,8 @@ public enum ExpressionTokenType
     LESSOREQUAL,
     GREATEROREQUAL,
     EQUAL,
+    AND,
+    OR,
     EXPRESSIONIDENTIFIER,
     CYCLE,
 }

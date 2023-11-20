@@ -155,6 +155,10 @@ public class Evaluator
             {
                 Operations.Comparison(dataStack, token.TokenType);
             }
+            else if (token.TokenType == ExpressionTokenType.AND)
+            {
+
+            }
             else
             {
                 throw new NotImplementedException();

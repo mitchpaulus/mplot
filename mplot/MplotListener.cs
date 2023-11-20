@@ -644,11 +644,12 @@ public class MplotListener : MplotBaseListener
             lines.Add($"set timefmt \"{TimeFormat}\"");
         }
 
+        // Sets the format for tick marks. Typical format modifiers like '%f' and '%e'
+        // Also sets the time formats
         if (!string.IsNullOrWhiteSpace(XFormat))
         {
             lines.Add($"set format x \"{XFormat}\"");
         }
-
 
         foreach (var source in seriesList.Where(series => series.FilePath.IsInlindeDataSource).Select(series => series.FilePath.AsT1))
         {

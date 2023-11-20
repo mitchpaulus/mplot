@@ -201,6 +201,9 @@ FORWARDSLASH : '/' ;
 PLUS : '+' ;
 MINUS : '-' ;
 
+AND : 'and' ;
+OR : 'or' ;
+
 PLOTSEP : '---' '-'* ;
 
 EXPRESSIONCOL : '$' INT ;
@@ -229,6 +232,8 @@ expressionItem
     | LESSOREQUAL # LessOrEqualExp
     | GREATEROREQUAL # GreaterOrEqualExp
     | EQUAL # EqualExp
+    | AND # AndExp
+    | OR # OrExp
     | EXPRESSIONIDENTIFIER # ExpressionIdentifierExp
     | CYCLE # CycleExp
     ;
