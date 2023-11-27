@@ -198,6 +198,7 @@ public class MplotListener : MplotBaseListener
     public override void EnterFilter(MplotParser.FilterContext context)
     {
         if (context.ASTERISK() is not null) Filters.SetMode(MplotArrayMode.Repeat);
+        if (context.CYCLE() is not null) Filters.SetMode(MplotArrayMode.Cycle);
         ExpressionListener l = new();
         _walker.Walk(l, context.expression());
         Filters.Add(l.Tokens);

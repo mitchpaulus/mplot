@@ -79,7 +79,7 @@ timeFormat : ('tf' | 'timeformat') STRING ;
 isoDate : 'isodate' ;
 seriesStyle : (pointStyle | lineStyle | CYCLE | ASTERISK)+ ;
 gnuplotLiteral : 'gnuplot' STRING+ ;
-filter : 'filter' ASTERISK? expression ;
+filter : 'filter' (ASTERISK | CYCLE)? expression ;
 
 noLegend : 'nokey' | 'nolegend' ;
 
