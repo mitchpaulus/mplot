@@ -9,8 +9,8 @@ public class Rational
     {
         if (rationalContext is MplotParser.FractionContext fraction)
         {
-            Numerator = int.Parse(fraction.GetText());
-            Denominator = int.Parse(fraction.GetText());
+            Numerator = int.Parse(fraction.numerator.Text);
+            Denominator = int.Parse(fraction.denominator.Text);
         }
         else if (rationalContext is MplotParser.MixedFractionContext mixedFraction)
         {
