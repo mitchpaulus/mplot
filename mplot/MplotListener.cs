@@ -217,9 +217,9 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterHeight(MplotParser.HeightContext context)
     {
-        if (context.INT() != null)
+        if (context.rational() is MplotParser.IntegerContext integerContext)
         {
-            Height = new Rational(int.Parse(context.INT().GetText()));
+            Height = new Rational(int.Parse(integerContext.INT().GetText()));
         }
         else if (context.rational() is MplotParser.FractionContext fractionContext)
         {
@@ -252,9 +252,9 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterWidth(MplotParser.WidthContext context)
     {
-        if (context.INT() != null)
+        if (context.rational() is MplotParser.IntegerContext integerContext)
         {
-            Width = new Rational(int.Parse(context.INT().GetText()));
+            Width = new Rational(int.Parse(integerContext.INT().GetText()));
         }
         else if (context.rational() is MplotParser.FractionContext fractionContext)
         {
