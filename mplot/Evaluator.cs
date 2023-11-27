@@ -48,7 +48,7 @@ public class Evaluator
             }
             else if (token.TokenType == ExpressionTokenType.STRING)
             {
-                expStack.Push($"column(\"{token.Contents.RemoveQuotes()}\"");
+                expStack.Push($"column(\"{token.Contents.RemoveQuotes()}\")");
             }
             else if (token.TokenType == ExpressionTokenType.EXPRESSIONCOL)
             {
