@@ -93,12 +93,16 @@ range : lowLimit=rational? (COLON | TO) highLimit=rational? ;
 COLON : ':' ;
 TO : 'to' ;
 
-marker
+marker : MARKER? (ASTERISK | CYCLE)? markerType (ASTERISK | CYCLE)? ;
+
+markerType
   : ('o' | 'circle') # CircleMarker
   | 'plus' # PlusMarker
   | 'square' # SquareMarker
-  | ('filledcircle' | 'fcircle' | 'fillcircle') # FilledCircleMarker
+  | ('filledcircle' | 'fcircle' | 'fillcircle' | 'filled') # FilledCircleMarker
   ;
+
+MARKER : 'marker' | 'm' ;
 
 stringArray : (STRING | ASTERISK | CYCLE)+ ;
 intArray : (INT | ASTERISK | CYCLE)+ ;

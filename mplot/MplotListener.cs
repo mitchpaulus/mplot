@@ -332,6 +332,18 @@ public class MplotListener : MplotBaseListener
         PlotSeriesStyleArray.Add(SeriesStyle.Line);
     }
 
+    public override void EnterMarker(MplotParser.MarkerContext context)
+    {
+        if (context.ASTERISK().Any())
+        {
+            MarkerArray.SetMode(MplotArrayMode.Repeat);
+        }
+        else if (context.CYCLE().Any())
+        {
+            MarkerArray.SetMode(MplotArrayMode.Cycle);
+        }
+    }
+
     public override void EnterPlusMarker(MplotParser.PlusMarkerContext context)
     {
         PlusMarker plusMarker = new();
