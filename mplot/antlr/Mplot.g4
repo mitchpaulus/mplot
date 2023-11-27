@@ -119,7 +119,7 @@ fragment END : ('end' | 'End' | 'END') [ \t*]* '\n';
 
 CMD : 'cmd' | 'command' ;
 
-commandSource : CMD STRING+ ;
+commandSource : CMD ASTERISK? STRING+ ;
 
 commaSeparator : COMMA_CHAR | COMMA_WORD | CSV ;
 

@@ -548,6 +548,8 @@ public class MplotListener : MplotBaseListener
         var cmdDataSource = new CommandDataSource(arguments, _currentVar);
         _currentVar++;
         FilePathArray.Add(cmdDataSource);
+
+        if (context.ASTERISK() is not null) FilePathArray.SetMode(MplotArrayMode.Repeat);
     }
 
     public override void EnterFont(MplotParser.FontContext context)
