@@ -38,6 +38,8 @@ element
   | output
   | isoDate
   | legendOption
+  | legendCols
+  | legendRows
   | noLegend
   | seriesStyle
   | xtics
@@ -108,6 +110,9 @@ stringArray : (STRING | ASTERISK | CYCLE)+ ;
 intArray : (INT | ASTERISK | CYCLE)+ ;
 rationalArray : (rational | ASTERISK | CYCLE)+ ;
 colorArray : (hexColor | rgbColor | knownColor | ASTERISK | CYCLE)+ ;
+
+legendCols : ('legendcols' | 'keycols') INT ;
+legendRows : ('legendrows' | 'keyrows') INT ;
 
 separator_type
   : commaSeparator ASTERISK? # CommaSep

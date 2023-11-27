@@ -64,6 +64,9 @@ public class MplotListener : MplotBaseListener
 
     public LegendPosition LegendPosition = new Empty();
 
+    public int LegendCols = -1;
+    public int LegendRows = -1;
+
     public string? FontName { get; set; } = null;
     public int FontSize { get; set; } = 10;
 
@@ -188,6 +191,9 @@ public class MplotListener : MplotBaseListener
         bool cycle =  context.stringArray().CYCLE() is not null;
         FilePathArray.Update(context.stringArray().STRING().Select(node => (DataSource)new FileSource(node.GetText().RemoveQuotes())).ToList(), cycle, repeat);
     }
+
+    public override void EnterLegendCols(MplotParser.LegendColsContext context) => LegendCols = int.Parse(context.INT().GetText());
+    public override void EnterLegendRows(MplotParser.LegendRowsContext context) => LegendRows = int.Parse(context.INT().GetText());
 
     public override void EnterFilter(MplotParser.FilterContext context)
     {
@@ -599,9 +605,11 @@ public class MplotListener : MplotBaseListener
         if (Grid) lines.Add("set grid");
         List<Series> seriesList = GenSeries();
 
+        string legendMaxRowsMaxCols =
+            LegendCols > 0 ? $" maxcols {LegendCols}" : LegendRows > 0 ? $" maxrows {LegendRows}" : "";
         if (Legend == SpecifiedBool.False) lines.Add("set key off");
-        else if (Legend == SpecifiedBool.True) lines.Add($"set key {LegendPosition.GnuPlotLegendPosition}");
-        else lines.Add(seriesList.Count > 1 ? $"set key {LegendPosition.GnuPlotLegendPosition}" : "set key off");
+        else if (Legend == SpecifiedBool.True) lines.Add($"set key {LegendPosition.GnuPlotLegendPosition}{legendMaxRowsMaxCols}");
+        else lines.Add(seriesList.Count > 1 ? $"set key {LegendPosition.GnuPlotLegendPosition}{legendMaxRowsMaxCols}" : "set key off");
 
         if (!double.IsNaN(XMin) && !double.IsNaN(XMax)) lines.Add($"set xrange [{XMin}:{XMax}]");
         else if (!double.IsNaN(XMin))                   lines.Add($"set xrange [{XMin}:*]");
