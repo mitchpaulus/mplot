@@ -351,27 +351,18 @@ public class MplotListener : MplotBaseListener
         }
     }
 
-    public override void EnterPlusMarker(MplotParser.PlusMarkerContext context)
+    public override void EnterMarkerTypeCount(MplotParser.MarkerTypeCountContext context)
     {
-        PlusMarker plusMarker = new();
-        MarkerArray.Add(plusMarker);
-    }
+        Marker m = context.markerType() switch
+        {
+            MplotParser.CircleMarkerContext => new CircleMarker(),
+            MplotParser.FilledCircleMarkerContext => new FilledCircleMarker(),
+            MplotParser.PlusMarkerContext => new PlusMarker(),
+            _ => new CircleMarker()
+        };
 
-    public override void EnterCircleMarker(MplotParser.CircleMarkerContext context)
-    {
-        CircleMarker circleMarker = new();
-        MarkerArray.Add(circleMarker);
-    }
-
-    public override void EnterFilledCircleMarker(MplotParser.FilledCircleMarkerContext context)
-    {
-        FilledCircleMarker filledCircleMarker = new();
-        MarkerArray.Add(filledCircleMarker);
-    }
-
-    public override void EnterSquareMarker(MplotParser.SquareMarkerContext context)
-    {
-
+        int count = context.count() is null ? 1 : int.Parse(context.count().INT().GetText());
+        for (int i = 0; i < count; i++) MarkerArray.Add(m);
     }
 
     public override void EnterLabels(MplotParser.LabelsContext context)

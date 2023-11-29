@@ -100,7 +100,9 @@ count : POUND INT ;
 intCount : INT count? ;
 stringCount : STRING count? ;
 
-marker : MARKER? (ASTERISK | CYCLE)? markerType (ASTERISK | CYCLE)? ;
+marker : MARKER? (ASTERISK | CYCLE)? markerTypeCount (ASTERISK | CYCLE)? ;
+
+markerTypeCount : markerType count? ;
 
 markerType
   : ('o' | 'circle') # CircleMarker
