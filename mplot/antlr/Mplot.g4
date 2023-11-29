@@ -61,7 +61,7 @@ skip       : 'skip' intArray ;
 title      : ('ct' | 'charttitle') STRING ;
 titles     : 't' STRING STRING STRING ;
 xlabel     : ('xl' | 'xlabel') STRING ;
-xcol       : ('x' | 'xcol') (INT | STRING | CYCLE | ASTERISK)+ ;
+xcol       : ('x' | 'xcol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 xexp       : 'xexp' ASTERISK? expression ;
 yexp       : 'yexp' ASTERISK? expression ;
 xformat    : 'xf' STRING ;
@@ -70,7 +70,7 @@ yrange     : ('yr' | 'yrange') range ;
 labels     : ('l' | 'labels') STRING STRING ;
 lineWidth  : ('lw' | 'linewidth') intArray ;
 ylabel     : ('yl' | 'ylabel') STRING ;
-ycol       : ('y' | 'ycol') (INT | STRING | CYCLE | ASTERISK)+ ;
+ycol       : ('y' | 'ycol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 width      : ('w' | 'width') rational ;
 height     : ('h' | 'height') rational ;
 output     : ('out' | 'output') STRING ;
@@ -94,6 +94,11 @@ lineStyle : 'line' ;
 range : lowLimit=rational? (COLON | TO) highLimit=rational? ;
 COLON : ':' ;
 TO : 'to' ;
+
+count : POUND INT ;
+
+intCount : INT count? ;
+stringCount : STRING count? ;
 
 marker : MARKER? (ASTERISK | CYCLE)? markerType (ASTERISK | CYCLE)? ;
 
@@ -209,6 +214,7 @@ EQUAL : '=' ;
 FORWARDSLASH : '/' ;
 PLUS : '+' ;
 MINUS : '-' ;
+POUND : '#' ;
 
 AND : 'and' ;
 OR : 'or' ;

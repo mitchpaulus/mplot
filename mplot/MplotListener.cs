@@ -407,29 +407,40 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterYcol(MplotParser.YcolContext context)
     {
-        foreach (var child in context.children)
+        foreach (IParseTree? child in context.children)
         {
-            if (child is not ITerminalNode node) continue;
+            // if (child is not ITerminalNode node) continue;
+            if (child is MplotParser.IntCountContext intCountContext)
+            {
+                var count = int.Parse(intCountContext.count()?.INT().GetText() ?? "1");
+                var integerCol = int.Parse(intCountContext.INT().GetText());
+                ColumnSpecifier columnSpecifier = new(integerCol);
+                for (int i = 0; i < count; i++)
+                {
+                    YcolsArray.Add(columnSpecifier);
+                }
+            }
+            else if (child is MplotParser.StringCountContext stringCountContext)
+            {
+                var text = stringCountContext.STRING().GetText().RemoveQuotes();
+                var count = int.Parse(stringCountContext.count()?.INT().GetText() ?? "1");
+                ColumnSpecifier columnSpecifier = new(text);
 
-            if (node.Symbol.Type == MplotParser.INT)
-            {
-                var integer = int.Parse(node.GetText());
-                ColumnSpecifier columnSpecifier = new(integer);
-                YcolsArray.Add(columnSpecifier);
+                for (int i = 0; i < count; i++)
+                {
+                    YcolsArray.Add(columnSpecifier);
+                }
             }
-            else if (node.Symbol.Type == MplotParser.STRING)
+            else if (child is ITerminalNode node)
             {
-                var text = node.GetText().RemoveQuotes();
-                ColumnSpecifier columnSpecifier = new ColumnSpecifier(text);
-                YcolsArray.Add(columnSpecifier);
-            }
-            else if (node.Symbol.Type == MplotParser.ASTERISK)
-            {
-                YcolsArray.SetMode(MplotArrayMode.Repeat);
-            }
-            else if (node.Symbol.Type == MplotParser.CYCLE)
-            {
-                YcolsArray.SetMode(MplotArrayMode.Cycle);
+                if (node.Symbol.Type == MplotParser.ASTERISK)
+                {
+                    YcolsArray.SetMode(MplotArrayMode.Repeat);
+                }
+                else if (node.Symbol.Type == MplotParser.CYCLE)
+                {
+                    YcolsArray.SetMode(MplotArrayMode.Cycle);
+                }
             }
         }
     }
@@ -438,27 +449,38 @@ public class MplotListener : MplotBaseListener
     {
         foreach (IParseTree? child in context.children)
         {
-            if (child is not ITerminalNode node) continue;
+            // if (child is not ITerminalNode node) continue;
+            if (child is MplotParser.IntCountContext intCountContext)
+            {
+                var count = int.Parse(intCountContext.count()?.INT().GetText() ?? "1");
+                var integerCol = int.Parse(intCountContext.INT().GetText());
+                ColumnSpecifier columnSpecifier = new(integerCol);
+                for (int i = 0; i < count; i++)
+                {
+                    XcolsArray.Add(columnSpecifier);
+                }
+            }
+            else if (child is MplotParser.StringCountContext stringCountContext)
+            {
+                var text = stringCountContext.STRING().GetText().RemoveQuotes();
+                var count = int.Parse(stringCountContext.count()?.INT().GetText() ?? "1");
+                ColumnSpecifier columnSpecifier = new(text);
 
-            if (node.Symbol.Type == MplotParser.INT)
-            {
-                var integer = int.Parse(node.GetText());
-                ColumnSpecifier columnSpecifier = new(integer);
-                XcolsArray.Add(columnSpecifier);
+                for (int i = 0; i < count; i++)
+                {
+                    XcolsArray.Add(columnSpecifier);
+                }
             }
-            else if (node.Symbol.Type == MplotParser.STRING)
+            else if (child is ITerminalNode node)
             {
-                var text = node.GetText().RemoveQuotes();
-                ColumnSpecifier columnSpecifier = new ColumnSpecifier(text);
-                XcolsArray.Add(columnSpecifier);
-            }
-            else if (node.Symbol.Type == MplotParser.ASTERISK)
-            {
-                XcolsArray.SetMode(MplotArrayMode.Repeat);
-            }
-            else if (node.Symbol.Type == MplotParser.CYCLE)
-            {
-                XcolsArray.SetMode(MplotArrayMode.Cycle);
+                if (node.Symbol.Type == MplotParser.ASTERISK)
+                {
+                    XcolsArray.SetMode(MplotArrayMode.Repeat);
+                }
+                else if (node.Symbol.Type == MplotParser.CYCLE)
+                {
+                    XcolsArray.SetMode(MplotArrayMode.Cycle);
+                }
             }
         }
     }
