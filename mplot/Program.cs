@@ -86,7 +86,7 @@ class Program
 
             if (args[i] is "-V" or "--version")
             {
-                Console.Write("0.1.0\n");
+                Console.Write("0.2.0\n");
                 return 0;
             }
 
