@@ -87,6 +87,26 @@ public class MplotArray<T> : IMplotArray
     }
 
     int IMplotArray.Length() => Length;
+
+    public override string ToString()
+    {
+        if (Mode() == MplotArrayMode.Cycle)
+        {
+            return $"[{string.Join(", ", _elements.Select(arg => arg!.ToString()))}, cycle..]";
+        }
+        else if (Mode() == MplotArrayMode.Normal)
+        {
+            return $"[{string.Join(", ", _elements.Select(arg => arg!.ToString()))}]";
+        }
+        else if (Mode() == MplotArrayMode.Repeat)
+        {
+            return $"[{string.Join(", ", _elements.Select(arg => arg!.ToString()))}*]";
+        }
+        else
+        {
+            return "Mode type not handled.";
+        }
+    }
 }
 
 public interface IMplotArray

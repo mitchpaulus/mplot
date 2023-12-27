@@ -103,6 +103,10 @@ public class MplotListener : MplotBaseListener
         {
             StringBuilder b = new();
             b.Append("At least one array for the series needs to be a countable array.\n");
+
+            b.Append($"File path: {FilePathArray.ToString()}");
+            b.Append($"X cols: {XcolsArray.ToString()}");
+
             throw new InvalidDataException(b.ToString());
         }
 
@@ -952,6 +956,14 @@ public class ColumnSelector : OneOfBase<ColumnSpecifier, List<MplotToken>>
 
     public static implicit operator ColumnSelector(ColumnSpecifier _) => new(_);
     public static implicit operator ColumnSelector(List<MplotToken> _) => new(_);
+
+    public override string ToString()
+    {
+        return Match(
+            specifier => specifier.ToString(),
+            list => string.Join(" ", list.Select(token => token.ToString()))
+        );
+    }
 }
 
 public class ColumnSpecifier

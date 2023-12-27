@@ -39,6 +39,8 @@ public class FileSource
     }
 
     public string Filepath { get; private set; }
+
+    public override string ToString() => Filepath;
 }
 
 public class InlineDataSource
