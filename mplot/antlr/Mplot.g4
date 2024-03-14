@@ -48,6 +48,7 @@ element
   | dpi
   | commandSource
   | filter
+  | ticsOut
   ;
 
 file       : ('f' | 'file') stringArray ;
@@ -68,7 +69,7 @@ xformat    : 'xf' STRING ;
 xrange     : ('xr' | 'xrange') range ;
 yrange     : ('yr' | 'yrange') range ;
 labels     : ('l' | 'labels') STRING STRING ;
-lineWidth  : ('lw' | 'linewidth') intArray ;
+lineWidth  : ('lw' | 'linewidth' | 'linethickness') intArray ;
 ylabel     : ('yl' | 'ylabel') STRING ;
 ycol       : ('y' | 'ycol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 width      : ('w' | 'width') rational ;
@@ -87,6 +88,10 @@ firstAsterisk : ASTERISK ;
 
 xtics : 'xtics' rational rational rational ;
 ytics : 'ytics' rational rational rational ;
+
+ticsOut : TICS_OUT ;
+
+TICS_OUT : 'ticsout' | 'outtics' | 'ticksout' | 'outticks' ;
 
 pointStyle : 'point' | 'scatter' | 'xy' ;
 lineStyle : 'line' ;
@@ -172,11 +177,11 @@ RED : 'red' ;
 GREEN : 'green' ;
 BLUE : 'blue' ;
 
-CCLLC_BLUE : 'ccblue' ;
-CCLLC_GRAY : 'ccgray' ;
-CCLLC_MAROON : 'ccmaroon' ;
-CCLLC_GREEN  : 'ccgreen' ;
-CCLLC_YELLOW : 'ccyellow' ;
+CCLLC_BLUE : 'ccblue' | 'ccllcblue' ;
+CCLLC_GRAY : 'ccgray' | 'ccllcgray' ;
+CCLLC_MAROON : 'ccmaroon' | 'ccllcmaroon';
+CCLLC_GREEN  : 'ccgreen' | 'ccllcgreen' ;
+CCLLC_YELLOW : 'ccyellow' | 'ccllcyellow' ;
 
 knownColor
   : RED          # RedColor

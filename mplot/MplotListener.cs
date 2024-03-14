@@ -42,6 +42,8 @@ public class MplotListener : MplotBaseListener
     public Rational? XTicMax = null;
     public Rational? XTicIncrement = null;
 
+    public bool TicsOut = false;
+
     public double YMin { get; set; } = double.NaN;
     public double YMax { get; set; } = double.NaN;
 
@@ -198,6 +200,8 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterLegendCols(MplotParser.LegendColsContext context) => LegendCols = int.Parse(context.INT().GetText());
     public override void EnterLegendRows(MplotParser.LegendRowsContext context) => LegendRows = int.Parse(context.INT().GetText());
+
+    public override void EnterTicsOut(MplotParser.TicsOutContext context) => TicsOut = true;
 
     public override void EnterFilter(MplotParser.FilterContext context)
     {
@@ -644,6 +648,12 @@ public class MplotListener : MplotBaseListener
         if (YTicMin is not null && YTicMax is not null && YTicIncrement is not null)
         {
             lines.Add( $"set ytics {YTicMin.ToDecimalString()}, {YTicIncrement.ToDecimalString()}, {YTicMax.ToDecimalString()}");
+        }
+
+        if (TicsOut)
+        {
+            lines.Add("set xtics out");
+            lines.Add("set ytics out");
         }
 
         if (TimeAxis)
