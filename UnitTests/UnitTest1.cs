@@ -19,7 +19,9 @@ public class Tests
     {
         // string filename = "/home/mitch/repos/mplot/tests/test1.mplot";
         // string filename = "C:\\Users\\mpaulus\\source\\repos\\mplot\\tests\\and_or.mplot";
-        string filename = @"C:\Users\mpaulus\source\repos\23-CEGDC-001-GSA-ESPC-ROB-Building-Model\data\wc.mplot";
+        // string filename = @"C:\Users\mpaulus\source\repos\23-CEGDC-001-GSA-ESPC-ROB-Building-Model\data\wc.mplot";
+        string filename =
+            "C:\\Users\\mpaulus\\Command Commissioning\\Jobs - 23-FIDTX-003 WLK TDW Economizer Tune-up Ph 1\\3 Cx\\assets\\co2.mplot";
 
         string contents = File.ReadAllText(filename, Encoding.UTF8);
 

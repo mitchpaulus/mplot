@@ -201,9 +201,9 @@ fragment HEX_DIGIT : '0'..'9' | 'a'..'f' | 'A'..'F' ;
 INT : [0-9]+ ;
 
 rational
-  : numerator=INT '/' denominator=INT  # Fraction
-  | integer=INT MINUS numerator=INT '/' denominator=INT  # MixedFraction
-  | INT # Integer
+  : negate=MINUS? numerator=INT '/' denominator=INT  # Fraction
+  | negate=MINUS? integer=INT MINUS numerator=INT '/' denominator=INT  # MixedFraction
+  | negate=MINUS? INT # Integer
   ;
 
 WS : [ \t\n]+ -> skip ;

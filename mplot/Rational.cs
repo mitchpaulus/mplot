@@ -11,16 +11,19 @@ public class Rational
         {
             Numerator = int.Parse(fraction.numerator.Text);
             Denominator = int.Parse(fraction.denominator.Text);
+            if (fraction.negate is not null) Numerator = -Numerator;
         }
         else if (rationalContext is MplotParser.MixedFractionContext mixedFraction)
         {
             Numerator = int.Parse(mixedFraction.denominator.Text) * int.Parse(mixedFraction.integer.Text) + int.Parse(mixedFraction.numerator.Text);
             Denominator = int.Parse(mixedFraction.denominator.Text);
+            if (mixedFraction.negate is not null) Numerator = -Numerator;
         }
         else if (rationalContext is MplotParser.IntegerContext integerContext)
         {
-            Numerator = int.Parse(integerContext.GetText());
+            Numerator = int.Parse(integerContext.INT().GetText());
             Denominator = 1;
+            if (integerContext.negate is not null) Numerator = -Numerator;
         }
         else
         {
