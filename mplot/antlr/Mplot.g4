@@ -12,7 +12,6 @@ element
   | separator_type
   | series
   | title
-  | titles
   | skip
   | xcol
   | xexp
@@ -59,8 +58,7 @@ dpi        : ('dpi' | 'd') INT ;
 separator  : ('sep' | 'separator') stringArray ;
 series     : ('s' | 'series') stringArray ;
 skip       : 'skip' intArray ;
-title      : ('ct' | 'charttitle') STRING ;
-titles     : 't' STRING STRING STRING ;
+title      : ('ct' | 'charttitle' | 'title' | 't') STRING ;
 xlabel     : ('xl' | 'xlabel') STRING ;
 xcol       : ('x' | 'xcol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 xexp       : 'xexp' ASTERISK? expression ;

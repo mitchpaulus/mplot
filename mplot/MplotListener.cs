@@ -184,13 +184,6 @@ public class MplotListener : MplotBaseListener
     public override void EnterXlabel(MplotParser.XlabelContext context) => XLabel = ParseXLabelContext(context).Trim();
     public override void EnterYlabel(MplotParser.YlabelContext context) => YLabel = ParseYLabelContext(context).Trim();
 
-    public override void EnterTitles(MplotParser.TitlesContext context)
-    {
-        Title =  context.STRING()[0].GetText().RemoveQuotes().Trim();
-        XLabel = context.STRING()[1].GetText().RemoveQuotes().Trim();
-        YLabel = context.STRING()[2].GetText().RemoveQuotes().Trim();
-    }
-
     public override void EnterFile(MplotParser.FileContext context)
     {
         bool repeat = context.stringArray().ASTERISK() is not null;
