@@ -112,6 +112,8 @@ markerType
   | 'plus' # PlusMarker
   | 'square' # SquareMarker
   | ('filledcircle' | 'fcircle' | 'fillcircle' | 'filled') # FilledCircleMarker
+  | ('filledsquare' | 'fsquare' | 'fillsquare') # FilledSquareMarker
+  | 'nomarker' # NoMarker
   ;
 
 MARKER : 'marker' | 'm' ;

@@ -60,7 +60,7 @@ public class MplotListener : MplotBaseListener
 
     public readonly MplotArray<Separator2> SeparatorArray = new(new List<Separator2> {  new AutoSeparator() } , MplotArrayMode.Repeat, "Separator");
 
-    public readonly MplotArray<Marker> MarkerArray = new(new CircleMarker(), MplotArrayMode.Repeat, "Marker");
+    public MplotArray<Marker> MarkerArray = new(new CircleMarker(), MplotArrayMode.Repeat, "Marker");
 
     public readonly MplotArray<DataSource> FilePathArray = new(new FileSource("data.tsv"), MplotArrayMode.Repeat, "File path");
 
@@ -338,6 +338,11 @@ public class MplotListener : MplotBaseListener
     {
         PlotSeriesStyle = SeriesStyle.Line;
         PlotSeriesStyleArray.Add(SeriesStyle.Line);
+
+        if (MarkerArray.UseDefault)
+        {
+            MarkerArray = new(new NoMarker(), MplotArrayMode.Repeat, "Marker");
+        }
     }
 
     public override void EnterMarker(MplotParser.MarkerContext context)
@@ -359,6 +364,7 @@ public class MplotListener : MplotBaseListener
             MplotParser.CircleMarkerContext => new CircleMarker(),
             MplotParser.FilledCircleMarkerContext => new FilledCircleMarker(),
             MplotParser.PlusMarkerContext => new PlusMarker(),
+            MplotParser.SquareMarkerContext => new SquareMarker(),
             _ => new CircleMarker()
         };
 
@@ -798,87 +804,6 @@ public class IndexedItem<T>
     }
 }
 
-public abstract class Marker
-{
-    public abstract string ToGnuplot();
-}
-
-
-public class CircleMarker : Marker
-{
-    public override string ToGnuplot() => "pt 6";
-}
-
-public class FilledCircleMarker : Marker
-{
-    public override string ToGnuplot() => "pt 7";
-}
-
-public class PlusMarker : Marker
-{
-    public override string ToGnuplot() => "pt 1";
-}
-
-public class LineMarker : Marker
-{
-    public override string ToGnuplot()
-    {
-        return "";
-    }
-}
-
-public class XMarker : Marker
-{
-    public override string ToGnuplot()
-    {
-        return "";
-    }
-}
-
-public class Series
-{
-    private readonly string _xCol;
-    private readonly string _yCol;
-    private readonly string _name;
-    public DataSource FilePath { get; }
-    private readonly Marker _marker;
-    private readonly int _skip;
-    private readonly Color _lineColor;
-    private readonly int _lineWidth;
-    private readonly SeriesStyle _style;
-    public Separator2 Separator { get; }
-
-    public Series(string xCol, string yCol, string name, DataSource filePath, Marker marker, int skip, Color lineColor, int lineWidth, SeriesStyle style, Separator2 separator)
-    {
-        _xCol = xCol;
-        _yCol = yCol;
-        _name = name;
-        FilePath = filePath;
-        _marker = marker;
-        _skip = skip;
-        _lineColor = lineColor;
-        _lineWidth = lineWidth;
-        _style = style;
-        Separator = separator;
-    }
-
-    public string ToGnuplot()
-    {
-        string skipText = _skip == 0 ? "" : $" skip {_skip}";
-        string lineWidth = _lineWidth == 1 ? "" : $"lw {_lineWidth}";
-        string title = string.IsNullOrWhiteSpace(_name) ? "" : $" title \"{_name}\"";
-
-        string source = FilePath.Match(
-            fileSource => $"\"{fileSource.Filepath}\"",
-            inlineDataSource => "$" + inlineDataSource.VariableName,
-            cmdDataSource => $"\"{cmdDataSource.TmpFilePath()}\""
-        );
-
-        string markerText = _style.IsScatter ? " " + _marker.ToGnuplot() + " " : " ";
-
-        return $"{source} using {_xCol}:{_yCol}{skipText} with {_style.GnuplotStyle}{markerText}{lineWidth} linecolor {_lineColor.ToGnuplot()}{title}";
-    }
-}
 
 public class AutoSeparator
 {
