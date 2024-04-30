@@ -2,7 +2,7 @@
 
 A better plotting language.
 
-## Commands
+# Commands
 
 ```antlr
 file       : ('f' | 'file') STRING+ ;
@@ -24,3 +24,10 @@ height     : 'h' (rational | INT) ;
 timeAxis   : TIME ;
 timeFormat : 'tf' STRING ;
 ```
+
+# Series Styling
+
+Basically a choice between scatter or lines.
+
+For points, `point`, `scatter`, or `xy`.
+For lines, `line`.
