@@ -42,7 +42,9 @@ element
   | noLegend
   | seriesStyle
   | xtics
+  | xticAdd
   | ytics
+  | yticAdd
   | gnuplotLiteral
   | dpi
   | commandSource
@@ -84,10 +86,14 @@ noLegend : 'nokey' | 'nolegend' ;
 
 firstAsterisk : ASTERISK ;
 
+// xtics min step max
 xtics : 'xtics' rational rational rational ;
 ytics : 'ytics' rational rational rational ;
 
 ticsOut : TICS_OUT ;
+
+xticAdd : ('xticadd' | 'xtickadd' | 'addxtic' | 'addxtick') (rational STRING? | STRING rational) ;
+yticAdd : ('yticadd' | 'ytickadd' | 'addytic' | 'addytick') (rational STRING? | STRING rational) ;
 
 TICS_OUT : 'ticsout' | 'outtics' | 'ticksout' | 'outticks' ;
 

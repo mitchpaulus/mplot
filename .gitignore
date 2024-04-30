@@ -4,6 +4,7 @@
 *.tokens
 .idea/
 examples/cmd.png
+.redo/
 
 publish*/
 tests/*.png

@@ -31,3 +31,11 @@ Basically a choice between scatter or lines.
 
 For points, `point`, `scatter`, or `xy`.
 For lines, `line`.
+
+# Tic Marks
+
+```
+xtics min step max
+xticadd value "label"
+ticsout {- tics out instead of inside by default -}
+```
