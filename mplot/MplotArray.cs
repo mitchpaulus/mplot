@@ -10,14 +10,14 @@ public class MplotArray<T> : IMplotArray
 
     public MplotArrayMode Mode()
     {
-        return _useDefault ? _defaultMode : _mode;
+        return UseDefault ? _defaultMode : _mode;
     }
 
     private MplotArrayMode _mode = MplotArrayMode.Normal;
 
     public void SetMode(MplotArrayMode mode) => _mode = mode;
     private readonly List<T> _elements = new();
-    private bool _useDefault;
+    public bool UseDefault { get; private set; }
     private readonly string _name;
 
     public int Length => _elements.Count;
@@ -25,7 +25,7 @@ public class MplotArray<T> : IMplotArray
     public MplotArray(string name)
     {
         _name = name;
-        _useDefault = false;
+        UseDefault = false;
     }
 
     public MplotArray(List<T> elements, MplotArrayMode mode, string name)
@@ -33,7 +33,7 @@ public class MplotArray<T> : IMplotArray
         _defaultElements = elements;
         _defaultMode = mode;
         _name = name;
-        _useDefault = true;
+        UseDefault = true;
     }
 
     public MplotArray(T element, MplotArrayMode mode, string name)
@@ -41,12 +41,12 @@ public class MplotArray<T> : IMplotArray
         _defaultElements = new List<T> { element };
         _defaultMode = mode;
         _name = name;
-        _useDefault = true;
+        UseDefault = true;
     }
 
     public bool Add(T item)
     {
-        _useDefault = false;
+        UseDefault = false;
         _elements.Add(item);
         return true;
     }
@@ -56,14 +56,14 @@ public class MplotArray<T> : IMplotArray
         foreach (T i in items) Add(i);
         if (cycle) _mode = MplotArrayMode.Cycle;
         if (repeat) _mode = MplotArrayMode.Repeat;
-        _useDefault = false;
+        UseDefault = false;
     }
 
     public T this[int index]
     {
         get
         {
-            List<T> eleList = _useDefault ? (_defaultElements ?? new List<T>()) : _elements;
+            List<T> eleList = UseDefault ? (_defaultElements ?? new List<T>()) : _elements;
 
             if (!eleList.Any())
             {
