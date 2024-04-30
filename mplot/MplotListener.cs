@@ -525,6 +525,8 @@ public class MplotListener : MplotBaseListener
     public override void EnterRedColor(MplotParser.RedColorContext context) => LineColorArray.Add(Color.Red);
     public override void EnterGreenColor(MplotParser.GreenColorContext context) => LineColorArray.Add(Color.Green);
     public override void EnterBlueColor(MplotParser.BlueColorContext context) => LineColorArray.Add(Color.Blue);
+    public override void EnterBlackColor(MplotParser.BlackColorContext context) => LineColorArray.Add(Color.Black);
+
     public override void EnterCcllcBlueColor(MplotParser.CcllcBlueColorContext context) => LineColorArray.Add(CcllcColors.Blue);
     public override void EnterCcllcGray(MplotParser.CcllcGrayContext context) => LineColorArray.Add(CcllcColors.Gray);
     public override void EnterCcllcMaroon(MplotParser.CcllcMaroonContext context) => LineColorArray.Add(CcllcColors.Maroon);

@@ -174,6 +174,7 @@ rgbColor : RGB INT INT INT (ASTERISK | CYCLE)? ;
 RED : 'red' ;
 GREEN : 'green' ;
 BLUE : 'blue' ;
+BLACK : 'black' ;
 
 CCLLC_BLUE : 'ccblue' | 'ccllcblue' ;
 CCLLC_GRAY : 'ccgray' | 'ccllcgray' ;
@@ -185,6 +186,7 @@ knownColor
   : RED          # RedColor
   | GREEN        # GreenColor
   | BLUE         # BlueColor
+  | BLACK        # BlackColor
   | CCLLC_BLUE   # CcllcBlueColor
   | CCLLC_GRAY   # CcllcGray
   | CCLLC_MAROON # CcllcMaroon
