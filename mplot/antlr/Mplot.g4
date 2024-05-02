@@ -48,7 +48,7 @@ element
   | gnuplotLiteral
   | dpi
   | commandSource
-  | filter
+  | ignore
   | ticsOut
   ;
 
@@ -80,7 +80,7 @@ timeFormat : ('tf' | 'timeformat') STRING ;
 isoDate : 'isodate' ;
 seriesStyle : (pointStyle | lineStyle | CYCLE | ASTERISK)+ ;
 gnuplotLiteral : 'gnuplot' STRING+ ;
-filter : 'filter' (ASTERISK | CYCLE)? expression ;
+ignore : 'ignore' (ASTERISK | CYCLE)? expression ;
 
 noLegend : 'nokey' | 'nolegend' ;
 

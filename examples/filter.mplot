@@ -4,4 +4,4 @@ start
 5 6
 end
 
-filter $x 1.5 >
+ignore $x 1.5 >

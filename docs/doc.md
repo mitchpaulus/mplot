@@ -39,3 +39,33 @@ xtics min step max
 xticadd value "label"
 ticsout {- tics out instead of inside by default -}
 ```
+
+# Ignoring data
+
+Ignoring data is done with a very simple concatenative stack-based language.
+
+The final result on the stack should be a boolean. If the value is true, the row is ignored.
+
+```
+ignore expression
+```
+
+You can reference columns by index or by 'x' or 'y', prefixed with a `$`, like `$x`, `$y`, or `$2`.
+
+Other expression items:
+
+```
+124 # integer
+1.24 # float
+"string" # string
++ - * / # arithmetic
+< > <= >= = != # comparison
+and or # logical
+```
+
+# Example
+
+```mplot
+// Ignore when column "a" is less than 0 and column "b" is greater than 10
+ignore "a" 0 < "b" 10 > and
+```

@@ -4,5 +4,5 @@ start
 7 8 9
 end*
 
-filter $1 2 < $1 6 > or
-filter $1 2 > $1 6 < and
+ignore $1 2 > $1 6 < and
+ignore $1 2 < $1 6 > or

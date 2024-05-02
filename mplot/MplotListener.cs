@@ -17,7 +17,7 @@ public class MplotListener : MplotBaseListener
     public string? YLabel { get; set; }
     public MplotArray<ColumnSelector> YcolsArray { get; } = new (new ColumnSpecifier(2), MplotArrayMode.Repeat, "Y col specifier");
     public MplotArray<ColumnSelector> XcolsArray { get; } = new(new ColumnSpecifier(1), MplotArrayMode.Repeat, "X col specifier");
-    private MplotArray<Maybe<List<MplotToken>>> Filters { get; } = new(NoneMarker.None, MplotArrayMode.Repeat, "Filter expression");
+    private MplotArray<Maybe<List<MplotToken>>> Ignores { get; } = new(NoneMarker.None, MplotArrayMode.Repeat, "Ignore expression");
 
     private List<AdditionalTic> AdditionalXTics = new();
     private List<AdditionalTic> AdditionalYTics = new();
@@ -99,7 +99,7 @@ public class MplotListener : MplotBaseListener
             LineWidthArray,
             PlotSeriesStyleArray,
             SeparatorArray,
-            Filters,
+            Ignores,
         };
 
         List<IMplotArray> normalLengthArrays = requiredArrays.Where(array => array.Mode() == MplotArrayMode.Normal).ToList();
@@ -139,11 +139,11 @@ public class MplotListener : MplotBaseListener
             string xColSpecifier = XcolsArray[i].Match(specifier => specifier.ToString(), Evaluator.EvaluateGnuplot);
             string yColSpecifier = YcolsArray[i].Match(specifier => specifier.ToString(), Evaluator.EvaluateGnuplot);
 
-            Maybe<List<MplotToken>> filter = Filters[i];
+            Maybe<List<MplotToken>> ignore = Ignores[i];
 
-            if (filter.TryPickT0(out List<MplotToken> tokens, out NoneMarker _))
+            if (ignore.TryPickT0(out List<MplotToken> tokens, out NoneMarker _))
             {
-                var filterExpString = Evaluator.EvaluateGnuplot(tokens);
+                var ignoreExpString = Evaluator.EvaluateGnuplot(tokens);
 
                 var colSpecifier = xColSpecifier;
                 var newXSpecifier = XcolsArray[i].Match(
@@ -152,7 +152,7 @@ public class MplotListener : MplotBaseListener
                 );
 
                 // Wrap the x value in a ternary condition
-                xColSpecifier = $"({filterExpString} ? {newXSpecifier} : NaN)";
+                xColSpecifier = $"({ignoreExpString} ? NaN : {newXSpecifier})";
             }
 
             Series s = new(
@@ -199,13 +199,13 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterTicsOut(MplotParser.TicsOutContext context) => TicsOut = true;
 
-    public override void EnterFilter(MplotParser.FilterContext context)
+    public override void EnterIgnore(MplotParser.IgnoreContext context)
     {
-        if (context.ASTERISK() is not null) Filters.SetMode(MplotArrayMode.Repeat);
-        if (context.CYCLE() is not null) Filters.SetMode(MplotArrayMode.Cycle);
+        if (context.ASTERISK() is not null) Ignores.SetMode(MplotArrayMode.Repeat);
+        if (context.CYCLE() is not null) Ignores.SetMode(MplotArrayMode.Cycle);
         ExpressionListener l = new();
         _walker.Walk(l, context.expression());
-        Filters.Add(l.Tokens);
+        Ignores.Add(l.Tokens);
     }
 
     public override void EnterTitle(MplotParser.TitleContext context) => Title = context.STRING().GetText().RemoveQuotes();
