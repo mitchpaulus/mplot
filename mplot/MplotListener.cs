@@ -145,14 +145,14 @@ public class MplotListener : MplotBaseListener
             {
                 var ignoreExpString = Evaluator.EvaluateGnuplot(tokens);
 
-                var colSpecifier = xColSpecifier;
-                var newXSpecifier = XcolsArray[i].Match(
+                var colSpecifier = yColSpecifier;
+                var newYSpecifier = YcolsArray[i].Match(
                     columnSpecifier => columnSpecifier.ToGnuplotExp(),
                     _ => colSpecifier
                 );
 
-                // Wrap the x value in a ternary condition
-                xColSpecifier = $"({ignoreExpString} ? NaN : {newXSpecifier})";
+                // Wrap the Y value in a ternary condition. Has to be Y, since if you do it on a X that is time, doesn't seem to work.
+                yColSpecifier = $"({ignoreExpString} ? NaN : {newYSpecifier})";
             }
 
             Series s = new(

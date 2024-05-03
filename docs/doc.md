@@ -1,4 +1,4 @@
-# Mplot
+# `mplot`
 
 A better plotting language.
 
@@ -68,4 +68,22 @@ and or # logical
 ```mplot
 // Ignore when column "a" is less than 0 and column "b" is greater than 10
 ignore "a" 0 < "b" 10 > and
+```
+
+# Time Series
+
+Need to set the *time format*, using `tf "string"`.
+
+```
+tf "%Y-%m-%d %H:%M:%S"
+x "Timestamp
+y "Sensor Value"
+```
+
+# Gnuplot direct
+
+If there's something that not directly supported right now, you can inject text directly into the gnuplot script.
+
+```
+gnuplot "set xtics rotate by -45"
 ```
