@@ -19,8 +19,8 @@ public class MplotListener : MplotBaseListener
     public MplotArray<ColumnSelector> XcolsArray { get; } = new(new ColumnSpecifier(1), MplotArrayMode.Repeat, "X col specifier");
     private MplotArray<Maybe<List<MplotToken>>> Ignores { get; } = new(NoneMarker.None, MplotArrayMode.Repeat, "Ignore expression");
 
-    private List<AdditionalTic> AdditionalXTics = new();
-    private List<AdditionalTic> AdditionalYTics = new();
+    private readonly List<AdditionalTic> _additionalXTics = new();
+    private readonly List<AdditionalTic> _additionalYTics = new();
 
     public bool Grid = false;
 
@@ -229,13 +229,13 @@ public class MplotListener : MplotBaseListener
     public override void EnterXticAdd(MplotParser.XticAddContext context)
     {
         Rational r = new Rational(context.rational());
-        AdditionalXTics.Add(new (r, context.STRING()?.GetText().RemoveQuotes()));
+        _additionalXTics.Add(new (r, context.STRING()?.GetText().RemoveQuotes()));
     }
 
     public override void EnterYticAdd(MplotParser.YticAddContext context)
     {
         Rational r = new Rational(context.rational());
-        AdditionalYTics.Add(new (r, context.STRING()?.GetText().RemoveQuotes()));
+        _additionalYTics.Add(new (r, context.STRING()?.GetText().RemoveQuotes()));
     }
 
     public override void EnterHeight(MplotParser.HeightContext context)
@@ -662,9 +662,9 @@ public class MplotListener : MplotBaseListener
             lines.Add( $"set xtics {XTicMin.ToDecimalString()}, {XTicIncrement.ToDecimalString()}, {XTicMax.ToDecimalString()}");
         }
 
-        if (AdditionalXTics.Count > 0)
+        if (_additionalXTics.Count > 0)
         {
-            lines.Add($"set xtics add ({string.Join(", ", AdditionalXTics.Select(tic => tic.ToGnuplot()))})");
+            lines.Add($"set xtics add ({string.Join(", ", _additionalXTics.Select(tic => tic.ToGnuplot()))})");
         }
 
         if (YTicMin is not null && YTicMax is not null && YTicIncrement is not null)
@@ -672,9 +672,9 @@ public class MplotListener : MplotBaseListener
             lines.Add( $"set ytics {YTicMin.ToDecimalString()}, {YTicIncrement.ToDecimalString()}, {YTicMax.ToDecimalString()}");
         }
 
-        if (AdditionalYTics.Count > 0)
+        if (_additionalYTics.Count > 0)
         {
-            lines.Add($"set ytics add ({string.Join(", ", AdditionalYTics.Select(tic => tic.ToGnuplot()))})");
+            lines.Add($"set ytics add ({string.Join(", ", _additionalYTics.Select(tic => tic.ToGnuplot()))})");
         }
 
         if (TicsOut)
