@@ -106,24 +106,41 @@ class Program
             i++;
         }
 
-        if (!files.Any())
+        // If no files are provided and standard input is still a terminal then print help
+        if (!files.Any() && !Console.IsInputRedirected)
         {
             Console.Error.Write("No files found.\n");
             return 1;
         }
 
+        string contents;
+        FileInfo? fileInfo = null;
 
-        string filePath = files[0];
-
-        FileInfo fileInfo = new FileInfo(filePath);
-
-        if (!fileInfo.Exists)
+        if (files.Count == 0 || files[0] == "-") // Read from standard input
         {
-            Console.Error.Write($"The file '{fileInfo.FullName}' does not exist.\n");
-            return 1;
+            contents = Console.In.ReadToEnd();
         }
+        else
+        {
+            string filePath = files[0];
 
-        string contents = File.ReadAllText(fileInfo.FullName, Encoding.UTF8);
+            fileInfo = new(filePath);
+
+            try
+            {
+                contents = File.ReadAllText(filePath, Encoding.UTF8);
+            }
+            catch (FileNotFoundException)
+            {
+                Console.Error.Write($"The file '{filePath}' was not found.\n");
+                return 1;
+            }
+            catch (Exception e)
+            {
+                Console.Error.Write($"An error occurred while reading the file '{filePath}'.\n{e.Message}\n");
+                return 1;
+            }
+        }
 
         AntlrInputStream inputStream = new AntlrInputStream(contents);
         MplotLexer lexer = new MplotLexer(inputStream);
@@ -178,9 +195,17 @@ class Program
                 }
                 else if (toGnuplotFile)
                 {
-                    var gnuplotFilename = fileInfo.FullName.EndsWith(".mplot")
-                        ? fileInfo.FullName[..^5] + "gnuplot"
-                        : fileInfo.FullName + ".gnuplot";
+                    string gnuplotFilename;
+                    if (fileInfo is null)
+                    {
+                        gnuplotFilename = "stdin.gnuplot";
+                    }
+                    else
+                    {
+                        gnuplotFilename = fileInfo.FullName.EndsWith(".mplot")
+                            ? fileInfo.FullName[..^5] + "gnuplot"
+                            : fileInfo.FullName + ".gnuplot";
+                    }
 
                     Encoding e = new UTF8Encoding(false);
                     File.WriteAllText(gnuplotFilename, writeGnuplot, e);
