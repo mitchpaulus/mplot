@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Text;
 
 namespace mplot;
 
@@ -30,7 +31,70 @@ public static class Extensions
             yield return line;
         }
     }
-    
+
+    public static string EscapeShell(this string input)
+    {
+        // Special characters are: \ " `
+        bool needsQuotes = false;
+
+        StringBuilder sb = new(input.Length + 10);
+        //Space ( ): Used as a delimiter between commands and arguments.
+        // Tab (\t): Used as a delimiter, similar to space.
+        // Newline (\n): Indicates the end of a command or input.
+        // Ampersand (&): Used for running commands in the background.
+        // Semicolon (;): Used to separate multiple commands on a single line.
+        // Pipe (|): Used for command chaining and redirecting output.
+        // Less Than (<) and Greater Than (>): Used for input and output redirection.
+        // Question Mark (?): Used in wildcard patterns for matching a single character.
+        // Asterisk (*): Used in wildcard patterns for matching zero or more characters.
+        // Square Brackets ([ and ]): Used for grouping characters in wildcard patterns.
+        // Parentheses (( and )): Used for command grouping and arithmetic evaluation.
+        // Dollar Sign ($): Used for variable expansion and command substitution.
+        // Backslash (): Used to escape special characters.
+        // Single Quote ('): Used to preserve the literal value of each character within the quotes.
+        // Double Quote ("): Used to allow for variable expansion and interpretation of some special characters.
+
+        List<char> specialChars = new() { ' ', '\t', '\n', '&', ';', '|', '<', '>', '?', '*', '[', ']', '(', ')', '$', '\\', '\'', '"' };
+
+        foreach (var c in input)
+        {
+            if (specialChars.Contains(c)) needsQuotes = true;
+
+            if (c == '\'')
+            {
+                sb.Append("\"'\"");
+            }
+            else
+            {
+                sb.Append(c);
+            }
+        }
+
+        if (needsQuotes)
+        {
+            sb.Insert(0, '\'');
+            sb.Append('\'');
+        }
+        return sb.ToString();
+    }
+
+    public static string ToGnuPlotString(this string input)
+    {
+        // Add quotes around string, escaping interior quotes, and interior backslashes
+        StringBuilder sb = new(input.Length + 10);
+        sb.Append('"');
+        foreach (var c in input)
+        {
+            if (c == '"' || c == '\\')
+            {
+                sb.Append('\\');
+            }
+            sb.Append(c);
+        }
+        sb.Append('"');
+        return sb.ToString();
+    }
+
     public static IEnumerable<string> SplitLines(this TextReader input)
     {
         while (input.ReadLine() is { } line)

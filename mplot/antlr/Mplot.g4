@@ -50,6 +50,7 @@ element
   | commandSource
   | ignore
   | ticsOut
+  | binsize
   ;
 
 file       : ('f' | 'file') stringArray ;
@@ -78,7 +79,7 @@ output     : ('out' | 'output') STRING ;
 timeAxis   : TIME ;
 timeFormat : ('tf' | 'timeformat') STRING ;
 isoDate : 'isodate' ;
-seriesStyle : (pointStyle | lineStyle | CYCLE | ASTERISK)+ ;
+seriesStyle : (pointStyle | lineStyle | hist) (CYCLE | ASTERISK)* ;
 gnuplotLiteral : 'gnuplot' STRING+ ;
 ignore : 'ignore' (ASTERISK | CYCLE)? expression ;
 
@@ -157,6 +158,12 @@ TAB_CHAR   : 'tab' ;
 WHITESPACESEP : 'ws' | 'whitespace' ;
 
 TIME : 'time' ;
+
+hist : HIST ;
+HIST : 'hist' | 'histogram' ;
+BINSIZE : 'binsize' | 'bs' | 'binwidth' ;
+
+binsize : BINSIZE ASTERISK? rational ASTERISK? ;
 
 legendOption
   : TOP  # TopLegend

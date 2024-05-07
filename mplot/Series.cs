@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Text;
 
 namespace mplot;
 
@@ -31,6 +32,9 @@ public class Series
 
     public string ToGnuplot()
     {
+        StringBuilder b = new();
+
+
         string skipText = _skip == 0 ? "" : $" skip {_skip}";
         string lineWidth = _lineWidth == 1 ? "" : $"lw {_lineWidth}";
         string title = string.IsNullOrWhiteSpace(_name) ? "" : $" title \"{_name}\"";
@@ -38,8 +42,11 @@ public class Series
         string source = FilePath.Match(
             fileSource => $"\"{fileSource.Filepath}\"",
             inlineDataSource => "$" + inlineDataSource.VariableName,
-            cmdDataSource => $"\"{cmdDataSource.TmpFilePath()}\""
+            cmdDataSource => cmdDataSource.ToGnuPlotString()
         );
+
+        b.Append(source);
+        b.Append($" using {_xCol}:{_yCol}{skipText} with ");
 
         string gnuplotStyle;
         if (_style.Id == SeriesStyle.Line.Id && _marker is not NoMarker)
@@ -52,10 +59,26 @@ public class Series
         }
         else
         {
-            gnuplotStyle = "lines";
+            gnuplotStyle = _style.GnuplotStyle;
         }
 
-        string markerText = _marker is not NoMarker ? " " + _marker.ToGnuplot() + " " : " ";
-        return $"{source} using {_xCol}:{_yCol}{skipText} with {gnuplotStyle}{markerText}{lineWidth} linecolor {_lineColor.ToGnuplot()}{title}";
+        b.Append(gnuplotStyle);
+
+        if (gnuplotStyle != "boxes" && _marker is not NoMarker)
+        {
+            b.Append($" {_marker.ToGnuplot()}");
+        }
+
+        if (gnuplotStyle == "boxes")
+        {
+            b.Append(" fs solid");
+        }
+
+        if (_lineWidth != 1) b.Append($" lw {_lineWidth}");
+
+        b.Append($" linecolor {_lineColor.ToGnuplot()}");
+        if (!string.IsNullOrWhiteSpace(title)) b.Append($" {title}");
+
+        return b.ToString();
     }
 }

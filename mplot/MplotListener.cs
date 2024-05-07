@@ -30,7 +30,7 @@ public class MplotListener : MplotBaseListener
     public string? Title { get; set; }
 
     public int DefaultDpi = 96;
-    public readonly int PlotDpi; // 96 * 4
+    public readonly int PlotDpi; // 96 * 4 = 384
     public int TextDpi = 96;
 
     public SpecifiedBool Legend = SpecifiedBool.Unset;
@@ -60,6 +60,8 @@ public class MplotListener : MplotBaseListener
     public int Skip = 0;
 
     public readonly MplotArray<int> SkipArray = new(0, MplotArrayMode.Repeat, "Skip");
+
+    public readonly MplotArray<Rational> BinSizeArray = new(1, MplotArrayMode.Repeat, "Bin size");
 
     public readonly MplotArray<Separator2> SeparatorArray = new(new List<Separator2> {  new AutoSeparator() } , MplotArrayMode.Repeat, "Separator");
 
@@ -220,6 +222,17 @@ public class MplotListener : MplotBaseListener
     public override void EnterTitle(MplotParser.TitleContext context) => Title = context.STRING().GetText().RemoveQuotes();
 
     public override void EnterGnuplotLiteral(MplotParser.GnuplotLiteralContext context) => GnuplotLiterals.AddRange(context.STRING().Select(s => s.GetText()[1..^1]));
+
+    public override void EnterHist(MplotParser.HistContext context)
+    {
+        PlotSeriesStyleArray.Add(SeriesStyle.Boxes);
+    }
+
+    public override void EnterBinsize(MplotParser.BinsizeContext context)
+    {
+        BinSizeArray.Add(new Rational(context.rational()));
+        if (context.ASTERISK().Length > 0) BinSizeArray.SetMode(MplotArrayMode.Repeat);
+    }
 
     public override void EnterXtics(MplotParser.XticsContext context)
     {
@@ -718,18 +731,6 @@ public class MplotListener : MplotBaseListener
             varNamesUsed.Add(source.VariableName);
         }
 
-        foreach (var source in seriesList.Where(s => s.FilePath.IsCmdDataSource).Select(s => s.FilePath.AsT2))
-        {
-            var cmdOutput = source.Execute();
-            if (!cmdOutput.Success)
-            {
-                throw new InvalidOperationException(cmdOutput.ErrorMsg);
-            }
-
-            var enc = new UTF8Encoding(false);
-            File.WriteAllText(source.TmpFilePath(), cmdOutput.Output, enc);
-        }
-
         if (seriesList.Any())
         {
             // We still don't probably handle the case when series from different sources have different separators.
@@ -785,6 +786,7 @@ public class SeriesStyle
 
     public static SeriesStyle Scatter = new(0, new List<string> {"scatter", "point"}, "points", true);
     public static SeriesStyle Line = new(1, new List<string> {"line", "-"}, "lines", false);
+    public static SeriesStyle Boxes = new(2, new List<string> {"hist"}, "boxes", false);
 
     public SeriesStyle(int id, List<string> keywords, string gnuplotStyle, bool isScatter)
     {

@@ -82,6 +82,12 @@ public class CommandDataSource
         return $"/tmp/mplot_{_id}.txt";
     }
 
+    public string ToGnuPlotString()
+    {
+        var shellString =  "< " + string.Join(" ", Arguments.Select(s => s.EscapeShell()));
+        return shellString.ToGnuPlotString();
+    }
+
     public (bool Success, string Output, string ErrorMsg) Execute()
     {
         if (_output != null) return (true, _output, string.Empty);
