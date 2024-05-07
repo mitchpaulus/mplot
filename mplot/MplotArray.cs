@@ -90,17 +90,19 @@ public class MplotArray<T> : IMplotArray
 
     public override string ToString()
     {
+        var elements = UseDefault ? _defaultElements ?? new List<T>() : _elements;
+
         if (Mode() == MplotArrayMode.Cycle)
         {
-            return $"[{string.Join(", ", _elements.Select(arg => arg!.ToString()))}, cycle..]";
+            return $"[{string.Join(", ", elements.Select(arg => arg!.ToString()))}, cycle..]";
         }
         else if (Mode() == MplotArrayMode.Normal)
         {
-            return $"[{string.Join(", ", _elements.Select(arg => arg!.ToString()))}]";
+            return $"[{string.Join(", ", elements.Select(arg => arg!.ToString()))}]";
         }
         else if (Mode() == MplotArrayMode.Repeat)
         {
-            return $"[{string.Join(", ", _elements.Select(arg => arg!.ToString()))}*]";
+            return $"[{string.Join(", ", elements.Select(arg => arg!.ToString()))}*]";
         }
         else
         {

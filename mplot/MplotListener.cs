@@ -109,8 +109,17 @@ public class MplotListener : MplotBaseListener
             StringBuilder b = new();
             b.Append("At least one array for the series needs to be a countable array.\n");
 
-            b.Append($"File path: {FilePathArray.ToString()}");
-            b.Append($"X cols: {XcolsArray.ToString()}");
+            b.Append($"X cols: {XcolsArray.ToString()}\n");
+            b.Append($"Y cols: {YcolsArray.ToString()}\n");
+            b.Append($"Series name: {SeriesNameArray.ToString()}\n");
+            b.Append($"File path: {FilePathArray.ToString()}\n");
+            b.Append($"Marker: {MarkerArray.ToString()}\n");
+            b.Append($"Skip: {SkipArray.ToString()}\n");
+            b.Append($"Line color: {LineColorArray.ToString()}\n");
+            b.Append($"Line width: {LineWidthArray.ToString()}\n");
+            b.Append($"Plot series style: {PlotSeriesStyleArray.ToString()}\n");
+            b.Append($"Separator: {SeparatorArray.ToString()}\n");
+            b.Append($"Ignore: {Ignores.ToString()}\n");
 
             throw new InvalidDataException(b.ToString());
         }
