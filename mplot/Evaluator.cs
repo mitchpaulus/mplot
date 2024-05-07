@@ -121,6 +121,119 @@ public class Evaluator
         return expStack.Pop();
     }
 
+    public static AwkEval EvaluateAwk(List<MplotToken> tokens)
+    {
+        Stack<string> expStack = new();
+
+        bool needsHead = false;
+
+        foreach (var token in tokens)
+        {
+            if (token.TokenType == ExpressionTokenType.PLUS)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} + {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.MINUS)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} - {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.ASTERISK)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} * {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.FORWARDSLASH)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} / {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.STRING)
+            {
+                expStack.Push($"$headers[\"{token.Contents.RemoveQuotes()}\"");
+                needsHead = true;
+            }
+            else if (token.TokenType == ExpressionTokenType.EXPRESSIONCOL)
+            {
+                // This is '$' INT, example: $2. Passed as is to awk
+                expStack.Push(token.Contents);
+            }
+            else if (token.TokenType == ExpressionTokenType.INT)
+            {
+                expStack.Push(token.Contents);
+            }
+            else if (token.TokenType == ExpressionTokenType.FLOAT)
+            {
+                expStack.Push(token.Contents);
+            }
+            else if (token.TokenType == ExpressionTokenType.LESSTHAN)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} < {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.GREATERTHAN)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} > {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.LESSOREQUAL)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} <= {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.GREATEROREQUAL)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} >= {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.EQUAL)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} == {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.AND)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} && {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.OR)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} || {arg2})");
+            }
+            else
+            {
+                throw new NotImplementedException($"Token type {token.TokenType} not implemented yet");
+            }
+        }
+
+        return new (expStack.Pop(), needsHead);
+    }
+
+
     public static ExpressionArray Evaluate(List<MplotToken> atoms, IDataSource source)
     {
         Stack<ExpressionArray> dataStack = new();
@@ -524,5 +637,17 @@ public static class Operations
         stack.Push(new BoolArray(newArray));
 
         return true;
+    }
+}
+
+public class AwkEval
+{
+    public string AwkExpression;
+    public bool NeedsHeaderRead;
+
+    public AwkEval(string awkExpression, bool needsHeaderRead)
+    {
+        AwkExpression = awkExpression;
+        NeedsHeaderRead = needsHeaderRead;
     }
 }
