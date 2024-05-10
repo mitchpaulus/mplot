@@ -53,6 +53,7 @@ element
   | ignore
   | ticsOut
   | binsize
+  | colorData
   ;
 
 file       : ('f' | 'file') stringArray ;
@@ -68,7 +69,7 @@ xlabel     : ('xl' | 'xlabel') STRING ;
 xcol       : ('x' | 'xcol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 xexp       : 'xexp' ASTERISK? expression ;
 yexp       : 'yexp' ASTERISK? expression ;
-xformat    : 'xf' STRING ;
+xformat    : ('xf' | 'xticformat') STRING ;
 xrange     : ('xr' | 'xrange') range ;
 yrange     : ('yr' | 'yrange') range ;
 labels     : ('l' | 'labels') STRING STRING ;
@@ -202,6 +203,8 @@ CCLLC_MAROON : 'ccmaroon' | 'ccllcmaroon';
 CCLLC_GREEN  : 'ccgreen' | 'ccllcgreen' ;
 CCLLC_YELLOW : 'ccyellow' | 'ccllcyellow' ;
 
+colorData : 'colordata' ;
+
 knownColor
   : RED          # RedColor
   | GREEN        # GreenColor
@@ -251,6 +254,8 @@ PLOTSEP : '---' '-'* ;
 EXPRESSIONCOL : '$' INT ;
 EXPRESSIONCOLX : '$x' ;
 EXPRESSIONCOLY : '$y' ;
+
+DATETIME : '[0-9]{4}-[0-9]{2}-[0-9]{2}(T[0-9]{2}:[0-9]{2})?' ;
 
 expression : expressionItem+ ;
 
