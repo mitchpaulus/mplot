@@ -22,6 +22,9 @@ public class MplotListener : MplotBaseListener
     private readonly List<AdditionalTic> _additionalXTics = new();
     private readonly List<AdditionalTic> _additionalYTics = new();
 
+    private readonly List<AdditionalTic> _additionalXTics2 = new();
+    private readonly List<AdditionalTic> _additionalYTics2 = new();
+
     public bool Grid = false;
 
     public List<string> GnuplotLiterals = new();
@@ -192,8 +195,8 @@ public class MplotListener : MplotBaseListener
         OutputFile = null;
     }
 
-    public string ParseXLabelContext(MplotParser.XlabelContext context) => context.STRING().GetText().RemoveQuotes();
-    public string ParseYLabelContext(MplotParser.YlabelContext context) => context.STRING().GetText().RemoveQuotes();
+    public string ParseXLabelContext(MplotParser.XlabelContext context) => context.STRING().GetText().UnescapeMplotString();
+    public string ParseYLabelContext(MplotParser.YlabelContext context) => context.STRING().GetText().UnescapeMplotString();
 
     public override void EnterXlabel(MplotParser.XlabelContext context) => XLabel = ParseXLabelContext(context).Trim();
     public override void EnterYlabel(MplotParser.YlabelContext context) => YLabel = ParseYLabelContext(context).Trim();
@@ -202,7 +205,7 @@ public class MplotListener : MplotBaseListener
     {
         bool repeat = context.stringArray().ASTERISK() is not null;
         bool cycle =  context.stringArray().CYCLE() is not null;
-        FilePathArray.Update(context.stringArray().STRING().Select(node => (DataSource)new FileSource(node.GetText().RemoveQuotes())).ToList(), cycle, repeat);
+        FilePathArray.Update(context.stringArray().STRING().Select(node => (DataSource)new FileSource(node.GetText().UnescapeMplotString())).ToList(), cycle, repeat);
     }
 
     public override void EnterLegendCols(MplotParser.LegendColsContext context) => LegendCols = int.Parse(context.INT().GetText());
@@ -219,9 +222,9 @@ public class MplotListener : MplotBaseListener
         Ignores.Add(l.Tokens);
     }
 
-    public override void EnterTitle(MplotParser.TitleContext context) => Title = context.STRING().GetText().RemoveQuotes();
+    public override void EnterTitle(MplotParser.TitleContext context) => Title = context.STRING().GetText().UnescapeMplotString();
 
-    public override void EnterGnuplotLiteral(MplotParser.GnuplotLiteralContext context) => GnuplotLiterals.AddRange(context.STRING().Select(s => s.GetText()[1..^1]));
+    public override void EnterGnuplotLiteral(MplotParser.GnuplotLiteralContext context) => GnuplotLiterals.AddRange(context.STRING().Select(s => s.GetText().UnescapeMplotString()));
 
     public override void EnterHist(MplotParser.HistContext context)
     {
@@ -251,13 +254,25 @@ public class MplotListener : MplotBaseListener
     public override void EnterXticAdd(MplotParser.XticAddContext context)
     {
         Rational r = new Rational(context.rational());
-        _additionalXTics.Add(new (r, context.STRING()?.GetText().RemoveQuotes()));
+        _additionalXTics.Add(new(r, context.STRING()?.GetText().UnescapeMplotString()));
     }
 
     public override void EnterYticAdd(MplotParser.YticAddContext context)
     {
         Rational r = new Rational(context.rational());
-        _additionalYTics.Add(new (r, context.STRING()?.GetText().RemoveQuotes()));
+        _additionalYTics.Add(new (r, context.STRING()?.GetText().UnescapeMplotString()));
+    }
+
+    public override void EnterXticAdd2(MplotParser.XticAdd2Context context)
+    {
+        Rational r = new Rational(context.rational());
+        _additionalXTics2.Add(new (r, context.STRING()?.GetText().UnescapeMplotString()));
+    }
+
+    public override void EnterYticAdd2(MplotParser.YticAdd2Context context)
+    {
+         Rational r = new Rational(context.rational());
+         _additionalYTics2.Add(new (r, context.STRING()?.GetText().UnescapeMplotString()));
     }
 
     public override void EnterHeight(MplotParser.HeightContext context)
@@ -318,7 +333,7 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterTimeFormat(MplotParser.TimeFormatContext context)
     {
-        TimeFormat = context.STRING().GetText().RemoveQuotes();
+        TimeFormat = context.STRING().GetText().UnescapeMplotString();
         TimeAxis = true;
     }
 
@@ -353,7 +368,7 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterSeparator(MplotParser.SeparatorContext context)
     {
-        var separatorText = context.stringArray().STRING().Select(s => s.GetText().RemoveQuotes()).ToList();
+        var separatorText = context.stringArray().STRING().Select(s => s.GetText().UnescapeMplotString()).ToList();
         CharactersSeparator charactersSeparator = new(separatorText[0]);
 
         SeparatorArray.Update(separatorText.Select(s => (Separator2)new CharactersSeparator(s)).ToList(), context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
@@ -411,8 +426,8 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterLabels(MplotParser.LabelsContext context)
     {
-        XLabel = context.STRING()[0].GetText().RemoveQuotes();
-        YLabel = context.STRING()[1].GetText().RemoveQuotes();
+        XLabel = context.STRING()[0].GetText().UnescapeMplotString();
+        YLabel = context.STRING()[1].GetText().UnescapeMplotString();
     }
 
     public override void EnterRgbColor(MplotParser.RgbColorContext context)
@@ -457,7 +472,7 @@ public class MplotListener : MplotBaseListener
             }
             else if (child is MplotParser.StringCountContext stringCountContext)
             {
-                var text = stringCountContext.STRING().GetText().RemoveQuotes();
+                var text = stringCountContext.STRING().GetText().UnescapeMplotString();
                 var count = int.Parse(stringCountContext.count()?.INT().GetText() ?? "1");
                 ColumnSpecifier columnSpecifier = new(text);
 
@@ -497,7 +512,7 @@ public class MplotListener : MplotBaseListener
             }
             else if (child is MplotParser.StringCountContext stringCountContext)
             {
-                var text = stringCountContext.STRING().GetText().RemoveQuotes();
+                var text = stringCountContext.STRING().GetText().UnescapeMplotString();
                 var count = int.Parse(stringCountContext.count()?.INT().GetText() ?? "1");
                 ColumnSpecifier columnSpecifier = new(text);
 
@@ -538,12 +553,12 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterOutput(MplotParser.OutputContext context)
     {
-        OutputFile = context.STRING().GetText().RemoveQuotes();
+        OutputFile = context.STRING().GetText().UnescapeMplotString();
     }
 
     public override void EnterXformat(MplotParser.XformatContext context)
     {
-        XFormat = context.STRING().GetText().RemoveQuotes();
+        XFormat = context.STRING().GetText().UnescapeMplotString();
     }
 
     public override void EnterSkip(MplotParser.SkipContext context)
@@ -585,7 +600,7 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterSeries(MplotParser.SeriesContext context)
     {
-        var names = context.stringArray().STRING().Select(node => node.GetText().RemoveQuotes().Trim()).ToList();
+        var names = context.stringArray().STRING().Select(node => node.GetText().UnescapeMplotString().Trim()).ToList();
         SeriesNameArray.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
     }
 
@@ -622,7 +637,7 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterCommandSource(MplotParser.CommandSourceContext context)
     {
-        var arguments = context.STRING().Select(s => s.GetText().RemoveQuotes()).ToList();
+        var arguments = context.STRING().Select(s => s.GetText().UnescapeMplotString()).ToList();
         var cmdDataSource = new CommandDataSource(arguments, _currentVar);
         _currentVar++;
         FilePathArray.Add(cmdDataSource);
@@ -632,7 +647,7 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterFont(MplotParser.FontContext context)
     {
-        FontName = context.STRING().GetText().RemoveQuotes();
+        FontName = context.STRING().GetText().UnescapeMplotString();
     }
 
     public override void EnterFontSize(MplotParser.FontSizeContext context)
@@ -689,6 +704,13 @@ public class MplotListener : MplotBaseListener
             lines.Add($"set xtics add ({string.Join(", ", _additionalXTics.Select(tic => tic.ToGnuplot()))})");
         }
 
+        if (_additionalXTics2.Count > 0)
+        {
+            lines.Add($"set x2tics add ({string.Join(", ", _additionalXTics2.Select(tic => tic.ToGnuplot()))})");
+            lines.Add("set link x2");
+            lines.Add("set format x2 \"\"");
+        }
+
         if (YTicMin is not null && YTicMax is not null && YTicIncrement is not null)
         {
             lines.Add( $"set ytics {YTicMin.ToDecimalString()}, {YTicIncrement.ToDecimalString()}, {YTicMax.ToDecimalString()}");
@@ -698,6 +720,14 @@ public class MplotListener : MplotBaseListener
         {
             lines.Add($"set ytics add ({string.Join(", ", _additionalYTics.Select(tic => tic.ToGnuplot()))})");
         }
+
+        if (_additionalYTics2.Count > 0)
+        {
+            lines.Add($"set y2tics add ({string.Join(", ", _additionalYTics2.Select(tic => tic.ToGnuplot()))})");
+            lines.Add($"set link y2");
+            lines.Add("set format y2 \"\"");
+        }
+
 
         if (TicsOut)
         {

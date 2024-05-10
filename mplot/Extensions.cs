@@ -78,6 +78,41 @@ public static class Extensions
         return sb.ToString();
     }
 
+    public static string UnescapeMplotString(this string quotedString)
+    {
+        StringBuilder b = new();
+        for (int i = 1; i < quotedString.Length - 1; i++)
+        {
+            char c = quotedString[i];
+            if (c == '\\')
+            {
+                if (i + 1 < quotedString.Length - 1)
+                {
+                    char c2 = quotedString[i + 1];
+                    if (c2 == '\\') b.Append('\\');
+                    else if (c2 == '"') b.Append('"');
+                    else
+                    {
+                        b.Append(c);
+                        b.Append(c2);
+                    }
+
+                    i++;
+                }
+                else
+                {
+                    b.Append('\\');
+                }
+            }
+            else
+            {
+                b.Append(c);
+            }
+        }
+
+        return b.ToString();
+    }
+
     public static string ToGnuPlotString(this string input)
     {
         // Add quotes around string, escaping interior quotes, and interior backslashes

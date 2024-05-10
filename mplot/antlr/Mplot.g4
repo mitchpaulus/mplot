@@ -43,8 +43,10 @@ element
   | seriesStyle
   | xtics
   | xticAdd
+  | xticAdd2
   | ytics
   | yticAdd
+  | yticAdd2
   | gnuplotLiteral
   | dpi
   | commandSource
@@ -95,6 +97,9 @@ ticsOut : TICS_OUT ;
 
 xticAdd : ('xticadd' | 'xtickadd' | 'addxtic' | 'addxtick') (rational STRING? | STRING rational) ;
 yticAdd : ('yticadd' | 'ytickadd' | 'addytic' | 'addytick') (rational STRING? | STRING rational) ;
+
+xticAdd2 : ('xticadd2' | 'xtickadd2' | 'addxtic2' | 'addxtick2') (rational STRING? | STRING rational) ;
+yticAdd2 : ('yticadd2' | 'ytickadd2' | 'addytic2' | 'addytick2') (rational STRING? | STRING rational) ;
 
 TICS_OUT : 'ticsout' | 'outtics' | 'ticksout' | 'outticks' ;
 
