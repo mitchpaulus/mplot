@@ -41,8 +41,8 @@ public class MplotListener : MplotBaseListener
 
     public readonly MplotArray<SeriesStyle> PlotSeriesStyleArray = new(SeriesStyle.Scatter, MplotArrayMode.Repeat, "Series style");
 
-    public double XMin { get; set; } = double.NaN;
-    public double XMax { get; set; } = double.NaN;
+    public RangeSpec XMin { get; set; } = AutoRange.Auto();
+    public RangeSpec XMax { get; set; } = AutoRange.Auto();
 
     public Rational? XTicMin = null;
     public Rational? XTicMax = null;
@@ -50,8 +50,8 @@ public class MplotListener : MplotBaseListener
 
     public bool TicsOut = false;
 
-    public double YMin { get; set; } = double.NaN;
-    public double YMax { get; set; } = double.NaN;
+    public RangeSpec YMin { get; set; } = AutoRange.Auto();
+    public RangeSpec YMax { get; set; } = AutoRange.Auto();
 
     public Rational? YTicMin = null;
     public Rational? YTicMax = null;
@@ -84,7 +84,7 @@ public class MplotListener : MplotBaseListener
 
     public MplotArray<string> SeriesNameArray = new MplotArray<string>("Series", MplotArrayMode.Repeat, "Series name");
     public bool TimeAxis { get; set; } = false;
-    public string TimeFormat { get; set; } = "";
+    public Maybe<string> TimeFormat { get; set; } = NoneMarker.None;
 
     public string XFormat { get; set; } = "";
 
@@ -154,6 +154,11 @@ public class MplotListener : MplotBaseListener
             string yColSpecifier = YcolsArray[i].Match(specifier => specifier.ToString(), Evaluator.EvaluateGnuplot);
 
             Maybe<List<MplotToken>> ignore = Ignores[i];
+
+            if (TimeAxis)
+            {
+                xColSpecifier = TimeFormat.IsNone ? $"(timecolumn(1, \"%Y-%m-%d %H:%M\")" : $"(timecolumn(1, \"{TimeFormat.AsValue}\")";
+            }
 
             if (ignore.TryPickT0(out List<MplotToken> tokens, out NoneMarker _))
             {
@@ -298,14 +303,19 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterXrange(MplotParser.XrangeContext context)
     {
-        if (context.range().lowLimit != null)  XMin = new Rational(context.range().lowLimit);
-        if (context.range().highLimit != null) XMax = new Rational(context.range().highLimit);
+        XMin = context.range().lowLimit.ToRangeSpec();
+        XMax = context.range().highLimit.ToRangeSpec();
     }
     public override void EnterYrange(MplotParser.YrangeContext context)
     {
-        if (context.range().lowLimit != null)  YMin = new Rational(context.range().lowLimit);
-        if (context.range().highLimit != null) YMax = new Rational(context.range().highLimit);
+        YMin = context.range().lowLimit.ToRangeSpec();
+        YMax = context.range().highLimit.ToRangeSpec();
     }
+
+    public override void EnterXmin(MplotParser.XminContext context) => XMin = context.rangeItem().ToRangeSpec();
+    public override void EnterXmax(MplotParser.XmaxContext context) => XMax = context.rangeItem().ToRangeSpec();
+    public override void EnterYmin(MplotParser.YminContext context) => YMin = context.rangeItem().ToRangeSpec();
+    public override void EnterYmax(MplotParser.YmaxContext context) => YMax = context.rangeItem().ToRangeSpec();
 
     public override void EnterNoLegend(MplotParser.NoLegendContext context) => Legend = SpecifiedBool.False;
 
@@ -668,6 +678,12 @@ public class MplotListener : MplotBaseListener
 
         lines.Add($"set terminal pngcairo size {widthPixels},{heightPixels} font \"{fontName},{FontSize}\" fontscale {fontScale} pointscale {fontScale}");
 
+        if (TimeAxis)
+        {
+            lines.Add("set timeformat \"%Y-%m-%d %H:%M\"");
+            lines.Add("set xdata time");
+        }
+
         lines.AddRange(GnuplotLiterals);
 
         // TODO: escape characters
@@ -686,13 +702,8 @@ public class MplotListener : MplotBaseListener
         else if (Legend == SpecifiedBool.True) lines.Add($"set key {LegendPosition.GnuPlotLegendPosition}{legendMaxRowsMaxCols}");
         else lines.Add(seriesList.Count > 1 ? $"set key {LegendPosition.GnuPlotLegendPosition}{legendMaxRowsMaxCols}" : "set key off");
 
-        if (!double.IsNaN(XMin) && !double.IsNaN(XMax)) lines.Add($"set xrange [{XMin}:{XMax}]");
-        else if (!double.IsNaN(XMin))                   lines.Add($"set xrange [{XMin}:*]");
-        else if (!double.IsNaN(XMax))                   lines.Add($"set xrange [*:{XMax}]");
-
-        if (!double.IsNaN(YMin) && !double.IsNaN(YMax)) lines.Add($"set yrange [{YMin}:{YMax}]");
-        else if (!double.IsNaN(YMin))                   lines.Add($"set yrange [{YMin}:*]");
-        else if (!double.IsNaN(YMax))                   lines.Add($"set yrange [*:{YMax}]");
+        if (!XMin.IsAuto || !XMax.IsAuto) lines.Add($"set xrange [{XMin.ToGnuplot()}:{XMax.ToGnuplot()}]");
+        if (!YMin.IsAuto || !YMax.IsAuto) lines.Add($"set yrange [{YMin.ToGnuplot()}:{YMax.ToGnuplot()}]");
 
         if (XTicMin is not null && XTicMax is not null && XTicIncrement is not null)
         {
@@ -728,17 +739,10 @@ public class MplotListener : MplotBaseListener
             lines.Add("set format y2 \"\"");
         }
 
-
         if (TicsOut)
         {
             lines.Add("set xtics out");
             lines.Add("set ytics out");
-        }
-
-        if (TimeAxis)
-        {
-            lines.Add("set xdata time");
-            lines.Add($"set timefmt \"{TimeFormat}\"");
         }
 
         // Sets the format for tick marks. Typical format modifiers like '%f' and '%e'
@@ -1055,4 +1059,7 @@ public class Maybe<T> : OneOfBase<T, NoneMarker>
 
     public static implicit operator Maybe<T>(T _) => new(_);
     public static implicit operator Maybe<T>(NoneMarker _) => new(_);
+
+    public bool IsNone => IsT1;
+    public T AsValue => AsT0;
 }

@@ -147,4 +147,40 @@ public static class Extensions
     {
         stringArray.Update(stringArrayContext.STRING().Select(node =>  node.GetText().RemoveQuotes().Trim()).ToList(),  stringArrayContext.CYCLE().Any(), stringArrayContext.ASTERISK().Any());
     }
+
+    public static RangeSpec ToRangeSpec(this MplotParser.RangeItemContext rangeItemContext)
+    {
+        if (rangeItemContext.ASTERISK() is not null || rangeItemContext.AUTO() is not null) return AutoRange.Auto();
+        if (rangeItemContext.rational() is not null)
+        {
+            MplotParser.RationalContext? rational = rangeItemContext.rational();
+            return new Rational(rational);
+        }
+
+        if (rangeItemContext.dateTime() is not null)
+        {
+            return rangeItemContext.dateTime().ToDatetime();
+        }
+
+        // Should never reach
+        throw new InvalidOperationException();
+    }
+
+    public static DateTime ToDatetime(this MplotParser.DateTimeContext dtContext)
+    {
+        // yyyy-MM-dd
+        string dayText = dtContext.DAY().GetText();
+        int year = int.Parse(dayText[..4]);
+        int month = int.Parse(dayText.Substring(5, 2));
+        int day = int.Parse(dayText.Substring(8, 2));
+
+        // TODO: Handle invalid dates?
+        if (dtContext.TIME() is null) return new DateTime(year, month, day);
+
+        // HH:mm
+        string timeText = dtContext.TIME().GetText();
+        int hour = int.Parse(timeText.Substring(0, 2));
+        int minute = int.Parse(timeText.Substring(3, 2));
+        return new DateTime(year, month, day, hour, minute, 0);
+    }
 }

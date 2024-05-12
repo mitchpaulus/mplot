@@ -29,7 +29,11 @@ element
   | timeFormat
   | xformat
   | xrange
+  | xmin
+  | xmax
   | yrange
+  | ymin
+  | ymax
   | knownColorCycleAsterisk
   | lineWidth
   | font
@@ -72,6 +76,10 @@ yexp       : 'yexp' ASTERISK? expression ;
 xformat    : ('xf' | 'xticformat') STRING ;
 xrange     : ('xr' | 'xrange') range ;
 yrange     : ('yr' | 'yrange') range ;
+xmin       : ('xmin' | 'xlow') rangeItem ;
+xmax       : ('xmax' | 'xhigh') rangeItem ;
+ymin       : ('ymin' | 'ylow') rangeItem ;
+ymax       : ('ymax' | 'yhigh') rangeItem ;
 labels     : ('l' | 'labels') STRING STRING ;
 lineWidth  : ('lw' | 'linewidth' | 'linethickness') intArray ;
 ylabel     : ('yl' | 'ylabel') STRING ;
@@ -79,7 +87,7 @@ ycol       : ('y' | 'ycol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 width      : ('w' | 'width') rational ;
 height     : ('h' | 'height') rational ;
 output     : ('out' | 'output') STRING ;
-timeAxis   : TIME ;
+timeAxis   : TIME_KEYWORD ;
 timeFormat : ('tf' | 'timeformat') STRING ;
 isoDate : 'isodate' ;
 seriesStyle : (pointStyle | lineStyle | hist) (CYCLE | ASTERISK)* ;
@@ -107,7 +115,10 @@ TICS_OUT : 'ticsout' | 'outtics' | 'ticksout' | 'outticks' ;
 pointStyle : 'point' | 'scatter' | 'xy' ;
 lineStyle : 'line' ;
 
-range : lowLimit=rational? (COLON | TO) highLimit=rational? ;
+AUTO : 'auto' ;
+range : lowLimit=rangeItem (COLON | TO)? highLimit=rangeItem ;
+rangeItem : rational | dateTime | ASTERISK | AUTO ;
+
 COLON : ':' ;
 TO : 'to' ;
 
@@ -163,7 +174,7 @@ CSV : 'CSV' | 'csv' ;
 TAB_CHAR   : 'tab' ;
 WHITESPACESEP : 'ws' | 'whitespace' ;
 
-TIME : 'time' ;
+TIME_KEYWORD : 'time' ;
 
 hist : HIST ;
 HIST : 'hist' | 'histogram' ;
@@ -255,7 +266,10 @@ EXPRESSIONCOL : '$' INT ;
 EXPRESSIONCOLX : '$x' ;
 EXPRESSIONCOLY : '$y' ;
 
-DATETIME : '[0-9]{4}-[0-9]{2}-[0-9]{2}(T[0-9]{2}:[0-9]{2})?' ;
+DAY : '[0-9]{4}-[0-9]{2}-[0-9]{2}' ;
+TIME : '[0-9]{2}:[0-9]{2}' ;
+
+dateTime : DAY TIME? ;
 
 expression : expressionItem+ ;
 
