@@ -232,6 +232,10 @@ knownColorCycleAsterisk : knownColor (ASTERISK | CYCLE)? ;
 
 fragment HEX_DIGIT : '0'..'9' | 'a'..'f' | 'A'..'F' ;
 
+// Must be above INT for lexing priority
+DAY : [0-9][0-9][0-9][0-9]'-'[0-9][0-9]'-'[0-9][0-9] ;
+TIME : [0-9][0-9]':'[0-9][0-9] ;
+
 INT : [0-9]+ ;
 
 rational
@@ -266,8 +270,6 @@ EXPRESSIONCOL : '$' INT ;
 EXPRESSIONCOLX : '$x' ;
 EXPRESSIONCOLY : '$y' ;
 
-DAY : '[0-9]{4}-[0-9]{2}-[0-9]{2}' ;
-TIME : '[0-9]{2}:[0-9]{2}' ;
 
 dateTime : DAY TIME? ;
 

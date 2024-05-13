@@ -20,7 +20,7 @@ public class RangeSpec : OneOfBase<Rational, AutoRange, DateTime>
 
             rational => rational.ToDecimalString(),
             _ => "*",
-            time => $"{time:yyyy-MM-dd HH:mm}"
+            time => $"\"{time:yyyy-MM-dd HH:mm}\""
         );
     }
 }

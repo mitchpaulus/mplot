@@ -159,8 +159,8 @@ public class MplotListener : MplotBaseListener
             if (TimeAxis)
             {
                 xColSpecifier = TimeFormat.Match(
-                    tf => $"(timecolumn(1, \"{tf}\")",
-                    _ => "(timecolumn(1, \"%Y-%m-%d %H:%M\")"
+                    tf => $"(timecolumn(1, \"{tf}\"))",
+                    _ => "(timecolumn(1, \"%Y-%m-%d %H:%M\"))"
                 );
             }
 
@@ -686,7 +686,7 @@ public class MplotListener : MplotBaseListener
 
         if (TimeAxis)
         {
-            lines.Add("set timeformat \"%Y-%m-%d %H:%M\"");
+            lines.Add("set timefmt \"%Y-%m-%d %H:%M\"");
             lines.Add("set xdata time");
         }
 
