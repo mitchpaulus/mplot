@@ -15,6 +15,7 @@ class Program
         List<string> files = new();
         bool compile = false;
         bool toGnuplotFile = false;
+        bool printDependencies = false;
 
         while (i < args.Length)
         {
@@ -28,6 +29,7 @@ class Program
                 Console.Write('\n');
                 Console.Write("OPTIONS\n");
                 Console.Write(" -c  Pipe directly to gnuplot to compile.\n");
+                Console.Write(" -d  Print dependencies\n");
                 Console.Write(" -g  Write directly to gnuplot file of same name.\n");
                 Console.Write('\n');
                 Console.Write('\n');
@@ -98,6 +100,10 @@ class Program
             {
                 toGnuplotFile = true;
             }
+            else if (args[i] is "-d")
+            {
+                printDependencies = true;
+            }
             else
             {
                 files.Add(args[i]);
@@ -114,17 +120,18 @@ class Program
         }
 
         string contents;
-        FileInfo? fileInfo = null;
+        Maybe<FileInfo> fileInfo;
+        // FileInfo? fileInfo = null;
 
         if (files.Count == 0 || files[0] == "-") // Read from standard input
         {
             contents = Console.In.ReadToEnd();
+            fileInfo = NoneMarker.None;
         }
         else
         {
             string filePath = files[0];
-
-            fileInfo = new(filePath);
+            fileInfo = new FileInfo(filePath);
 
             try
             {
@@ -151,10 +158,13 @@ class Program
 
         var parsedFile = parser.mplot();
 
+        ParseTreeWalker walker = new ParseTreeWalker();
+
+        List<string> dependencies = new();
+
         foreach (var plot in parsedFile.plot())
         {
-            MplotListener listener = new MplotListener();
-            ParseTreeWalker walker = new ParseTreeWalker();
+            MplotListener listener = new MplotListener(fileInfo);
 
             try
             {
@@ -195,30 +205,45 @@ class Program
                 }
                 else if (toGnuplotFile)
                 {
-                    string gnuplotFilename;
-                    if (fileInfo is null)
-                    {
-                        gnuplotFilename = "stdin.gnuplot";
-                    }
-                    else
-                    {
-                        gnuplotFilename = fileInfo.FullName.EndsWith(".mplot")
-                            ? fileInfo.FullName[..^5] + "gnuplot"
-                            : fileInfo.FullName + ".gnuplot";
-                    }
+                    string gnuplotFilename = fileInfo.Match(
+                        info => info.FullName.EndsWith(".mplot")
+                                    ? info.FullName[..^5] + "gnuplot"
+                                    : info.FullName + ".gnuplot",
+                        _ => "stdin.gnuplot"
+                    );
 
                     Encoding e = new UTF8Encoding(false);
                     File.WriteAllText(gnuplotFilename, writeGnuplot, e);
+                }
+                else if (printDependencies)
+                {
+                    var fileSources = listener.FilePathArray.Elements().Where(source => source.IsFileSource).Select(source => source.AsT0).ToList();
+
+                    foreach (var fs in fileSources)
+                    {
+                        if (!dependencies.Contains(fs.Filepath)) dependencies.Add(fs.Filepath);
+                    }
                 }
                 else
                 {
                     Console.Write(writeGnuplot);
                 }
+
             }
             catch (Exception e)
             {
                 Console.Error.Write(e.Message + "\n");
                 return 1;
+            }
+        }
+
+        if (printDependencies)
+        {
+            dependencies.Sort();
+            foreach (var d in dependencies)
+            {
+                Console.Write(d);
+                Console.Write('\n');
             }
         }
 

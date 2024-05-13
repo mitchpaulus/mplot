@@ -59,6 +59,11 @@ public class MplotArray<T> : IMplotArray
         UseDefault = false;
     }
 
+    public List<T> Elements()
+    {
+        return UseDefault ? _defaultElements?.Select(arg => arg).ToList() ?? new List<T>() : _elements.Select(arg => arg).ToList();
+    }
+
     public T this[int index]
     {
         get

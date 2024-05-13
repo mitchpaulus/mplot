@@ -34,7 +34,7 @@ public class Tests
 
         var parsedFile = parser.mplot();
 
-        MplotListener listener = new MplotListener();
+        MplotListener listener = new MplotListener(NoneMarker.None);
 
         ParseTreeWalker walker = new ParseTreeWalker();
 
@@ -91,5 +91,15 @@ public class Tests
         {
             foreach (var d in dArray.Array) Console.Write(d + "\n");
         }
+    }
+
+    [Test]
+    public void PathTests()
+    {
+        string path1 = "C:\\Users\\mpaulus\\test.txt";
+        string otherDir = "D:\\sample";
+
+        string fullPath = Path.GetFullPath(path1, otherDir);
+        Console.WriteLine(fullPath);
     }
 }

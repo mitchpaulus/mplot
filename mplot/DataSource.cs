@@ -33,12 +33,30 @@ public class DataSource : OneOfBase<FileSource, InlineDataSource, CommandDataSou
 
 public class FileSource
 {
-    public FileSource(string filepath)
+    private readonly Maybe<FileInfo> _mplotFileInfo;
+    private readonly string _filepath;
+
+    public FileSource(string filepath, Maybe<FileInfo> mplotFileInfo)
     {
-        Filepath = filepath;
+        _mplotFileInfo = mplotFileInfo;
+        _filepath = filepath;
     }
 
-    public string Filepath { get; private set; }
+    public string Filepath
+    {
+        get
+        {
+            if (_mplotFileInfo.TryPickT0(out var fileInfo, out _) && fileInfo.DirectoryName is not null)
+            {
+                return Path.GetFullPath(_filepath, fileInfo.DirectoryName);
+            }
+            else
+            {
+                return _filepath;
+            }
+        }
+    }
+
 
     public override string ToString() => Filepath;
 }

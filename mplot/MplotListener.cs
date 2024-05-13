@@ -7,6 +7,7 @@ namespace mplot;
 
 public class MplotListener : MplotBaseListener
 {
+    private readonly Maybe<FileInfo> _fileInfo;
     public readonly MplotArray<Color> LineColorArray = new(Color.Black, MplotArrayMode.Repeat, "Line color");
 
     public readonly MplotArray<int> LineWidthArray = new(1, MplotArrayMode.Repeat, "Line width");
@@ -70,7 +71,7 @@ public class MplotListener : MplotBaseListener
 
     public MplotArray<Marker> MarkerArray = new(new CircleMarker(), MplotArrayMode.Repeat, "Marker");
 
-    public readonly MplotArray<DataSource> FilePathArray = new(new FileSource("data.tsv"), MplotArrayMode.Repeat, "File path");
+    public readonly MplotArray<DataSource> FilePathArray;
 
     public LegendPosition LegendPosition = new Empty();
 
@@ -143,9 +144,9 @@ public class MplotListener : MplotBaseListener
         List<Series> series = new();
         for (int i = 0; i < lengths.First(); i++)
         {
-            Stream stream = FilePathArray[i].Stream();
-            StreamReader reader = new(stream, Encoding.UTF8);
-            var contents = reader.ReadToEnd();
+            // Stream stream = FilePathArray[i].Stream();
+            // StreamReader reader = new(stream, Encoding.UTF8);
+            // var contents = reader.ReadToEnd();
 
             Separator2 sep2 = SeparatorArray[i];
             Separator sep = sep2.Determine(FilePathArray[i]);
@@ -157,7 +158,10 @@ public class MplotListener : MplotBaseListener
 
             if (TimeAxis)
             {
-                xColSpecifier = TimeFormat.IsNone ? $"(timecolumn(1, \"%Y-%m-%d %H:%M\")" : $"(timecolumn(1, \"{TimeFormat.AsValue}\")";
+                xColSpecifier = TimeFormat.Match(
+                    tf => $"(timecolumn(1, \"{tf}\")",
+                    _ => "(timecolumn(1, \"%Y-%m-%d %H:%M\")"
+                );
             }
 
             if (ignore.TryPickT0(out List<MplotToken> tokens, out NoneMarker _))
@@ -194,10 +198,12 @@ public class MplotListener : MplotBaseListener
     }
 
 
-    public MplotListener()
+    public MplotListener(Maybe<FileInfo> fileInfo)
     {
+        _fileInfo = fileInfo;
         PlotDpi = DefaultDpi * 4;
         OutputFile = null;
+        FilePathArray = new(new FileSource("data.tsv", _fileInfo), MplotArrayMode.Repeat, "File path");
     }
 
     public string ParseXLabelContext(MplotParser.XlabelContext context) => context.STRING().GetText().UnescapeMplotString();
@@ -210,7 +216,7 @@ public class MplotListener : MplotBaseListener
     {
         bool repeat = context.stringArray().ASTERISK() is not null;
         bool cycle =  context.stringArray().CYCLE() is not null;
-        FilePathArray.Update(context.stringArray().STRING().Select(node => (DataSource)new FileSource(node.GetText().UnescapeMplotString())).ToList(), cycle, repeat);
+        FilePathArray.Update(context.stringArray().STRING().Select(node => (DataSource)new FileSource(node.GetText().UnescapeMplotString(), _fileInfo)).ToList(), cycle, repeat);
     }
 
     public override void EnterLegendCols(MplotParser.LegendColsContext context) => LegendCols = int.Parse(context.INT().GetText());
