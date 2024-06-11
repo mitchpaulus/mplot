@@ -166,13 +166,19 @@ public class MplotListener : MplotBaseListener
 
             if (ignore.TryPickT0(out List<MplotToken> tokens, out NoneMarker _))
             {
-                var ignoreExpString = Evaluator.EvaluateGnuplot(tokens);
 
                 var colSpecifier = yColSpecifier;
                 var newYSpecifier = YcolsArray[i].Match(
                     columnSpecifier => columnSpecifier.ToGnuplotExp(),
                     _ => colSpecifier
                 );
+
+                var xExp = XcolsArray[i].Match(
+                    specifier => specifier.ToGnuplotExp(),
+                    _ => xColSpecifier
+                );
+
+                var ignoreExpString = Evaluator.EvaluateGnuplot(tokens, xExp, newYSpecifier);
 
                 // Wrap the Y value in a ternary condition. Has to be Y, since if you do it on a X that is time, doesn't seem to work.
                 yColSpecifier = $"({ignoreExpString} ? NaN : {newYSpecifier})";

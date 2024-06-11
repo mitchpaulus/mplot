@@ -12,7 +12,9 @@ public class Evaluator
     {
     }
 
-    public static string EvaluateGnuplot(List<MplotToken> tokens)
+    public static string EvaluateGnuplot(List<MplotToken> tokens) => EvaluateGnuplot(tokens, null, null);
+
+    public static string EvaluateGnuplot(List<MplotToken> tokens, string? currentX, string? currentY)
     {
         Stack<string> expStack = new();
 
@@ -111,6 +113,16 @@ public class Evaluator
                 string arg2 = expStack.Pop();
                 string arg1 = expStack.Pop();
                 expStack.Push($"({arg1} || {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.EXPRESSIONCOLX)
+            {
+                if (string.IsNullOrWhiteSpace(currentX)) throw new InvalidDataException($"Current x expression not set.");
+                expStack.Push($"({currentX})");
+            }
+            else if (token.TokenType == ExpressionTokenType.EXPRESSIONCOLY)
+            {
+                if (string.IsNullOrWhiteSpace(currentY)) throw new InvalidDataException($"Current y expression not set.");
+                expStack.Push($"({currentY})");
             }
             else
             {
