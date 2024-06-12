@@ -49,7 +49,7 @@ public class MplotListener : MplotBaseListener
     public Rational? XTicMax = null;
     public Rational? XTicIncrement = null;
 
-    public MplotArray<string> XTicLabels = new MplotArray<string>("X Tic Labels");
+    public MplotArray<string> XTicLabels = new("X Tic Labels");
 
     public bool TicsOut = false;
 

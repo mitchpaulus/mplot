@@ -25,7 +25,7 @@ public class MplotArray<T> : IMplotArray
     public MplotArray(string name)
     {
         _name = name;
-        UseDefault = false;
+        UseDefault = true;
     }
 
     public MplotArray(List<T> elements, MplotArrayMode mode, string name)
