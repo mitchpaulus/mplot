@@ -169,6 +169,14 @@ class Program
             try
             {
                 walker.Walk(listener, plot);
+
+                var checks = listener.GnuplotCheck();
+                if (checks.Any())
+                {
+                    foreach (var check in checks) Console.Write(check);
+                    return 1;
+                }
+
                 string writeGnuplot = listener.WriteGnuplot();
 
                 if (compile)

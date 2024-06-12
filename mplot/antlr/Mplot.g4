@@ -48,6 +48,7 @@ element
   | xtics
   | xticAdd
   | xticAdd2
+  | xticlabels
   | ytics
   | yticAdd
   | yticAdd2
@@ -101,6 +102,8 @@ firstAsterisk : ASTERISK ;
 // xtics min step max
 xtics : 'xtics' rational rational rational ;
 ytics : 'ytics' rational rational rational ;
+
+xticlabels : 'xticlabels' stringArray ;
 
 ticsOut : TICS_OUT ;
 

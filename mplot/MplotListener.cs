@@ -16,7 +16,7 @@ public class MplotListener : MplotBaseListener
 
     public string? XLabel { get; set; }
     public string? YLabel { get; set; }
-    public MplotArray<ColumnSelector> YcolsArray { get; } = new (new ColumnSpecifier(2), MplotArrayMode.Repeat, "Y col specifier");
+    public MplotArray<ColumnSelector> YcolsArray { get; } = new(new ColumnSpecifier(2), MplotArrayMode.Repeat, "Y col specifier");
     public MplotArray<ColumnSelector> XcolsArray { get; } = new(new ColumnSpecifier(1), MplotArrayMode.Repeat, "X col specifier");
     private MplotArray<Maybe<List<MplotToken>>> Ignores { get; } = new(NoneMarker.None, MplotArrayMode.Repeat, "Ignore expression");
 
@@ -49,6 +49,8 @@ public class MplotListener : MplotBaseListener
     public Rational? XTicMax = null;
     public Rational? XTicIncrement = null;
 
+    public MplotArray<string> XTicLabels = new MplotArray<string>("X Tic Labels");
+
     public bool TicsOut = false;
 
     public RangeSpec YMin { get; set; } = AutoRange.Auto();
@@ -67,7 +69,7 @@ public class MplotListener : MplotBaseListener
 
     public readonly MplotArray<Rational> BinSizeArray = new(1, MplotArrayMode.Repeat, "Bin size");
 
-    public readonly MplotArray<Separator2> SeparatorArray = new(new List<Separator2> {  new AutoSeparator() } , MplotArrayMode.Repeat, "Separator");
+    public readonly MplotArray<Separator2> SeparatorArray = new(new List<Separator2> { new AutoSeparator() }, MplotArrayMode.Repeat, "Separator");
 
     public MplotArray<Marker> MarkerArray = new(new CircleMarker(), MplotArrayMode.Repeat, "Marker");
 
@@ -221,7 +223,7 @@ public class MplotListener : MplotBaseListener
     public override void EnterFile(MplotParser.FileContext context)
     {
         bool repeat = context.stringArray().ASTERISK() is not null;
-        bool cycle =  context.stringArray().CYCLE() is not null;
+        bool cycle = context.stringArray().CYCLE() is not null;
         FilePathArray.Update(context.stringArray().STRING().Select(node => (DataSource)new FileSource(node.GetText().UnescapeMplotString(), _fileInfo)).ToList(), cycle, repeat);
     }
 
@@ -240,14 +242,12 @@ public class MplotListener : MplotBaseListener
     }
 
     public override void EnterTitle(MplotParser.TitleContext context) => Title = context.STRING().GetText().UnescapeMplotString();
-
     public override void EnterGnuplotLiteral(MplotParser.GnuplotLiteralContext context) => GnuplotLiterals.AddRange(context.STRING().Select(s => s.GetText().UnescapeMplotString()));
 
     public override void EnterHist(MplotParser.HistContext context)
     {
         PlotSeriesStyleArray.Add(SeriesStyle.Boxes);
     }
-
     public override void EnterBinsize(MplotParser.BinsizeContext context)
     {
         BinSizeArray.Add(new Rational(context.rational()));
@@ -277,19 +277,19 @@ public class MplotListener : MplotBaseListener
     public override void EnterYticAdd(MplotParser.YticAddContext context)
     {
         Rational r = new Rational(context.rational());
-        _additionalYTics.Add(new (r, context.STRING()?.GetText().UnescapeMplotString()));
+        _additionalYTics.Add(new(r, context.STRING()?.GetText().UnescapeMplotString()));
     }
 
     public override void EnterXticAdd2(MplotParser.XticAdd2Context context)
     {
         Rational r = new Rational(context.rational());
-        _additionalXTics2.Add(new (r, context.STRING()?.GetText().UnescapeMplotString()));
+        _additionalXTics2.Add(new(r, context.STRING()?.GetText().UnescapeMplotString()));
     }
 
     public override void EnterYticAdd2(MplotParser.YticAdd2Context context)
     {
-         Rational r = new Rational(context.rational());
-         _additionalYTics2.Add(new (r, context.STRING()?.GetText().UnescapeMplotString()));
+        Rational r = new Rational(context.rational());
+        _additionalYTics2.Add(new(r, context.STRING()?.GetText().UnescapeMplotString()));
     }
 
     public override void EnterHeight(MplotParser.HeightContext context)
@@ -318,6 +318,7 @@ public class MplotListener : MplotBaseListener
         XMin = context.range().lowLimit.ToRangeSpec();
         XMax = context.range().highLimit.ToRangeSpec();
     }
+
     public override void EnterYrange(MplotParser.YrangeContext context)
     {
         YMin = context.range().lowLimit.ToRangeSpec();
@@ -393,13 +394,20 @@ public class MplotListener : MplotBaseListener
         var separatorText = context.stringArray().STRING().Select(s => s.GetText().UnescapeMplotString()).ToList();
         CharactersSeparator charactersSeparator = new(separatorText[0]);
 
-        SeparatorArray.Update(separatorText.Select(s => (Separator2)new CharactersSeparator(s)).ToList(), context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
+        SeparatorArray.Update(separatorText.Select(s => (Separator2)new CharactersSeparator(s)).ToList(),
+            context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
     }
 
     public override void EnterSeriesStyle(MplotParser.SeriesStyleContext context)
     {
         if (context.CYCLE() is not null) PlotSeriesStyleArray.SetMode(MplotArrayMode.Cycle);
         if (context.ASTERISK() is not null) PlotSeriesStyleArray.SetMode(MplotArrayMode.Repeat);
+    }
+
+    public override void EnterXticlabels(MplotParser.XticlabelsContext context)
+    {
+        var names = context.stringArray().STRING().Select(node => node.GetText().UnescapeMplotString().Trim()).ToList();
+        XTicLabels.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
     }
 
     public override void EnterPointStyle(MplotParser.PointStyleContext context)
@@ -461,7 +469,7 @@ public class MplotListener : MplotBaseListener
         // Get Color from RGB
         Color color = Color.FromArgb(r, g, b);
         LineColorArray.Add(color);
-        if (context.ASTERISK() is not null)  LineColorArray.SetMode(MplotArrayMode.Repeat);
+        if (context.ASTERISK() is not null) LineColorArray.SetMode(MplotArrayMode.Repeat);
         if (context.CYCLE() is not null) LineColorArray.SetMode(MplotArrayMode.Cycle);
     }
 
@@ -473,7 +481,7 @@ public class MplotListener : MplotBaseListener
         Color color = ColorTranslator.FromHtml(hex);
         LineColorArray.Add(color);
 
-        if (context.ASTERISK() is not null)  LineColorArray.SetMode(MplotArrayMode.Repeat);
+        if (context.ASTERISK() is not null) LineColorArray.SetMode(MplotArrayMode.Repeat);
         if (context.CYCLE() is not null) LineColorArray.SetMode(MplotArrayMode.Cycle);
     }
 
@@ -590,6 +598,7 @@ public class MplotListener : MplotBaseListener
         {
             Skip = ints[0];
         }
+
         SkipArray.Update(context.intArray());
     }
 
@@ -606,7 +615,6 @@ public class MplotListener : MplotBaseListener
     public override void EnterGreenColor(MplotParser.GreenColorContext context) => LineColorArray.Add(Color.Green);
     public override void EnterBlueColor(MplotParser.BlueColorContext context) => LineColorArray.Add(Color.Blue);
     public override void EnterBlackColor(MplotParser.BlackColorContext context) => LineColorArray.Add(Color.Black);
-
     public override void EnterCcllcBlueColor(MplotParser.CcllcBlueColorContext context) => LineColorArray.Add(CcllcColors.Blue);
     public override void EnterCcllcGray(MplotParser.CcllcGrayContext context) => LineColorArray.Add(CcllcColors.Gray);
     public override void EnterCcllcMaroon(MplotParser.CcllcMaroonContext context) => LineColorArray.Add(CcllcColors.Maroon);
@@ -617,10 +625,8 @@ public class MplotListener : MplotBaseListener
     public override void EnterRightLegend(MplotParser.RightLegendContext context) => LegendPosition = new Right();
     public override void EnterUpperRightLegend(MplotParser.UpperRightLegendContext context) => LegendPosition = new InsideUpperRight();
     public override void EnterUpperLeftLegend(MplotParser.UpperLeftLegendContext context) => LegendPosition = new InsideUpperLeft();
-
     public override void EnterBottomLeftLegend(MplotParser.BottomLeftLegendContext context) => LegendPosition = new InsideBottomLeft();
     public override void EnterBottomRightLegend(MplotParser.BottomRightLegendContext context) => LegendPosition = new InsideBottomRight();
-
     public override void EnterGrid(MplotParser.GridContext context) => Grid = true;
 
     public override void EnterSeries(MplotParser.SeriesContext context)
@@ -654,7 +660,7 @@ public class MplotListener : MplotBaseListener
             break;
         }
 
-        string data = content[(indexOfFirstNewline+1)..finalIndex];
+        string data = content[(indexOfFirstNewline + 1)..finalIndex];
 
         FilePathArray.Add(new InlineDataSource(data, "var" + _currentVar));
         _currentVar++;
@@ -679,6 +685,36 @@ public class MplotListener : MplotBaseListener
     {
         FontSize = int.Parse(context.INT().GetText());
     }
+
+    public List<string> GnuplotCheck()
+    {
+        List<string> checks = new();
+
+        if (!XTicLabels.UseDefault && XTicMin is null)
+        {
+            checks.Add($"Explicit x tic labels were provided, but no explicit x tic range (`xtics`) was provided.\n");
+        }
+
+
+        if (XTicMin is not null && XTicMax is not null && XTicIncrement is not null)
+        {
+            if (!XTicLabels.UseDefault)
+            {
+                if (XTicLabels.Mode() == MplotArrayMode.Normal)
+                {
+                    Rational division = (XTicMax - XTicMin) / XTicIncrement;
+                    int numTicks = division.IsInt() ? (int)division + 1 : (int)division.Ceiling() ;
+                    if (XTicLabels.Length != numTicks)
+                    {
+                        checks.Add($"The supplied number of x tic labels ({XTicLabels.Length}) does not equal the number of tics ({numTicks}).\n");
+                    }
+                }
+            }
+        }
+
+        return checks;
+    }
+
 
     public string WriteGnuplot()
     {
@@ -722,7 +758,33 @@ public class MplotListener : MplotBaseListener
 
         if (XTicMin is not null && XTicMax is not null && XTicIncrement is not null)
         {
-            lines.Add( $"set xtics {XTicMin.ToDecimalString()}, {XTicIncrement.ToDecimalString()}, {XTicMax.ToDecimalString()}");
+            if (!XTicLabels.UseDefault)
+            {
+                Rational tic = XTicMin;
+                StringBuilder b = new();
+                b.Append("(");
+                int index = 0;
+                string label = XTicLabels[index];
+                b.Append($"{label.ToGnuPlotString()} {tic.ToDecimalString()}");
+                tic += XTicIncrement;
+                index++;
+
+                while (tic <= XTicMax)
+                {
+                    label = XTicLabels[index];
+                    b.Append($", {label.ToGnuPlotString()} {tic.ToDecimalString()}");
+                    tic += XTicIncrement;
+                    index++;
+                }
+
+                b.Append(")");
+
+                lines.Add($"set xtics {b}");
+            }
+            else
+            {
+                lines.Add( $"set xtics {XTicMin.ToDecimalString()}, {XTicIncrement.ToDecimalString()}, {XTicMax.ToDecimalString()}");
+            }
         }
 
         if (_additionalXTics.Count > 0)

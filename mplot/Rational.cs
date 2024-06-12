@@ -58,6 +58,13 @@ public class Rational
         return $"{Numerator}/{Denominator}";
     }
 
+    public bool IsInt() => Numerator % Denominator == 0;
+
+    public Rational Ceiling()
+    {
+        return new Rational((Numerator + Denominator - 1) / Denominator);
+    }
+
     // Implement addition
     public static Rational operator +(Rational r1, Rational r2)
     {
