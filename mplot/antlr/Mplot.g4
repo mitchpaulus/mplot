@@ -187,12 +187,16 @@ legendOption
   | RIGHT # RightLegend
   | UPPER_RIGHT # UpperRightLegend
   | UPPER_LEFT  # UpperLeftLegend
+  | BOTTOM_RIGHT # BottomRightLegend
+  | BOTTOM_LEFT  # BottomLeftLegend
   ;
 
 TOP : 'top' ;
 RIGHT : 'right' ;
 UPPER_RIGHT : 'ur' | 'upperright' ;
 UPPER_LEFT : 'ul' | 'upperleft' ;
+BOTTOM_RIGHT : 'br' | 'bottomright' ;
+BOTTOM_LEFT : 'bl' | 'bottomleft' ;
 
 grid : GRID ;
 

@@ -80,10 +80,24 @@ x "Timestamp
 y "Sensor Value"
 ```
 
-# Gnuplot direct
+# Gnuplot Direct
 
 If there's something that not directly supported right now, you can inject text directly into the gnuplot script.
 
 ```
 gnuplot "set xtics rotate by -45"
 ```
+
+# Legend/Key Location
+
+Keywords for legend position:
+
+```
+TOP : 'top' ;
+RIGHT : 'right' ;
+UPPER_RIGHT : 'ur' | 'upperright' ;
+UPPER_LEFT : 'ul' | 'upperleft' ;
+BOTTOM_RIGHT : 'br' | 'bottomright' ;
+BOTTOM_LEFT : 'bl' | 'bottomleft' ;
+```
+
