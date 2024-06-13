@@ -91,7 +91,7 @@ public static class Extensions
                     char c2 = quotedString[i + 1];
                     if (c2 == '\\') b.Append('\\');
                     else if (c2 == '"') b.Append('"');
-                    else
+                    else // Append both
                     {
                         b.Append(c);
                         b.Append(c2);

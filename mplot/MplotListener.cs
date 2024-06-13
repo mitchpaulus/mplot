@@ -248,11 +248,14 @@ public class MplotListener : MplotBaseListener
     {
         PlotSeriesStyleArray.Add(SeriesStyle.Boxes);
     }
+
     public override void EnterBinsize(MplotParser.BinsizeContext context)
     {
         BinSizeArray.Add(new Rational(context.rational()));
         if (context.ASTERISK().Length > 0) BinSizeArray.SetMode(MplotArrayMode.Repeat);
     }
+
+    public override void EnterFstep(MplotParser.FstepContext context) => PlotSeriesStyleArray.Add(SeriesStyle.FStep);
 
     public override void EnterXtics(MplotParser.XticsContext context)
     {
@@ -400,6 +403,7 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterSeriesStyle(MplotParser.SeriesStyleContext context)
     {
+        // The actual addition of the style to the array is handled in the listener for each.
         if (context.CYCLE() is not null) PlotSeriesStyleArray.SetMode(MplotArrayMode.Cycle);
         if (context.ASTERISK() is not null) PlotSeriesStyleArray.SetMode(MplotArrayMode.Repeat);
     }
@@ -740,7 +744,7 @@ public class MplotListener : MplotBaseListener
         // TODO: escape characters
         if (!string.IsNullOrWhiteSpace(OutputFile)) lines.Add($"set output \"{OutputFile}\"");
 
-        if (!string.IsNullOrWhiteSpace(Title)) lines.Add($"set title \"{Title}\"");
+        if (!string.IsNullOrWhiteSpace(Title)) lines.Add($"set title \"{Title.ToGnuPlotString()}\"");
         if (!string.IsNullOrWhiteSpace(XLabel)) lines.Add($"set xlabel \"{XLabel}\"");
         if (!string.IsNullOrWhiteSpace(YLabel)) lines.Add($"set ylabel \"{YLabel}\"");
 
@@ -898,6 +902,7 @@ public class SeriesStyle
     public static SeriesStyle Scatter = new(0, new List<string> {"scatter", "point"}, "points", true);
     public static SeriesStyle Line = new(1, new List<string> {"line", "-"}, "lines", false);
     public static SeriesStyle Boxes = new(2, new List<string> {"hist"}, "boxes", false);
+    public static SeriesStyle FStep = new(3, new List<string> {"fstep"}, "fstep", false);
 
     public SeriesStyle(int id, List<string> keywords, string gnuplotStyle, bool isScatter)
     {

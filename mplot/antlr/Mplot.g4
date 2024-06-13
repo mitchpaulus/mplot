@@ -91,7 +91,7 @@ output     : ('out' | 'output') STRING ;
 timeAxis   : TIME_KEYWORD ;
 timeFormat : ('tf' | 'timeformat') STRING ;
 isoDate : 'isodate' ;
-seriesStyle : (pointStyle | lineStyle | hist) (CYCLE | ASTERISK)* ;
+seriesStyle : (pointStyle | lineStyle | hist | fstep) (CYCLE | ASTERISK)* ;
 gnuplotLiteral : 'gnuplot' STRING+ ;
 ignore : 'ignore' (ASTERISK | CYCLE)? expression ;
 
@@ -182,6 +182,8 @@ TIME_KEYWORD : 'time' ;
 hist : HIST ;
 HIST : 'hist' | 'histogram' ;
 BINSIZE : 'binsize' | 'bs' | 'binwidth' ;
+
+fstep : 'fstep' ;
 
 binsize : BINSIZE ASTERISK? rational ASTERISK? ;
 

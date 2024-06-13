@@ -64,7 +64,7 @@ public class Series
 
         b.Append(gnuplotStyle);
 
-        if (gnuplotStyle != "boxes" && _marker is not NoMarker)
+        if (gnuplotStyle != "boxes" && gnuplotStyle != "fstep" && _marker is not NoMarker)
         {
             b.Append($" {_marker.ToGnuplot()}");
         }
