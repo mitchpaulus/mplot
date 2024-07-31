@@ -10,7 +10,7 @@ public class MplotListener : MplotBaseListener
     private readonly Maybe<FileInfo> _fileInfo;
     public readonly MplotArray<Color> LineColorArray = new(Color.Black, MplotArrayMode.Repeat, "Line color");
 
-    public readonly MplotArray<int> LineWidthArray = new(1, MplotArrayMode.Repeat, "Line width");
+    public readonly MplotArray<int> LineWidthArray = new(4, MplotArrayMode.Repeat, "Line width");
 
     private int _currentVar = 1;
 
