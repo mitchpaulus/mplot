@@ -82,7 +82,7 @@ xmax       : ('xmax' | 'xhigh') rangeItem ;
 ymin       : ('ymin' | 'ylow') rangeItem ;
 ymax       : ('ymax' | 'yhigh') rangeItem ;
 labels     : ('l' | 'labels') STRING STRING ;
-lineWidth  : ('lw' | 'linewidth' | 'linethickness') intArray ;
+lineWidth  : ('lw' | 'linewidth' | 'lt' | 'linethickness') intArray ;
 ylabel     : ('yl' | 'ylabel') STRING ;
 ycol       : ('y' | 'ycol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 width      : ('w' | 'width') rational ;
