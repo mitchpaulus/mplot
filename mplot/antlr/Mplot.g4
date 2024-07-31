@@ -116,7 +116,7 @@ yticAdd2 : ('yticadd2' | 'ytickadd2' | 'addytic2' | 'addytick2') (rational STRIN
 TICS_OUT : 'ticsout' | 'outtics' | 'ticksout' | 'outticks' ;
 
 pointStyle : 'point' | 'scatter' | 'xy' ;
-lineStyle : 'line' ;
+lineStyle : 'line' | 'lines';
 
 AUTO : 'auto' ;
 range : lowLimit=rangeItem (COLON | TO)? highLimit=rangeItem ;
