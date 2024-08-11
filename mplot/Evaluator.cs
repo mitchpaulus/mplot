@@ -59,7 +59,9 @@ public class Evaluator
             }
             else if (token.TokenType == ExpressionTokenType.INT)
             {
-                expStack.Push(token.Contents);
+                // The '.0' here is key.
+                // Gnuplot will do integer division otherwise, and this is almost certainly unintended.
+                expStack.Push(token.Contents + ".0");
             }
             else if (token.TokenType == ExpressionTokenType.FLOAT)
             {
