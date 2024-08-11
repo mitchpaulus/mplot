@@ -186,6 +186,16 @@ public class MplotListener : MplotBaseListener
                 yColSpecifier = $"({ignoreExpString} ? NaN : {newYSpecifier})";
             }
 
+            int lineWidth;
+            if (LineWidthArray.UseDefault)
+            {
+                lineWidth = MarkerArray[i] is not NoMarker ? 1 : LineWidthArray[i];
+            }
+            else
+            {
+                lineWidth = LineWidthArray[i];
+            }
+
             Series s = new(
                 xColSpecifier,
                 yColSpecifier,
@@ -194,7 +204,7 @@ public class MplotListener : MplotBaseListener
                 MarkerArray[i],
                 SkipArray[i],
                 LineColorArray[i],
-                LineWidthArray[i],
+                lineWidth,
                 PlotSeriesStyleArray[i],
                 SeparatorArray[i]
             );
