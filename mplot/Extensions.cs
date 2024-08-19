@@ -186,7 +186,7 @@ public static class Extensions
         return new DateTime(year, month, day, hour, minute, 0);
     }
 
-    public static MPlotString ToMPlotString(this MplotParser.StringContext stringContext)
+    public static MPlotString ToMPlotString(this MplotParser.ArgStringContext stringContext)
     {
         if (stringContext.STRING_ARG() is not null)
         {

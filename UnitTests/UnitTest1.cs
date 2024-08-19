@@ -34,7 +34,7 @@ public class Tests
 
         var parsedFile = parser.mplot();
 
-        MplotListener listener = new MplotListener(NoneMarker.None);
+        MplotListener listener = new MplotListener(NoneMarker.None, new List<string>());
 
         ParseTreeWalker walker = new ParseTreeWalker();
 

@@ -24,14 +24,15 @@ class Program
             {
                 Console.Write("mplot - plotting DSL\n\n");
                 Console.Write("USAGE:\n");
-                Console.Write("mplot [-g] FILE\n");
+                Console.Write("mplot [-g] [-s STRING]* FILE\n");
                 Console.Write("mplot -h | --help\n");
                 Console.Write("mplot -V | --version\n");
                 Console.Write('\n');
                 Console.Write("OPTIONS\n");
-                Console.Write(" -c  Pipe directly to gnuplot to compile.\n");
-                Console.Write(" -d  Print dependencies\n");
-                Console.Write(" -g  Write directly to gnuplot file of same name.\n");
+                Console.Write(" -c        Pipe directly to gnuplot to compile.\n");
+                Console.Write(" -d        Print dependencies\n");
+                Console.Write(" -g        Write directly to gnuplot file of same name.\n");
+                Console.Write(" -s STRING Add a string argument (used as sargXX in code)\n");
                 Console.Write('\n');
                 Console.Write('\n');
                 Console.Write("Example syntax:\n");

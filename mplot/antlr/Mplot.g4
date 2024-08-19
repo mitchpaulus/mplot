@@ -70,7 +70,7 @@ separator  : ('sep' | 'separator') stringArray ;
 series     : ('s' | 'series') stringArray ;
 skip       : 'skip' intArray ;
 title      : ('ct' | 'charttitle' | 'title' | 't') STRING ;
-xlabel     : ('xl' | 'xlabel') string ;
+xlabel     : ('xl' | 'xlabel') argString ;
 xcol       : ('x' | 'xcol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 xexp       : 'xexp' ASTERISK? expression ;
 yexp       : 'yexp' ASTERISK? expression ;
@@ -83,7 +83,7 @@ ymin       : ('ymin' | 'ylow') rangeItem ;
 ymax       : ('ymax' | 'yhigh') rangeItem ;
 labels     : ('l' | 'labels') STRING STRING ;
 lineWidth  : ('lw' | 'linewidth' | 'lt' | 'linethickness') intArray ;
-ylabel     : ('yl' | 'ylabel') string ;
+ylabel     : ('yl' | 'ylabel') argString ;
 ycol       : ('y' | 'ycol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 width      : ('w' | 'width') rational ;
 height     : ('h' | 'height') rational ;
@@ -99,7 +99,7 @@ stdinInput : STDIN ASTERISK? ;
 STDIN : 'stdin' ;
 
 STRING_ARG : 'sarg' [0-9]+ ;
-string : STRING
+argString : STRING
        | LPAREN STRING_ARG STRING? RPAREN
        | STRING_ARG
        ;
@@ -157,7 +157,7 @@ markerType
 
 MARKER : 'marker' | 'm' ;
 
-stringArray : (string | ASTERISK | CYCLE)+ ;
+stringArray : (argString | ASTERISK | CYCLE)+ ;
 intArray : (INT | ASTERISK | CYCLE)+ ;
 rationalArray : (rational | ASTERISK | CYCLE)+ ;
 colorArray : (hexColor | rgbColor | knownColor | ASTERISK | CYCLE)+ ;

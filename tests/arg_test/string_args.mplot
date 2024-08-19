@@ -1,0 +1,6 @@
+START
+1 2
+3 4
+END
+xl sarg1
+yl (sarg2 "Default y label")
