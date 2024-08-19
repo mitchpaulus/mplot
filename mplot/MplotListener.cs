@@ -8,6 +8,8 @@ namespace mplot;
 public class MplotListener : MplotBaseListener
 {
     private readonly Maybe<FileInfo> _fileInfo;
+    private readonly List<string> _stringArgs;
+
     public readonly MplotArray<Color> LineColorArray = new(Color.Black, MplotArrayMode.Repeat, "Line color");
 
     public readonly MplotArray<int> LineWidthArray = new(4, MplotArrayMode.Repeat, "Line width");
@@ -216,25 +218,31 @@ public class MplotListener : MplotBaseListener
     }
 
 
-    public MplotListener(Maybe<FileInfo> fileInfo)
+    public MplotListener(Maybe<FileInfo> fileInfo, List<string> stringArgs)
     {
+        _stringArgs = stringArgs;
         _fileInfo = fileInfo;
         PlotDpi = DefaultDpi * 4;
         OutputFile = null;
         FilePathArray = new(new FileSource("data.tsv", _fileInfo), MplotArrayMode.Repeat, "File path");
     }
 
-    public string ParseXLabelContext(MplotParser.XlabelContext context) => context.STRING().GetText().UnescapeMplotString();
-    public string ParseYLabelContext(MplotParser.YlabelContext context) => context.STRING().GetText().UnescapeMplotString();
+    public string ParseXLabelContext(MplotParser.XlabelContext context) => context.argString().ToMPlotString().GetString(_stringArgs).Trim();
+    public string ParseYLabelContext(MplotParser.YlabelContext context) => context.argString().ToMPlotString().GetString(_stringArgs).Trim();
 
-    public override void EnterXlabel(MplotParser.XlabelContext context) => XLabel = ParseXLabelContext(context).Trim();
-    public override void EnterYlabel(MplotParser.YlabelContext context) => YLabel = ParseYLabelContext(context).Trim();
+    public override void EnterXlabel(MplotParser.XlabelContext context) => XLabel = ParseXLabelContext(context);
+    public override void EnterYlabel(MplotParser.YlabelContext context) => YLabel = ParseYLabelContext(context);
 
     public override void EnterFile(MplotParser.FileContext context)
     {
         bool repeat = context.stringArray().ASTERISK() is not null;
         bool cycle = context.stringArray().CYCLE() is not null;
-        FilePathArray.Update(context.stringArray().STRING().Select(node => (DataSource)new FileSource(node.GetText().UnescapeMplotString(), _fileInfo)).ToList(), cycle, repeat);
+        FilePathArray.Update(context.stringArray().argString().Select(node => (DataSource)new FileSource(node.ToMPlotString().GetString(_stringArgs), _fileInfo)).ToList(), cycle, repeat);
+    }
+
+    public override void EnterStdinInput(MplotParser.StdinInputContext context)
+    {
+        FilePathArray.Update( new List<DataSource> { new StdInSource() },  context.ASTERISK() is not null, false);
     }
 
     public override void EnterLegendCols(MplotParser.LegendColsContext context) => LegendCols = int.Parse(context.INT().GetText());
@@ -404,7 +412,7 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterSeparator(MplotParser.SeparatorContext context)
     {
-        var separatorText = context.stringArray().STRING().Select(s => s.GetText().UnescapeMplotString()).ToList();
+        var separatorText = context.stringArray().argString().Select(s => s.ToMPlotString().GetString(_stringArgs)).ToList();
         CharactersSeparator charactersSeparator = new(separatorText[0]);
 
         SeparatorArray.Update(separatorText.Select(s => (Separator2)new CharactersSeparator(s)).ToList(),
@@ -420,7 +428,7 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterXticlabels(MplotParser.XticlabelsContext context)
     {
-        var names = context.stringArray().STRING().Select(node => node.GetText().UnescapeMplotString().Trim()).ToList();
+        var names = context.stringArray().argString().Select(node => node.ToMPlotString().GetString(_stringArgs).Trim()).ToList();
         XTicLabels.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
     }
 
@@ -645,7 +653,7 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterSeries(MplotParser.SeriesContext context)
     {
-        var names = context.stringArray().STRING().Select(node => node.GetText().UnescapeMplotString().Trim()).ToList();
+        var names = context.stringArray().argString().Select(node => node.ToMPlotString().GetString(_stringArgs).Trim()).ToList();
         SeriesNameArray.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
     }
 

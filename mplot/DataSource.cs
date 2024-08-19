@@ -6,29 +6,36 @@ using OneOf;
 
 namespace mplot;
 
-public class DataSource : OneOfBase<FileSource, InlineDataSource, CommandDataSource>
+public class DataSource : OneOfBase<FileSource, InlineDataSource, CommandDataSource, StdInSource>
 {
-    protected DataSource(OneOf<FileSource, InlineDataSource, CommandDataSource> input) : base(input)
+    protected DataSource(OneOf<FileSource, InlineDataSource, CommandDataSource, StdInSource> input) : base(input)
     {
     }
 
     public static implicit operator DataSource(FileSource fileSource) => new(fileSource);
     public static implicit operator DataSource(InlineDataSource inlineDataSource) => new(inlineDataSource);
     public static implicit operator DataSource(CommandDataSource commandDataSource) => new(commandDataSource);
+    public static implicit operator DataSource(StdInSource stdInSource) => new(stdInSource);
 
     public bool IsFileSource => IsT0;
     public bool IsInlindeDataSource => IsT1;
     public bool IsCmdDataSource => IsT2;
+    public bool IsStdInSource => IsT3;
 
     public Stream Stream()
     {
         Stream s = Match(
             fs => new FileStream(fs.Filepath, FileMode.Open),
             inlineDataSource => (Stream) new MemoryStream(Encoding.UTF8.GetBytes(inlineDataSource.Contents)),
-            cmdDataSource => new MemoryStream(Encoding.UTF8.GetBytes(cmdDataSource.Execute().Output))
+            cmdDataSource => new MemoryStream(Encoding.UTF8.GetBytes(cmdDataSource.Execute().Output)),
+            stdIn => Console.OpenStandardInput()
         );
         return s;
     }
+}
+
+public class StdInSource
+{
 }
 
 public class FileSource
