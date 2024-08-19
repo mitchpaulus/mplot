@@ -8,14 +8,16 @@ namespace mplot;
 public class MplotListener : MplotBaseListener
 {
     private readonly Maybe<FileInfo> _fileInfo;
+    private readonly List<string> _stringArgs;
+
     public readonly MplotArray<Color> LineColorArray = new(Color.Black, MplotArrayMode.Repeat, "Line color");
 
     public readonly MplotArray<int> LineWidthArray = new(4, MplotArrayMode.Repeat, "Line width");
 
     private int _currentVar = 1;
 
-    public string? XLabel { get; set; }
-    public string? YLabel { get; set; }
+    public MPlotString? XLabel { get; set; }
+    public MPlotString? YLabel { get; set; }
     public MplotArray<ColumnSelector> YcolsArray { get; } = new(new ColumnSpecifier(2), MplotArrayMode.Repeat, "Y col specifier");
     public MplotArray<ColumnSelector> XcolsArray { get; } = new(new ColumnSpecifier(1), MplotArrayMode.Repeat, "X col specifier");
     private MplotArray<Maybe<List<MplotToken>>> Ignores { get; } = new(NoneMarker.None, MplotArrayMode.Repeat, "Ignore expression");
@@ -216,25 +218,31 @@ public class MplotListener : MplotBaseListener
     }
 
 
-    public MplotListener(Maybe<FileInfo> fileInfo)
+    public MplotListener(Maybe<FileInfo> fileInfo, List<string> stringArgs)
     {
+        _stringArgs = stringArgs;
         _fileInfo = fileInfo;
         PlotDpi = DefaultDpi * 4;
         OutputFile = null;
         FilePathArray = new(new FileSource("data.tsv", _fileInfo), MplotArrayMode.Repeat, "File path");
     }
 
-    public string ParseXLabelContext(MplotParser.XlabelContext context) => context.STRING().GetText().UnescapeMplotString();
-    public string ParseYLabelContext(MplotParser.YlabelContext context) => context.STRING().GetText().UnescapeMplotString();
+    public MPlotString ParseXLabelContext(MplotParser.XlabelContext context) => context.@string().ToMPlotString();
+    public MPlotString ParseYLabelContext(MplotParser.YlabelContext context) => context.@string().ToMPlotString();
 
-    public override void EnterXlabel(MplotParser.XlabelContext context) => XLabel = ParseXLabelContext(context).Trim();
-    public override void EnterYlabel(MplotParser.YlabelContext context) => YLabel = ParseYLabelContext(context).Trim();
+    public override void EnterXlabel(MplotParser.XlabelContext context) => XLabel = ParseXLabelContext(context);
+    public override void EnterYlabel(MplotParser.YlabelContext context) => YLabel = ParseYLabelContext(context);
 
     public override void EnterFile(MplotParser.FileContext context)
     {
         bool repeat = context.stringArray().ASTERISK() is not null;
         bool cycle = context.stringArray().CYCLE() is not null;
         FilePathArray.Update(context.stringArray().STRING().Select(node => (DataSource)new FileSource(node.GetText().UnescapeMplotString(), _fileInfo)).ToList(), cycle, repeat);
+    }
+
+    public override void EnterStdinInput(MplotParser.StdinInputContext context)
+    {
+        FilePathArray.Update( new List<DataSource> { new StdInSource() },  context.ASTERISK() is not null, false);
     }
 
     public override void EnterLegendCols(MplotParser.LegendColsContext context) => LegendCols = int.Parse(context.INT().GetText());

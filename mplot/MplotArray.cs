@@ -51,6 +51,9 @@ public class MplotArray<T> : IMplotArray
         return true;
     }
 
+    /// <summary>
+    /// Adds items to list, adding cycle or repeat if needed. False does nothing.
+    /// </summary>
     public void Update(List<T> items, bool cycle, bool repeat)
     {
         foreach (T i in items) Add(i);

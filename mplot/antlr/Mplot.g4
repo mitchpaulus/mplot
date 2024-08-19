@@ -70,7 +70,7 @@ separator  : ('sep' | 'separator') stringArray ;
 series     : ('s' | 'series') stringArray ;
 skip       : 'skip' intArray ;
 title      : ('ct' | 'charttitle' | 'title' | 't') STRING ;
-xlabel     : ('xl' | 'xlabel') STRING ;
+xlabel     : ('xl' | 'xlabel') string ;
 xcol       : ('x' | 'xcol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 xexp       : 'xexp' ASTERISK? expression ;
 yexp       : 'yexp' ASTERISK? expression ;
@@ -83,7 +83,7 @@ ymin       : ('ymin' | 'ylow') rangeItem ;
 ymax       : ('ymax' | 'yhigh') rangeItem ;
 labels     : ('l' | 'labels') STRING STRING ;
 lineWidth  : ('lw' | 'linewidth' | 'lt' | 'linethickness') intArray ;
-ylabel     : ('yl' | 'ylabel') STRING ;
+ylabel     : ('yl' | 'ylabel') string ;
 ycol       : ('y' | 'ycol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 width      : ('w' | 'width') rational ;
 height     : ('h' | 'height') rational ;
@@ -94,6 +94,15 @@ isoDate : 'isodate' ;
 seriesStyle : (pointStyle | lineStyle | hist | fstep) (CYCLE | ASTERISK)* ;
 gnuplotLiteral : 'gnuplot' STRING+ ;
 ignore : 'ignore' (ASTERISK | CYCLE)? expression ;
+
+stdinInput : STDIN ASTERISK? ;
+STDIN : 'stdin' ;
+
+STRING_ARG : 'sarg' [0-9]+ ;
+string : STRING
+       | LPAREN STRING_ARG STRING? RPAREN
+       | STRING_ARG
+       ;
 
 noLegend : 'nokey' | 'nolegend' ;
 
@@ -112,6 +121,9 @@ yticAdd : ('yticadd' | 'ytickadd' | 'addytic' | 'addytick') (rational STRING? | 
 
 xticAdd2 : ('xticadd2' | 'xtickadd2' | 'addxtic2' | 'addxtick2') (rational STRING? | STRING rational) ;
 yticAdd2 : ('yticadd2' | 'ytickadd2' | 'addytic2' | 'addytick2') (rational STRING? | STRING rational) ;
+
+LPAREN : '(' ;
+RPAREN : ')' ;
 
 TICS_OUT : 'ticsout' | 'outtics' | 'ticksout' | 'outticks' ;
 
@@ -145,7 +157,7 @@ markerType
 
 MARKER : 'marker' | 'm' ;
 
-stringArray : (STRING | ASTERISK | CYCLE)+ ;
+stringArray : (string | ASTERISK | CYCLE)+ ;
 intArray : (INT | ASTERISK | CYCLE)+ ;
 rationalArray : (rational | ASTERISK | CYCLE)+ ;
 colorArray : (hexColor | rgbColor | knownColor | ASTERISK | CYCLE)+ ;

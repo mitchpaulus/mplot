@@ -16,6 +16,7 @@ class Program
         bool compile = false;
         bool toGnuplotFile = false;
         bool printDependencies = false;
+        List<string> stringArgs = new();
 
         while (i < args.Length)
         {
@@ -104,6 +105,16 @@ class Program
             {
                 printDependencies = true;
             }
+            else if (args[i] == "-s")
+            {
+                if (args.Length <= i + 1)
+                {
+                    Console.Error.Write("No file provided after -s\n");
+                    return 1;
+                }
+                i++;
+                stringArgs.Add(args[i]);
+            }
             else
             {
                 files.Add(args[i]);
@@ -164,7 +175,7 @@ class Program
 
         foreach (var plot in parsedFile.plot())
         {
-            MplotListener listener = new MplotListener(fileInfo);
+            MplotListener listener = new MplotListener(fileInfo, stringArgs);
 
             try
             {

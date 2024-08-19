@@ -1,7 +1,12 @@
-t "My title" "X Label" "Y Label"
+t "My title"
+
 x 1
-y 2 3 f "data.csv" "data2.txt" - o
+y 2 3 f "data.csv" "data2.txt"
+line xy
 g
+
+xl (sarg2 "My label")
+yl (sarg1 "My y label")
 
 #004987
 

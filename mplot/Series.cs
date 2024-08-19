@@ -42,7 +42,8 @@ public class Series
         string source = FilePath.Match(
             fileSource => $"\"{fileSource.Filepath}\"",
             inlineDataSource => "$" + inlineDataSource.VariableName,
-            cmdDataSource => cmdDataSource.ToGnuPlotString()
+            cmdDataSource => cmdDataSource.ToGnuPlotString(),
+            _ => "'-'"
         );
 
         b.Append(source);

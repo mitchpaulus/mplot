@@ -143,10 +143,12 @@ public static class Extensions
         intArray.Update(intArrayContext.INT().Select(node => int.Parse(node.GetText())).ToList(),  intArrayContext.CYCLE().Any(), intArrayContext.ASTERISK().Any()  );
     }
 
+    /*
     public static void Update(this MplotArray<string> stringArray, MplotParser.StringArrayContext stringArrayContext)
     {
         stringArray.Update(stringArrayContext.STRING().Select(node =>  node.GetText().RemoveQuotes().Trim()).ToList(),  stringArrayContext.CYCLE().Any(), stringArrayContext.ASTERISK().Any());
     }
+    */
 
     public static RangeSpec ToRangeSpec(this MplotParser.RangeItemContext rangeItemContext)
     {
@@ -182,5 +184,19 @@ public static class Extensions
         int hour = int.Parse(timeText.Substring(0, 2));
         int minute = int.Parse(timeText.Substring(3, 2));
         return new DateTime(year, month, day, hour, minute, 0);
+    }
+
+    public static MPlotString ToMPlotString(this MplotParser.StringContext stringContext)
+    {
+        if (stringContext.STRING_ARG() is not null)
+        {
+            int argNum = int.Parse(stringContext.STRING_ARG().GetText()[4..]);
+            string? defaultString = stringContext.STRING()?.GetText().UnescapeMplotString();
+            return new ArgString(argNum, defaultString);
+        }
+        else
+        {
+            return new SimpleString(stringContext.STRING().GetText().UnescapeMplotString());
+        }
     }
 }

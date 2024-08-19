@@ -8,25 +8,13 @@ public static class AutoSeriesType
     
     public static SeriesStyle GetStyle(DataSource source, ColumnSpecifier xSpecifier, Separator2 sep)
     {
-        using Stream s = source.Match(
-            fs => new FileStream(fs.Filepath, FileMode.Open),
-            inlineDataSource => (Stream)new MemoryStream(Encoding.UTF8.GetBytes(inlineDataSource.Contents)),
-            cmdDataSource => new MemoryStream(Encoding.UTF8.GetBytes(cmdDataSource.Execute().Output))
-        );
-        
-        // if (sep.)
-        
+        using Stream s = source.Stream();
         return SeriesStyle.Scatter;
     }
 
     public static List<Point> GetData(DataSource source, ColumnSpecifier xSpecifier, ColumnSpecifier ySpecifier, Separator2 sep, int skip = 0)
     {
-        using Stream s = source.Match(
-            fs => new FileStream(fs.Filepath, FileMode.Open),
-            inlineDataSource => (Stream)new MemoryStream(Encoding.UTF8.GetBytes(inlineDataSource.Contents)),
-            cmdDataSource => new MemoryStream(Encoding.UTF8.GetBytes(cmdDataSource.Execute().Output))
-        );
-        
+        using Stream s = source.Stream();
         using StreamReader reader = new StreamReader(s, Encoding.UTF8);
 
         var knownSep = sep.Determine(source);
