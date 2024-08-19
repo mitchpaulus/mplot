@@ -5,7 +5,19 @@ namespace mplot;
 
 public static class Extensions
 {
-    public static string RemoveQuotes(this string inputString) => inputString.Substring(1, inputString.Length - 2);
+    public static string RemoveQuotes(this string inputString)
+    {
+        if (inputString.Length < 2) return inputString;
+        if (inputString[0] == '"' && inputString[^1] == '"')
+        {
+            return inputString.Substring(1, inputString.Length - 2);
+        }
+        else
+        {
+            return inputString;
+        }
+    }
+
     public static T TryPop<T>(this Stack<T> stack, T defaultVal) => stack.TryPop(out T? found) ? found : defaultVal;
 
     public static List<IndexedItem<T>> WithIndex<T>(this IEnumerable<T> list, int init = 0) =>
@@ -78,6 +90,10 @@ public static class Extensions
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Handles escaping double quotes inside string.
+    /// This assumes a raw STRING text, this is, it is surrounded by double quotes.
+    /// </summary>
     public static string UnescapeMplotString(this string quotedString)
     {
         StringBuilder b = new();
@@ -113,6 +129,9 @@ public static class Extensions
         return b.ToString();
     }
 
+    /// <summary>
+    /// Adds quotes around the string, escapes the interior double quotes and backslashes
+    /// </summary>
     public static string ToGnuPlotString(this string input)
     {
         // Add quotes around string, escaping interior quotes, and interior backslashes

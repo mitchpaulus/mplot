@@ -754,7 +754,7 @@ public class MplotListener : MplotBaseListener
         // TODO: escape characters
         if (!string.IsNullOrWhiteSpace(OutputFile)) lines.Add($"set output \"{OutputFile}\"");
 
-        if (!string.IsNullOrWhiteSpace(Title)) lines.Add($"set title \"{Title.ToGnuPlotString()}\"");
+        if (!string.IsNullOrWhiteSpace(Title)) lines.Add($"set title {Title.ToGnuPlotString()}");
         if (!string.IsNullOrWhiteSpace(XLabel)) lines.Add($"set xlabel \"{XLabel}\"");
         if (!string.IsNullOrWhiteSpace(YLabel)) lines.Add($"set ylabel \"{YLabel}\"");
 
