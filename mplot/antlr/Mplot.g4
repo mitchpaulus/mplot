@@ -43,6 +43,7 @@ element
   | legendOption
   | legendCols
   | legendRows
+  | legend
   | noLegend
   | seriesStyle
   | xtics
@@ -105,6 +106,9 @@ argString : STRING
        ;
 
 noLegend : 'nokey' | 'nolegend' ;
+
+// Force a legend
+legend : 'key' | 'legend' ;
 
 firstAsterisk : ASTERISK ;
 

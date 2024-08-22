@@ -352,7 +352,7 @@ public class MplotListener : MplotBaseListener
     public override void EnterYmax(MplotParser.YmaxContext context) => YMax = context.rangeItem().ToRangeSpec();
 
     public override void EnterNoLegend(MplotParser.NoLegendContext context) => Legend = SpecifiedBool.False;
-
+    public override void EnterLegend(MplotParser.LegendContext context) => Legend = SpecifiedBool.True;
 
     public override void EnterWidth(MplotParser.WidthContext context)
     {
