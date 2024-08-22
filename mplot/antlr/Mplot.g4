@@ -113,8 +113,8 @@ legend : 'key' | 'legend' ;
 firstAsterisk : ASTERISK ;
 
 // xtics min step max
-xtics : 'xtics' rational rational rational ;
-ytics : 'ytics' rational rational rational ;
+xtics : 'xtics' rational (COMMA_CHAR | COLON)? rational (COMMA_CHAR | COLON)? rational ;
+ytics : 'ytics' rational (COMMA_CHAR | COLON)? rational (COMMA_CHAR | COLON)? rational ;
 
 xticlabels : 'xticlabels' stringArray ;
 
