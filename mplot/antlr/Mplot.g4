@@ -75,8 +75,8 @@ xcol       : ('x' | 'xcol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 xexp       : 'xexp' ASTERISK? expression ;
 yexp       : 'yexp' ASTERISK? expression ;
 xformat    : ('xf' | 'xticformat') STRING ;
-xrange     : ('xr' | 'xrange' | 'xlimit') range ;
-yrange     : ('yr' | 'yrange' | 'ylimit') range ;
+xrange     : ('xr' | 'xrange' | 'xlim' | 'xlimit') range ;
+yrange     : ('yr' | 'yrange' | 'ylim' | 'ylimit') range ;
 xmin       : ('xmin' | 'xlow') rangeItem ;
 xmax       : ('xmax' | 'xhigh') rangeItem ;
 ymin       : ('ymin' | 'ylow') rangeItem ;
@@ -208,7 +208,7 @@ legendOption
   | BOTTOM_LEFT  # BottomLeftLegend
   ;
 
-TOP : 'top' ;
+TOP : 'top' | 'above' ;
 RIGHT : 'right' ;
 UPPER_RIGHT : 'ur' | 'upperright' ;
 UPPER_LEFT : 'ul' | 'upperleft' ;
