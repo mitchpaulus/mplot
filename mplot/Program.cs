@@ -197,6 +197,7 @@ class Program
                     ProcessStartInfo startInfo = new ProcessStartInfo();
                     startInfo.FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "gnuplot.exe" : "gnuplot";
                     startInfo.RedirectStandardInput = true;
+                    startInfo.RedirectStandardOutput = true;
                     startInfo.UseShellExecute = false;
                     startInfo.CreateNoWindow = true;
 
@@ -213,6 +214,31 @@ class Program
                             {
                                 w.Write(writeGnuplot);
                             }
+                        }
+
+                        if (!Console.IsOutputRedirected)
+                        {
+                            // Write to file.
+                            if (fileInfo.IsNone)
+                            {
+                                Console.Error.Write("Not going to dump PNG contents to TTY. Please redirect to desired file.\n");
+                                return 1;
+                            }
+
+                            if (fileInfo.AsValue.Name.EndsWith(".mplot"))
+                            {
+                                using FileStream fStream = new FileStream(fileInfo.AsValue.FullName[..^6] + ".png", FileMode.Create);
+                                process.StandardOutput.BaseStream.CopyTo(fStream);
+                            }
+                            else
+                            {
+                                using FileStream fStream = new FileStream(fileInfo.AsValue.FullName + ".png", FileMode.Create);
+                                process.StandardOutput.BaseStream.CopyTo(fStream);
+                            }
+                        }
+                        else
+                        {
+                            Console.Write(process.StandardOutput.ReadToEnd());
                         }
 
                         process.WaitForExit();
