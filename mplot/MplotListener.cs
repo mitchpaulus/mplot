@@ -259,7 +259,7 @@ public class MplotListener : MplotBaseListener
         Ignores.Add(l.Tokens);
     }
 
-    public override void EnterTitle(MplotParser.TitleContext context) => Title = context.STRING().GetText().UnescapeMplotString();
+    public override void EnterTitle(MplotParser.TitleContext context) => Title = context.argString().ToMPlotString().GetString(_stringArgs);
     public override void EnterGnuplotLiteral(MplotParser.GnuplotLiteralContext context) => GnuplotLiterals.AddRange(context.STRING().Select(s => s.GetText().UnescapeMplotString()));
 
     public override void EnterHist(MplotParser.HistContext context)
@@ -524,7 +524,7 @@ public class MplotListener : MplotBaseListener
             }
             else if (child is MplotParser.StringCountContext stringCountContext)
             {
-                var text = stringCountContext.STRING().GetText().UnescapeMplotString();
+                var text = stringCountContext.argString().ToMPlotString().GetString(_stringArgs);
                 var count = int.Parse(stringCountContext.count()?.INT().GetText() ?? "1");
                 ColumnSpecifier columnSpecifier = new(text);
 
@@ -564,7 +564,7 @@ public class MplotListener : MplotBaseListener
             }
             else if (child is MplotParser.StringCountContext stringCountContext)
             {
-                var text = stringCountContext.STRING().GetText().UnescapeMplotString();
+                var text = stringCountContext.argString().ToMPlotString().GetString(_stringArgs);
                 var count = int.Parse(stringCountContext.count()?.INT().GetText() ?? "1");
                 ColumnSpecifier columnSpecifier = new(text);
 
@@ -1065,6 +1065,7 @@ public class WhiteSpaceSeparator : Separator
 
 public class ColumnSelector : OneOfBase<ColumnSpecifier, List<MplotToken>>
 {
+    // List<MplotToken> is for the yexp, xexp expression selectors.
     protected ColumnSelector(OneOf<ColumnSpecifier, List<MplotToken>> _) : base(_) { }
 
     public static implicit operator ColumnSelector(ColumnSpecifier _) => new(_);

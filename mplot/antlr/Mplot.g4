@@ -70,7 +70,7 @@ dpi        : ('dpi' | 'd') INT ;
 separator  : ('sep' | 'separator') stringArray ;
 series     : ('s' | 'series') stringArray ;
 skip       : 'skip' intArray ;
-title      : ('ct' | 'charttitle' | 'title' | 't') STRING ;
+title      : ('ct' | 'charttitle' | 'title' | 't') argString ;
 xlabel     : ('xl' | 'xlabel') argString ;
 xcol       : ('x' | 'xcol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 xexp       : 'xexp' ASTERISK? expression ;
@@ -101,7 +101,7 @@ STDIN : 'stdin' ;
 
 STRING_ARG : 'sarg' [0-9]+ ;
 argString : STRING
-       | LPAREN STRING_ARG STRING? RPAREN
+       | LPAREN STRING_ARG STRING? RPAREN  // This is for a default to be able to be specified
        | STRING_ARG
        ;
 
@@ -144,7 +144,7 @@ TO : 'to' ;
 count : POUND INT ;
 
 intCount : INT count? ;
-stringCount : STRING count? ;
+stringCount : argString count? ;
 
 marker : MARKER? (ASTERISK | CYCLE)? markerTypeCount (ASTERISK | CYCLE)? ;
 
