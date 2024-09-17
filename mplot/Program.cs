@@ -16,6 +16,7 @@ class Program
         bool compile = false;
         bool toGnuplotFile = false;
         bool printDependencies = false;
+        bool printHeaders = false;
         List<string> stringArgs = new();
 
         while (i < args.Length)
@@ -25,7 +26,9 @@ class Program
                 Console.Write("mplot - plotting DSL\n\n");
                 Console.Write("USAGE:\n");
                 Console.Write("mplot [-g] [-s STRING]* FILE\n");
+                Console.Write("mplot -d FILE\n");
                 Console.Write("mplot -h | --help\n");
+                Console.Write("mplot --headers FILE\n");
                 Console.Write("mplot -V | --version\n");
                 Console.Write('\n');
                 Console.Write("OPTIONS\n");
@@ -105,6 +108,10 @@ class Program
             else if (args[i] is "-d")
             {
                 printDependencies = true;
+            }
+            else if (args[i] is "--headers")
+            {
+                printHeaders = true;
             }
             else if (args[i] == "-s")
             {
@@ -268,6 +275,39 @@ class Program
                     foreach (var fs in fileSources)
                     {
                         if (!dependencies.Contains(fs.Filepath)) dependencies.Add(fs.Filepath);
+                    }
+                }
+                else if (printHeaders)
+                {
+                    var fileSources = listener.FilePathArray.Elements().Where(source => source.IsFileSource).Select(source => source.AsT0).ToList();
+
+                    HashSet<string> headers = new();
+                    foreach (var fs in fileSources)
+                    {
+                        if (fs.Filepath.ToLower().EndsWith(".tsv"))
+                        {
+                            var headerLine = File.ReadLines(fs.Filepath, Encoding.UTF8).Take(1).ToList();
+                            if (headerLine.Count > 0)
+                            {
+                                foreach (var head in headerLine[0].Split("\t")) headers.Add(head);
+                            }
+                        }
+                        else if (fs.Filepath.ToLower().EndsWith(".csv"))
+                        {
+                            var headerLine = File.ReadLines(fs.Filepath, Encoding.UTF8).Take(1).ToList();
+                            CsvReader csvReader = new();
+                            if (headerLine.Count > 0)
+                            {
+                                var cells = csvReader.ParseCsvLine(headerLine[0]);
+                                foreach (var head in cells) headers.Add(head);
+                            }
+                        }
+                    }
+
+                    foreach (var head in headers.OrderByNatural())
+                    {
+                        Console.Write(head);
+                        Console.Write('\n');
                     }
                 }
                 else
