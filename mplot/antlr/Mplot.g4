@@ -272,6 +272,7 @@ rational
 WS : [ \t\n]+ -> skip ;
 
 COMMENT : '{-' .*? '-}' -> skip ;
+LINE_COMMENT : '//'.*? '\n' -> skip ;
 
 STRING : '"' (ESC|.)*? '"' ;
 fragment ESC : '\\"' | '\\\\' ;
