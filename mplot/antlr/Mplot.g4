@@ -210,6 +210,7 @@ legendOption
   | UPPER_LEFT  # UpperLeftLegend
   | BOTTOM_RIGHT # BottomRightLegend
   | BOTTOM_LEFT  # BottomLeftLegend
+  | ABOVERIGHT   # AboveRightLegend
   ;
 
 TOP : 'top' | 'above' ;
@@ -218,6 +219,8 @@ UPPER_RIGHT : 'ur' | 'upperright' ;
 UPPER_LEFT : 'ul' | 'upperleft' ;
 BOTTOM_RIGHT : 'br' | 'bottomright' ;
 BOTTOM_LEFT : 'bl' | 'bottomleft' ;
+
+ABOVERIGHT : 'aboveright' ;
 
 grid : GRID ;
 

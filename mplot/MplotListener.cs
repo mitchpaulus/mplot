@@ -649,6 +649,9 @@ public class MplotListener : MplotBaseListener
     public override void EnterUpperLeftLegend(MplotParser.UpperLeftLegendContext context) => LegendPosition = new InsideUpperLeft();
     public override void EnterBottomLeftLegend(MplotParser.BottomLeftLegendContext context) => LegendPosition = new InsideBottomLeft();
     public override void EnterBottomRightLegend(MplotParser.BottomRightLegendContext context) => LegendPosition = new InsideBottomRight();
+
+    public override void EnterAboveRightLegend(MplotParser.AboveRightLegendContext context) => LegendPosition = new OuterTopRight();
+
     public override void EnterGrid(MplotParser.GridContext context) => Grid = true;
 
     public override void EnterSeries(MplotParser.SeriesContext context)
@@ -968,7 +971,10 @@ public class InsideBottomRight : LegendPosition
     public override string GnuPlotLegendPosition => "inside right bottom";
 }
 
-
+public class OuterTopRight : LegendPosition
+{
+    public override string GnuPlotLegendPosition => "tmargin right";
+}
 
 public class Empty : LegendPosition
 {
