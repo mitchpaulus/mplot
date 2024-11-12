@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
@@ -170,12 +171,26 @@ class Program
 
         AntlrInputStream inputStream = new AntlrInputStream(contents);
         MplotLexer lexer = new MplotLexer(inputStream);
+        ErrorListener errorListener = new ErrorListener();
+        lexer.RemoveErrorListeners();
+        lexer.AddErrorListener(errorListener);
 
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-
         MplotParser parser = new MplotParser(tokenStream);
-
+        parser.RemoveErrorListeners();
+        parser.AddErrorListener(errorListener);
         var parsedFile = parser.mplot();
+
+        if (errorListener.Messages.Count > 0)
+        {
+            foreach (var error in errorListener.Messages)
+            {
+                Console.Write(error);
+                if (!error.EndsWith('\n')) Console.Write('\n');
+            }
+
+            return 1;
+        }
 
         ParseTreeWalker walker = new ParseTreeWalker();
 
@@ -334,5 +349,20 @@ class Program
         }
 
         return 0;
+    }
+}
+
+public class ErrorListener : IAntlrErrorListener<IToken>, IAntlrErrorListener<int>
+{
+    public readonly List<string>  Messages = new();
+
+    public void SyntaxError(TextWriter output, IRecognizer recognizer, IToken offendingSymbol, int line, int charPositionInLine, string msg, RecognitionException e)
+    {
+        Messages.Add(msg);
+    }
+
+    public void SyntaxError(TextWriter output, IRecognizer recognizer, int offendingSymbol, int line, int charPositionInLine, string msg, RecognitionException e)
+    {
+        Messages.Add(msg);
     }
 }

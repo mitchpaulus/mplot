@@ -60,6 +60,8 @@ element
   | ticsOut
   | binsize
   | colorData
+  | lmargin
+  | rmargin
   ;
 
 file       : ('f' | 'file') stringArray ;
@@ -95,6 +97,8 @@ isoDate : 'isodate' ;
 seriesStyle : (pointStyle | lineStyle | hist | fstep) (CYCLE | ASTERISK)* ;
 gnuplotLiteral : 'gnuplot' STRING+ ;
 ignore : 'ignore' (ASTERISK | CYCLE)? expression ;
+lmargin : ('lmargin' | 'lm') rational ;
+rmargin : ('rmargin' | 'rm') rational ;
 
 stdinInput : STDIN ASTERISK? ;
 STDIN : 'stdin' ;

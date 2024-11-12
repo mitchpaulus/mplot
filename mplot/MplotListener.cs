@@ -7,6 +7,9 @@ namespace mplot;
 
 public class MplotListener : MplotBaseListener
 {
+
+    // SEE WriteGnuplot for actual writing of the file
+
     private readonly Maybe<FileInfo> _fileInfo;
     private readonly List<string> _stringArgs;
 
@@ -27,6 +30,9 @@ public class MplotListener : MplotBaseListener
 
     private readonly List<AdditionalTic> _additionalXTics2 = new();
     private readonly List<AdditionalTic> _additionalYTics2 = new();
+
+    private Maybe<Rational> _lmargin = NoneMarker.None;
+    private Maybe<Rational> _rmargin = NoneMarker.None;
 
     public bool Grid = false;
 
@@ -311,6 +317,16 @@ public class MplotListener : MplotBaseListener
     {
         Rational r = new Rational(context.rational());
         _additionalYTics2.Add(new(r, context.STRING()?.GetText().UnescapeMplotString()));
+    }
+
+    public override void EnterLmargin(MplotParser.LmarginContext context)
+    {
+        _lmargin = new Rational(context.rational());
+    }
+
+    public override void EnterRmargin(MplotParser.RmarginContext context)
+    {
+        _rmargin = new Rational(context.rational());
     }
 
     public override void EnterHeight(MplotParser.HeightContext context)
@@ -754,6 +770,9 @@ public class MplotListener : MplotBaseListener
 
         lines.Add($"set terminal pngcairo size {widthPixels},{heightPixels} font \"{fontName},{FontSize}\" fontscale {fontScale} pointscale {fontScale}");
 
+        if (_lmargin.IsValue(out var rational)) lines.Add($"set lmargin {rational.ToDecimalString()}");
+        if (_rmargin.IsValue(out rational)) lines.Add($"set rmargin {rational.ToDecimalString()}");
+
         if (TimeAxis)
         {
             lines.Add("set timefmt \"%Y-%m-%d %H:%M\"");
@@ -1178,6 +1197,8 @@ public class Maybe<T> : OneOfBase<T, NoneMarker>
 
     public static implicit operator Maybe<T>(T _) => new(_);
     public static implicit operator Maybe<T>(NoneMarker _) => new(_);
+
+    public bool IsValue(out T value) => TryPickT0(out value, out var _);
 
     public bool IsNone => IsT1;
     public T AsValue => AsT0;
