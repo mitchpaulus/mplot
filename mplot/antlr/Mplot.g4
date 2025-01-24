@@ -160,7 +160,7 @@ markerType
   | 'square' # SquareMarker
   | ('filledcircle' | 'fcircle' | 'fillcircle' | 'filled') # FilledCircleMarker
   | ('filledsquare' | 'fsquare' | 'fillsquare') # FilledSquareMarker
-  | 'nomarker' # NoMarker
+  | ('nomarker' | 'nomark') # NoMarker
   ;
 
 MARKER : 'marker' | 'm' ;
@@ -170,8 +170,8 @@ intArray : (INT | ASTERISK | CYCLE)+ ;
 rationalArray : (rational | ASTERISK | CYCLE)+ ;
 colorArray : (hexColor | rgbColor | knownColor | ASTERISK | CYCLE)+ ;
 
-legendCols : ('legendcols' | 'keycols') INT ;
-legendRows : ('legendrows' | 'keyrows') INT ;
+legendCols : ('legendcols' | 'keycols' | 'cols') INT ;
+legendRows : ('legendrows' | 'keyrows' | 'rows') INT ;
 
 separator_type
   : commaSeparator ASTERISK? # CommaSep
