@@ -36,7 +36,8 @@ public class Evaluator
             }
             else if (token.TokenType == ExpressionTokenType.ASTERISK)
             {
-                if (expStack.Count < 2) throw new ArgumentException();
+                if (expStack.Count == 0) throw new ArgumentException("No items on the stack for the '*' operator.");
+                if (expStack.Count == 1) throw new ArgumentException("Only 1 item on the stack for the '*' operator.");
                 string arg2 = expStack.Pop();
                 string arg1 = expStack.Pop();
                 expStack.Push($"({arg1} * {arg2})");
@@ -159,7 +160,8 @@ public class Evaluator
             }
             else if (token.TokenType == ExpressionTokenType.ASTERISK)
             {
-                if (expStack.Count < 2) throw new ArgumentException();
+                if (expStack.Count == 0) throw new ArgumentException("No items on the stack for the '*' operator.");
+                if (expStack.Count == 1) throw new ArgumentException("Only 1 item on the stack for the '*' operator.");
                 string arg2 = expStack.Pop();
                 string arg1 = expStack.Pop();
                 expStack.Push($"({arg1} * {arg2})");
