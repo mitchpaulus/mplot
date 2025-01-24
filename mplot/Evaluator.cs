@@ -103,6 +103,13 @@ public class Evaluator
                 string arg1 = expStack.Pop();
                 expStack.Push($"({arg1} == {arg2})");
             }
+            else if (token.TokenType == ExpressionTokenType.NOTEQUAL)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} != {arg2})");
+            }
             else if (token.TokenType == ExpressionTokenType.AND)
             {
                 if (expStack.Count < 2) throw new ArgumentException();
@@ -225,6 +232,13 @@ public class Evaluator
                 string arg2 = expStack.Pop();
                 string arg1 = expStack.Pop();
                 expStack.Push($"({arg1} == {arg2})");
+            }
+            else if (token.TokenType == ExpressionTokenType.NOTEQUAL)
+            {
+                if (expStack.Count < 2) throw new ArgumentException();
+                string arg2 = expStack.Pop();
+                string arg1 = expStack.Pop();
+                expStack.Push($"({arg1} != {arg2})");
             }
             else if (token.TokenType == ExpressionTokenType.AND)
             {

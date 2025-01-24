@@ -289,6 +289,7 @@ GREATERTHAN : '>' ;
 LESSOREQUAL : '<=' ;
 GREATEROREQUAL : '>=' ;
 EQUAL : '=' ;
+NOTEQUAL : '!=' ;
 FORWARDSLASH : '/' ;
 PLUS : '+' ;
 MINUS : '-' ;
@@ -328,6 +329,7 @@ expressionItem
     | LESSOREQUAL # LessOrEqualExp
     | GREATEROREQUAL # GreaterOrEqualExp
     | EQUAL # EqualExp
+    | NOTEQUAL # NotEqualExp
     | AND # AndExp
     | OR # OrExp
     | EXPRESSIONIDENTIFIER # ExpressionIdentifierExp
