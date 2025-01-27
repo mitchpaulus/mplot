@@ -46,7 +46,6 @@ public class MplotListener : MplotBaseListener
     public int TextDpi = 96;
 
     public SpecifiedBool Legend = SpecifiedBool.Unset;
-    public SeriesStyle PlotSeriesStyle { get; private set; } = SeriesStyle.Scatter;
 
     public readonly MplotArray<SeriesStyle> PlotSeriesStyleArray = new(SeriesStyle.Scatter, MplotArrayMode.Repeat, "Series style");
 
@@ -268,18 +267,11 @@ public class MplotListener : MplotBaseListener
     public override void EnterTitle(MplotParser.TitleContext context) => Title = context.argString().ToMPlotString().GetString(_stringArgs);
     public override void EnterGnuplotLiteral(MplotParser.GnuplotLiteralContext context) => GnuplotLiterals.AddRange(context.STRING().Select(s => s.GetText().UnescapeMplotString()));
 
-    public override void EnterHist(MplotParser.HistContext context)
-    {
-        PlotSeriesStyleArray.Add(SeriesStyle.Boxes);
-    }
-
     public override void EnterBinsize(MplotParser.BinsizeContext context)
     {
         BinSizeArray.Add(new Rational(context.rational()));
         if (context.ASTERISK().Length > 0) BinSizeArray.SetMode(MplotArrayMode.Repeat);
     }
-
-    public override void EnterFstep(MplotParser.FstepContext context) => PlotSeriesStyleArray.Add(SeriesStyle.FStep);
 
     public override void EnterXtics(MplotParser.XticsContext context)
     {
@@ -437,6 +429,30 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterSeriesStyle(MplotParser.SeriesStyleContext context)
     {
+        int count = context.count() is not null ? int.Parse(context.count().INT().GetText()) : 1;
+        for (int i = 0; i < count; i++)
+        {
+            if (context.seriesStyleItem().pointStyle() is not null)
+            {
+                PlotSeriesStyleArray.Add(SeriesStyle.Scatter);
+            }
+            else if (context.seriesStyleItem().lineStyle() is not null)
+            {
+                PlotSeriesStyleArray.Add(SeriesStyle.Line);
+                if (MarkerArray.UseDefault)
+                {
+                    MarkerArray = new(new NoMarker(), MplotArrayMode.Repeat, "Marker");
+                }
+            }
+            else if (context.seriesStyleItem().fstep() is not null)
+            {
+                PlotSeriesStyleArray.Add(SeriesStyle.FStep);
+            }
+            else if (context.seriesStyleItem().hist() is not null)
+            {
+                PlotSeriesStyleArray.Add(SeriesStyle.Boxes);
+            }
+        }
         // The actual addition of the style to the array is handled in the listener for each.
         if (context.CYCLE() is not null) PlotSeriesStyleArray.SetMode(MplotArrayMode.Cycle);
         if (context.ASTERISK() is not null) PlotSeriesStyleArray.SetMode(MplotArrayMode.Repeat);
@@ -446,23 +462,6 @@ public class MplotListener : MplotBaseListener
     {
         var names = context.stringArray().argString().Select(node => node.ToMPlotString().GetString(_stringArgs).Trim()).ToList();
         XTicLabels.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
-    }
-
-    public override void EnterPointStyle(MplotParser.PointStyleContext context)
-    {
-        PlotSeriesStyle = SeriesStyle.Scatter;
-        PlotSeriesStyleArray.Add(SeriesStyle.Scatter);
-    }
-
-    public override void EnterLineStyle(MplotParser.LineStyleContext context)
-    {
-        PlotSeriesStyle = SeriesStyle.Line;
-        PlotSeriesStyleArray.Add(SeriesStyle.Line);
-
-        if (MarkerArray.UseDefault)
-        {
-            MarkerArray = new(new NoMarker(), MplotArrayMode.Repeat, "Marker");
-        }
     }
 
     public override void EnterMarker(MplotParser.MarkerContext context)

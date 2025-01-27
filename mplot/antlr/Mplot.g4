@@ -94,7 +94,7 @@ output     : ('out' | 'output') STRING ;
 timeAxis   : TIME_KEYWORD ;
 timeFormat : ('tf' | 'timeformat') STRING ;
 isoDate : 'isodate' ;
-seriesStyle : (pointStyle | lineStyle | hist | fstep) (CYCLE | ASTERISK)* ;
+seriesStyle : seriesStyleItem (count | CYCLE | ASTERISK)? ;
 gnuplotLiteral : 'gnuplot' STRING+ ;
 ignore : 'ignore' (ASTERISK | CYCLE)? expression ;
 lmargin : ('lmargin' | 'lm') rational ;
@@ -134,6 +134,8 @@ LPAREN : '(' ;
 RPAREN : ')' ;
 
 TICS_OUT : 'ticsout' | 'outtics' | 'ticksout' | 'outticks' ;
+
+seriesStyleItem : pointStyle | lineStyle | hist | fstep ;
 
 pointStyle : 'point' | 'scatter' | 'xy' ;
 lineStyle : 'line' | 'lines';
