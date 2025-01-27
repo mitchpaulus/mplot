@@ -72,7 +72,7 @@ public class Series
 
         if (gnuplotStyle == "boxes")
         {
-            b.Append(" fs solid");
+            b.Append(" fs solid border -1");
         }
 
         if (_lineWidth != 1) b.Append($" lw {_lineWidth}");
