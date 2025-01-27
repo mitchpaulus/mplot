@@ -77,7 +77,7 @@ xlabel     : ('xl' | 'xlabel') argString ;
 xcol       : ('x' | 'xcol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 xexp       : 'xexp' ASTERISK? expression ;
 yexp       : 'yexp' ASTERISK? expression ;
-xformat    : ('xf' | 'xticformat') STRING ;
+xformat    : ('xf' | 'xticformat' | 'xformat') STRING ;
 xrange     : ('xr' | 'xrange' | 'xlim' | 'xlimit') range ;
 yrange     : ('yr' | 'yrange' | 'ylim' | 'ylimit') range ;
 xmin       : ('xmin' | 'xlow') rangeItem ;
