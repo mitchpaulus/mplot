@@ -481,9 +481,11 @@ public class MplotListener : MplotBaseListener
         Marker m = context.markerType() switch
         {
             MplotParser.CircleMarkerContext => new CircleMarker(),
-            MplotParser.FilledCircleMarkerContext => new FilledCircleMarker(),
             MplotParser.PlusMarkerContext => new PlusMarker(),
             MplotParser.SquareMarkerContext => new SquareMarker(),
+            MplotParser.FilledCircleMarkerContext => new FilledCircleMarker(),
+            MplotParser.FilledSquareMarkerContext => new FilledSquareMarker(),
+            MplotParser.NoMarkerContext => new NoMarker(),
             _ => new CircleMarker()
         };
 
