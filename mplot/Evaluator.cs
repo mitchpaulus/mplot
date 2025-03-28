@@ -140,7 +140,13 @@ public class Evaluator
             }
         }
 
-        return expStack.Pop();
+        var finalExp = expStack.Pop();
+        // If exp isn't surrounded by parens, add them.
+        var exp = finalExp.Length >= 2 && !(finalExp[0] == '(' && finalExp[^1] == ')')
+            ? '(' + finalExp + ')'
+            : finalExp;
+
+        return exp;
     }
 
     public static AwkEval EvaluateAwk(List<MplotToken> tokens)

@@ -1134,7 +1134,7 @@ public class ColumnSpecifier
 
     public override string ToString() => UseString ? $"\"{ColumnName}\"" : OneBasedColumnIndex.ToString();
 
-    public string ToGnuplotExp() => UseString ? $"column(\"{ColumnName}\")" : $"${OneBasedColumnIndex}";
+    public string ToGnuplotExp() => UseString ? $"(column(\"{ColumnName}\"))" : $"${OneBasedColumnIndex}";
 
     public int ColMatchZeroBased(List<string> line)
     {
