@@ -80,6 +80,8 @@ public class MplotListener : MplotBaseListener
 
     public MplotArray<Marker> MarkerArray = new(new CircleMarker(), MplotArrayMode.Repeat, "Marker");
 
+    public MplotArray<DashType> DashTypeArray = new(new SolidDash(), MplotArrayMode.Repeat, "Dash type");
+
     public readonly MplotArray<DataSource> FilePathArray;
 
     public LegendPosition LegendPosition = new Empty();
@@ -115,6 +117,7 @@ public class MplotListener : MplotBaseListener
             PlotSeriesStyleArray,
             SeparatorArray,
             Ignores,
+            DashTypeArray,
         };
 
         List<IMplotArray> normalLengthArrays = requiredArrays.Where(array => array.Mode() == MplotArrayMode.Normal).ToList();
@@ -135,6 +138,7 @@ public class MplotListener : MplotBaseListener
             b.Append($"Plot series style: {PlotSeriesStyleArray.ToString()}\n");
             b.Append($"Separator: {SeparatorArray.ToString()}\n");
             b.Append($"Ignore: {Ignores.ToString()}\n");
+            b.Append($"Dash type: {DashTypeArray.ToString()}");
 
             throw new InvalidDataException(b.ToString());
         }
@@ -213,7 +217,8 @@ public class MplotListener : MplotBaseListener
                 LineColorArray[i],
                 lineWidth,
                 PlotSeriesStyleArray[i],
-                SeparatorArray[i]
+                SeparatorArray[i],
+                DashTypeArray[i]
             );
 
             series.Add(s);
@@ -473,6 +478,45 @@ public class MplotListener : MplotBaseListener
         else if (context.CYCLE().Any())
         {
             MarkerArray.SetMode(MplotArrayMode.Cycle);
+        }
+    }
+
+    public override void EnterDash(MplotParser.DashContext context)
+    {
+        DashType dt;
+        if (context.dashType() is MplotParser.DashedLineContext)
+        {
+            dt = new SimpleDash();
+        }
+        else if (context.dashType() is MplotParser.SolidLineContext)
+        {
+            dt = new SolidDash();
+        }
+        else
+        {
+            throw new NotImplementedException();
+        }
+
+        if (context.count() is { } countContext)
+        {
+            for (int i = 0; i < int.Parse(countContext.INT().GetText()); i++)
+            {
+                DashTypeArray.Add(dt);
+            }
+        }
+        else if (context.ASTERISK() is not null)
+        {
+            DashTypeArray.Add(dt);
+            DashTypeArray.SetMode(MplotArrayMode.Repeat);
+        }
+        else if (context.CYCLE() is not null)
+        {
+            DashTypeArray.Add(dt);
+            DashTypeArray.SetMode(MplotArrayMode.Cycle);
+        }
+        else
+        {
+            DashTypeArray.Add(dt);
         }
     }
 
@@ -787,7 +831,6 @@ public class MplotListener : MplotBaseListener
 
         if (!string.IsNullOrWhiteSpace(Title)) lines.Add($"set title {Title.ToGnuPlotString()}");
         if (!string.IsNullOrWhiteSpace(XLabel)) lines.Add($"set xlabel \"{XLabel}\"");
-        if (!string.IsNullOrWhiteSpace(YLabel)) lines.Add($"set ylabel \"{YLabel}\"");
 
         if (Grid) lines.Add("set grid lw 2");
         List<Series> seriesList = GenSeries();
@@ -797,6 +840,12 @@ public class MplotListener : MplotBaseListener
         if (Legend == SpecifiedBool.False) lines.Add("set key off");
         else if (Legend == SpecifiedBool.True) lines.Add($"set key {LegendPosition.GnuPlotLegendPosition}{legendMaxRowsMaxCols}");
         else lines.Add(seriesList.Count > 1 ? $"set key {LegendPosition.GnuPlotLegendPosition}{legendMaxRowsMaxCols}" : "set key off");
+
+        if (!string.IsNullOrWhiteSpace(YLabel)) lines.Add($"set ylabel \"{YLabel}\"");
+        else if (seriesList.Count == 1)
+        {
+            lines.Add($"set ylabel \"{seriesList[0].Name}\"");
+        }
 
         if (!XMin.IsAuto || !XMax.IsAuto) lines.Add($"set xrange [{XMin.ToGnuplot()}:{XMax.ToGnuplot()}]");
         if (!YMin.IsAuto || !YMax.IsAuto) lines.Add($"set yrange [{YMin.ToGnuplot()}:{YMax.ToGnuplot()}]");

@@ -62,6 +62,7 @@ element
   | colorData
   | lmargin
   | rmargin
+  | dash
   ;
 
 file       : ('f' | 'file') stringArray ;
@@ -163,6 +164,13 @@ markerType
   | ('filledcircle' | 'fcircle' | 'fillcircle' | 'filled') # FilledCircleMarker
   | ('filledsquare' | 'fsquare' | 'fillsquare') # FilledSquareMarker
   | ('nomarker' | 'nomark') # NoMarker
+  ;
+
+dash : dashType (count | ASTERISK | CYCLE)? ;
+
+dashType
+  : ('dashed' | 'dash') # DashedLine
+  | ('nodash') # SolidLine
   ;
 
 MARKER : 'marker' | 'm' ;
