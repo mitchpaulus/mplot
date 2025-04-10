@@ -789,7 +789,7 @@ public class MplotListener : MplotBaseListener
         if (!string.IsNullOrWhiteSpace(XLabel)) lines.Add($"set xlabel \"{XLabel}\"");
         if (!string.IsNullOrWhiteSpace(YLabel)) lines.Add($"set ylabel \"{YLabel}\"");
 
-        if (Grid) lines.Add("set grid");
+        if (Grid) lines.Add("set grid lw 2");
         List<Series> seriesList = GenSeries();
 
         string legendMaxRowsMaxCols =
