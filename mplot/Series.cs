@@ -16,8 +16,9 @@ public class Series
     private readonly SeriesStyle _style;
     private readonly DashType _dashType;
     public Separator2 Separator { get; }
+    private YAxisSide _yAxisSide { get; }
 
-    public Series(string xCol, string yCol, string name, DataSource filePath, Marker marker, int skip, Color lineColor, int lineWidth, SeriesStyle style, Separator2 separator, DashType dashType)
+    public Series(string xCol, string yCol, string name, DataSource filePath, Marker marker, int skip, Color lineColor, int lineWidth, SeriesStyle style, Separator2 separator, DashType dashType, YAxisSide yAxisSide)
     {
         _xCol = xCol;
         _yCol = yCol;
@@ -30,15 +31,14 @@ public class Series
         _style = style;
         _dashType = dashType;
         Separator = separator;
+        _yAxisSide = yAxisSide;
     }
 
     public string ToGnuplot()
     {
         StringBuilder b = new();
 
-
         string skipText = _skip == 0 ? "" : $" skip {_skip}";
-        string lineWidth = _lineWidth == 1 ? "" : $"lw {_lineWidth}";
         string title = string.IsNullOrWhiteSpace(Name) ? "" : $" title \"{Name}\"";
 
         string source = FilePath.Match(
@@ -49,7 +49,8 @@ public class Series
         );
 
         b.Append(source);
-        b.Append($" using {_xCol}:{_yCol}{skipText} with ");
+        b.Append($" using {_xCol}:{_yCol}{skipText} axes {_yAxisSide.ToGnuplot()} with ");
+
 
         string gnuplotStyle;
         if (_style.Id == SeriesStyle.Line.Id && _marker is not NoMarker)

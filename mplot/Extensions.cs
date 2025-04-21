@@ -307,4 +307,11 @@ public static class Extensions
 
         return 0;
     }
+
+    public static string ToGnuplot(this YAxisSide side)
+    {
+        if (side == YAxisSide.Left) return "x1y1";
+        if (side == YAxisSide.Right) return "x1y2";
+        throw new NotImplementedException();
+    }
 }

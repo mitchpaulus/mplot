@@ -7,6 +7,7 @@ plot : element* ;
 element
   : xlabel
   | ylabel
+  | y2label
   | labels
   | separator
   | separator_type
@@ -32,6 +33,7 @@ element
   | xmin
   | xmax
   | yrange
+  | y2range
   | ymin
   | ymax
   | knownColorCycleAsterisk
@@ -63,6 +65,7 @@ element
   | lmargin
   | rmargin
   | dash
+  | axisSide
   ;
 
 file       : ('f' | 'file') stringArray ;
@@ -81,6 +84,7 @@ yexp       : 'yexp' ASTERISK? expression ;
 xformat    : ('xf' | 'xticformat' | 'xformat') STRING ;
 xrange     : ('xr' | 'xrange' | 'xlim' | 'xlimit') range ;
 yrange     : ('yr' | 'yrange' | 'ylim' | 'ylimit') range ;
+y2range     : ('yr2' | 'yrange2' | 'ylim2' | 'ylimit2' | 'y2r' | 'y2range' | 'y2lim' | 'y2limit') range ;
 xmin       : ('xmin' | 'xlow') rangeItem ;
 xmax       : ('xmax' | 'xhigh') rangeItem ;
 ymin       : ('ymin' | 'ylow') rangeItem ;
@@ -88,6 +92,7 @@ ymax       : ('ymax' | 'yhigh') rangeItem ;
 labels     : ('l' | 'labels') STRING STRING ;
 lineWidth  : ('lw' | 'linewidth' | 'lt' | 'linethickness') intArray ;
 ylabel     : ('yl' | 'ylabel') argString ;
+y2label     : ('yl2' | 'y2l' | 'ylabel2' | 'y2label') argString ;
 ycol       : ('y' | 'ycol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 width      : ('w' | 'width') rational ;
 height     : ('h' | 'height') rational ;
@@ -100,13 +105,14 @@ gnuplotLiteral : 'gnuplot' STRING+ ;
 ignore : 'ignore' (ASTERISK | CYCLE)? expression ;
 lmargin : ('lmargin' | 'lm') rational ;
 rmargin : ('rmargin' | 'rm') rational ;
+axisSide : side=('y1' | 'y2') (count | CYCLE | ASTERISK)? ;
 
 stdinInput : STDIN ASTERISK? ;
 STDIN : 'stdin' ;
 
 STRING_ARG : 'sarg' [0-9]+ ;
 argString : STRING
-       | LPAREN STRING_ARG STRING? RPAREN  // This is for a default to be able to be specified
+       | LPAREN STRING_ARG STRING? RPAREN  // This is for a default to be able to be specified like (sarg1 "mydefault")
        | STRING_ARG
        ;
 
@@ -192,7 +198,7 @@ separator_type
 CYCLE : 'cycle' ;
 ASTERISK : '*' ;
 INLINEDATA : START .*? END ;
-fragment START : ('start' | 'Start' | 'START') [ \t*]* '\n';
+fragment START : ('start' | 'Start' | 'START' | 'DATA') [ \t*]* '\n';
 fragment END : ('end' | 'End' | 'END') [ \t*]* '\n';
 
 CMD : 'cmd' | 'command' ;

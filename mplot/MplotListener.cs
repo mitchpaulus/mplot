@@ -5,6 +5,12 @@ using OneOf;
 
 namespace mplot;
 
+public enum YAxisSide
+{
+    Left,
+    Right
+}
+
 public class MplotListener : MplotBaseListener
 {
 
@@ -21,8 +27,12 @@ public class MplotListener : MplotBaseListener
 
     public string? XLabel { get; set; }
     public string? YLabel { get; set; }
+
+    public string? Y2Label { get; set; } = null;
     public MplotArray<ColumnSelector> YcolsArray { get; } = new(new ColumnSpecifier(2), MplotArrayMode.Repeat, "Y col specifier");
     public MplotArray<ColumnSelector> XcolsArray { get; } = new(new ColumnSpecifier(1), MplotArrayMode.Repeat, "X col specifier");
+
+    public MplotArray<YAxisSide> YAxisSidesArray { get; } = new MplotArray<YAxisSide>(YAxisSide.Left, MplotArrayMode.Repeat, "Y axis side (left/right)");
     private MplotArray<Maybe<List<MplotToken>>> Ignores { get; } = new(NoneMarker.None, MplotArrayMode.Repeat, "Ignore expression");
 
     private readonly List<AdditionalTic> _additionalXTics = new();
@@ -62,6 +72,9 @@ public class MplotListener : MplotBaseListener
 
     public RangeSpec YMin { get; set; } = AutoRange.Auto();
     public RangeSpec YMax { get; set; } = AutoRange.Auto();
+
+    public RangeSpec Y2Min { get; set; } = AutoRange.Auto();
+    public RangeSpec Y2Max { get; set; } = AutoRange.Auto();
 
     public Rational? YTicMin = null;
     public Rational? YTicMax = null;
@@ -118,6 +131,7 @@ public class MplotListener : MplotBaseListener
             SeparatorArray,
             Ignores,
             DashTypeArray,
+            YAxisSidesArray,
         };
 
         List<IMplotArray> normalLengthArrays = requiredArrays.Where(array => array.Mode() == MplotArrayMode.Normal).ToList();
@@ -139,6 +153,7 @@ public class MplotListener : MplotBaseListener
             b.Append($"Separator: {SeparatorArray.ToString()}\n");
             b.Append($"Ignore: {Ignores.ToString()}\n");
             b.Append($"Dash type: {DashTypeArray.ToString()}");
+            b.Append($"Y axis sides: {YAxisSidesArray.ToString()}");
 
             throw new InvalidDataException(b.ToString());
         }
@@ -218,7 +233,8 @@ public class MplotListener : MplotBaseListener
                 lineWidth,
                 PlotSeriesStyleArray[i],
                 SeparatorArray[i],
-                DashTypeArray[i]
+                DashTypeArray[i],
+                YAxisSidesArray[i]
             );
 
             series.Add(s);
@@ -237,11 +253,15 @@ public class MplotListener : MplotBaseListener
         FilePathArray = new(new FileSource("data.tsv", _fileInfo), MplotArrayMode.Repeat, "File path");
     }
 
+    public string ParseArgString(MplotParser.ArgStringContext ctx) => ctx.ToMPlotString().GetString(_stringArgs).Trim();
+
     public string ParseXLabelContext(MplotParser.XlabelContext context) => context.argString().ToMPlotString().GetString(_stringArgs).Trim();
     public string ParseYLabelContext(MplotParser.YlabelContext context) => context.argString().ToMPlotString().GetString(_stringArgs).Trim();
 
     public override void EnterXlabel(MplotParser.XlabelContext context) => XLabel = ParseXLabelContext(context);
     public override void EnterYlabel(MplotParser.YlabelContext context) => YLabel = ParseYLabelContext(context);
+
+    public override void EnterY2label(MplotParser.Y2labelContext context) => Y2Label = ParseArgString(context.argString());
 
     public override void EnterFile(MplotParser.FileContext context)
     {
@@ -357,6 +377,31 @@ public class MplotListener : MplotBaseListener
     {
         YMin = context.range().lowLimit.ToRangeSpec();
         YMax = context.range().highLimit.ToRangeSpec();
+    }
+
+    public override void EnterY2range(MplotParser.Y2rangeContext context)
+    {
+        Y2Min = context.range().lowLimit.ToRangeSpec();
+        Y2Max = context.range().highLimit.ToRangeSpec();
+    }
+
+    public override void EnterAxisSide(MplotParser.AxisSideContext context)
+    {
+        YAxisSide side = context.side.Text switch
+        {
+            "y1" => YAxisSide.Left,
+            "y2" => YAxisSide.Right,
+            _ => throw new NotImplementedException()
+        };
+
+        int count = context.count() is null ? 1 : int.Parse(context.count().INT().GetText());
+        for (int i = 0; i < count; i++)
+        {
+            YAxisSidesArray.Add(side);
+        }
+
+        if (context.CYCLE() is not null) YAxisSidesArray.SetMode(MplotArrayMode.Cycle);
+        if (context.ASTERISK() is not null) YAxisSidesArray.SetMode(MplotArrayMode.Repeat);
     }
 
     public override void EnterXmin(MplotParser.XminContext context) => XMin = context.rangeItem().ToRangeSpec();
@@ -806,7 +851,7 @@ public class MplotListener : MplotBaseListener
     {
         List<string> lines = new();
 
-        int widthPixels  =  (Width * PlotDpi).Round();
+        int widthPixels = (Width * PlotDpi).Round();
         int heightPixels = (Height * PlotDpi).Round();
 
         string fontScale = PlotDpi % TextDpi == 0 ? (PlotDpi / TextDpi).ToString() : ((double)PlotDpi / TextDpi).ToString("f3");
@@ -841,14 +886,17 @@ public class MplotListener : MplotBaseListener
         else if (Legend == SpecifiedBool.True) lines.Add($"set key {LegendPosition.GnuPlotLegendPosition}{legendMaxRowsMaxCols}");
         else lines.Add(seriesList.Count > 1 ? $"set key {LegendPosition.GnuPlotLegendPosition}{legendMaxRowsMaxCols}" : "set key off");
 
-        if (!string.IsNullOrWhiteSpace(YLabel)) lines.Add($"set ylabel \"{YLabel}\"");
+        if (!string.IsNullOrWhiteSpace(YLabel)) lines.Add($"set ylabel {YLabel.ToGnuPlotString()}");
         else if (seriesList.Count == 1)
         {
             lines.Add($"set ylabel \"{seriesList[0].Name}\"");
         }
 
+        if (!string.IsNullOrWhiteSpace(Y2Label)) lines.Add($"set y2label {Y2Label.ToGnuPlotString()}");
+
         if (!XMin.IsAuto || !XMax.IsAuto) lines.Add($"set xrange [{XMin.ToGnuplot()}:{XMax.ToGnuplot()}]");
         if (!YMin.IsAuto || !YMax.IsAuto) lines.Add($"set yrange [{YMin.ToGnuplot()}:{YMax.ToGnuplot()}]");
+        if (!Y2Min.IsAuto || !Y2Max.IsAuto) lines.Add($"set y2range [{Y2Min.ToGnuplot()}:{Y2Max.ToGnuplot()}]");
 
         if (XTicMin is not null && XTicMax is not null && XTicIncrement is not null)
         {
@@ -877,7 +925,7 @@ public class MplotListener : MplotBaseListener
             }
             else
             {
-                lines.Add( $"set xtics {XTicMin.ToDecimalString()}, {XTicIncrement.ToDecimalString()}, {XTicMax.ToDecimalString()}");
+                lines.Add($"set xtics {XTicMin.ToDecimalString()}, {XTicIncrement.ToDecimalString()}, {XTicMax.ToDecimalString()}");
             }
         }
 
@@ -895,12 +943,18 @@ public class MplotListener : MplotBaseListener
 
         if (YTicMin is not null && YTicMax is not null && YTicIncrement is not null)
         {
-            lines.Add( $"set ytics {YTicMin.ToDecimalString()}, {YTicIncrement.ToDecimalString()}, {YTicMax.ToDecimalString()}");
+            lines.Add($"set ytics {YTicMin.ToDecimalString()}, {YTicIncrement.ToDecimalString()}, {YTicMax.ToDecimalString()}");
         }
 
         if (_additionalYTics.Count > 0)
         {
             lines.Add($"set ytics add ({string.Join(", ", _additionalYTics.Select(tic => tic.ToGnuplot()))})");
+        }
+
+        if (YAxisSidesArray.Elements().Any(side => side == YAxisSide.Right))
+        {
+            lines.Add("set y2tics");
+            lines.Add("set ytics nomirror");
         }
 
         if (_additionalYTics2.Count > 0)
