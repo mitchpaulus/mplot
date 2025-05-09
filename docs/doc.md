@@ -100,3 +100,12 @@ UPPER_LEFT : 'ul' | 'upperleft' ;
 BOTTOM_RIGHT : 'br' | 'bottomright' ;
 BOTTOM_LEFT : 'bl' | 'bottomleft' ;
 ```
+
+
+# Passing data from CLI
+
+
+```
+f sarg1 sarg2
+f sarg1 ("Default")
+```

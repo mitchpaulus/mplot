@@ -332,7 +332,7 @@ EXPRESSIONIDENTIFIER : '\\' [a-zA-Z_]+ ;
 expressionItem
     : INT # IntExp
     | FLOAT # FloatExp
-    | STRING # StringExp
+    | argString # StringExp
     | EXPRESSIONCOL # ExpressionColExp
     | EXPRESSIONCOLX # ExpressionColXExp
     | EXPRESSIONCOLY # ExpressionColYExp

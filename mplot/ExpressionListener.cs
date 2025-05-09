@@ -2,6 +2,13 @@ namespace mplot;
 
 public class ExpressionListener : MplotBaseListener
 {
+    private readonly List<string> _stringArgs;
+
+    public ExpressionListener(List<string> stringArgs)
+    {
+        _stringArgs = stringArgs;
+    }
+
     public readonly List<MplotToken> Tokens = new();
     // Check out awk -f to_listener.awk Mplot.g4
 
@@ -17,7 +24,7 @@ public class ExpressionListener : MplotBaseListener
 
     public override void EnterStringExp(MplotParser.StringExpContext context)
     {
-        Tokens.Add(new(ExpressionTokenType.STRING, context.GetText()));
+        Tokens.Add(new(ExpressionTokenType.STRING, context.argString().ToMPlotString().GetString(_stringArgs)));
     }
 
     public override void EnterExpressionColExp(MplotParser.ExpressionColExpContext context)

@@ -77,7 +77,7 @@ public class Tests
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         MplotParser parser = new MplotParser(tokenStream);
         var expressionTree = parser.expression();
-        ExpressionListener expListener = new ExpressionListener();
+        ExpressionListener expListener = new ExpressionListener(new());
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.Walk(expListener, expressionTree);
 

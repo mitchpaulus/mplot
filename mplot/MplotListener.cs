@@ -284,7 +284,7 @@ public class MplotListener : MplotBaseListener
     {
         if (context.ASTERISK() is not null) Ignores.SetMode(MplotArrayMode.Repeat);
         if (context.CYCLE() is not null) Ignores.SetMode(MplotArrayMode.Cycle);
-        ExpressionListener l = new();
+        ExpressionListener l = new(_stringArgs);
         _walker.Walk(l, context.expression());
         Ignores.Add(l.Tokens);
     }
@@ -695,7 +695,7 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterXexp(MplotParser.XexpContext context)
     {
-        ExpressionListener l = new();
+        ExpressionListener l = new(_stringArgs);
         _walker.Walk(l, context.expression());
         XcolsArray.Add(l.Tokens);
         if (context.ASTERISK() is not null) XcolsArray.SetMode(MplotArrayMode.Repeat);
@@ -703,7 +703,7 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterYexp(MplotParser.YexpContext context)
     {
-        ExpressionListener l = new();
+        ExpressionListener l = new(_stringArgs);
         _walker.Walk(l, context.expression());
         YcolsArray.Add(l.Tokens);
         if (context.ASTERISK() is not null) YcolsArray.SetMode(MplotArrayMode.Repeat);
