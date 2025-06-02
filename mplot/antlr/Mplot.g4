@@ -29,6 +29,7 @@ element
   | timeAxis
   | timeFormat
   | xformat
+  | yformat
   | xrange
   | xmin
   | xmax
@@ -77,11 +78,12 @@ separator  : ('sep' | 'separator') stringArray ;
 series     : ('s' | 'series') stringArray ;
 skip       : 'skip' intArray ;
 title      : ('ct' | 'charttitle' | 'title' | 't') argString ;
-xlabel     : ('xl' | 'xlabel') argString ;
+xlabel     : ('xl' | 'xlabel' | 'xt' | 'xtitle') argString ;
 xcol       : ('x' | 'xcol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 xexp       : 'xexp' ASTERISK? expression ;
 yexp       : 'yexp' ASTERISK? expression ;
 xformat    : ('xf' | 'xticformat' | 'xformat') STRING ;
+yformat    : ('yf' | 'yticformat' | 'yformat') STRING ;
 xrange     : ('xr' | 'xrange' | 'xlim' | 'xlimit') range ;
 yrange     : ('yr' | 'yrange' | 'ylim' | 'ylimit') range ;
 y2range     : ('yr2' | 'yrange2' | 'ylim2' | 'ylimit2' | 'y2r' | 'y2range' | 'y2lim' | 'y2limit') range ;
@@ -91,7 +93,7 @@ ymin       : ('ymin' | 'ylow') rangeItem ;
 ymax       : ('ymax' | 'yhigh') rangeItem ;
 labels     : ('l' | 'labels') STRING STRING ;
 lineWidth  : ('lw' | 'linewidth' | 'lt' | 'linethickness') intArray ;
-ylabel     : ('yl' | 'ylabel') argString ;
+ylabel     : ('yl' | 'ylabel' | 'yt' | 'ytitle') argString ;
 y2label     : ('yl2' | 'y2l' | 'ylabel2' | 'y2label') argString ;
 ycol       : ('y' | 'ycol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 width      : ('w' | 'width') rational ;

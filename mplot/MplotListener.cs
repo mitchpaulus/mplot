@@ -112,6 +112,7 @@ public class MplotListener : MplotBaseListener
     public Maybe<string> TimeFormat { get; set; } = NoneMarker.None;
 
     public string XFormat { get; set; } = "";
+    public string YFormat { get; set; } = "";
 
     private readonly ParseTreeWalker _walker = new();
 
@@ -719,6 +720,11 @@ public class MplotListener : MplotBaseListener
         XFormat = context.STRING().GetText().UnescapeMplotString();
     }
 
+    public override void EnterYformat(MplotParser.YformatContext context)
+    {
+        YFormat = context.STRING().GetText().UnescapeMplotString();
+    }
+
     public override void EnterSkip(MplotParser.SkipContext context)
     {
         var ints = context.intArray().INT().Select(node => int.Parse(node.GetText())).ToList();
@@ -972,10 +978,8 @@ public class MplotListener : MplotBaseListener
 
         // Sets the format for tick marks. Typical format modifiers like '%f' and '%e'
         // Also sets the time formats
-        if (!string.IsNullOrWhiteSpace(XFormat))
-        {
-            lines.Add($"set format x \"{XFormat}\"");
-        }
+        if (!string.IsNullOrWhiteSpace(XFormat)) lines.Add($"set format x \"{XFormat}\"");
+        if (!string.IsNullOrWhiteSpace(YFormat)) lines.Add($"set format y \"{YFormat}\"");
 
         // If the File Path is set to repeat mode and the last one is a inline data source, we don't want to repeat.
         HashSet<string> varNamesUsed = new();
