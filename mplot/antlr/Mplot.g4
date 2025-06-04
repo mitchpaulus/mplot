@@ -67,6 +67,7 @@ element
   | rmargin
   | dash
   | axisSide
+  | xStep
   ;
 
 file       : ('f' | 'file') stringArray ;
@@ -108,6 +109,7 @@ ignore : 'ignore' (ASTERISK | CYCLE)? expression ;
 lmargin : ('lmargin' | 'lm') rational ;
 rmargin : ('rmargin' | 'rm') rational ;
 axisSide : side=('y1' | 'y2') (count | CYCLE | ASTERISK)? ;
+xStep : ('xstep' | 'xstepwidth') rational ;
 
 stdinInput : STDIN ASTERISK? ;
 STDIN : 'stdin' ;

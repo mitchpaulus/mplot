@@ -313,6 +313,11 @@ public class MplotListener : MplotBaseListener
         YTicMax = new Rational(context.rational(2));
     }
 
+    public override void EnterXStep(MplotParser.XStepContext context)
+    {
+        XTicIncrement = new Rational(context.rational());
+    }
+
     public override void EnterXticAdd(MplotParser.XticAddContext context)
     {
         Rational r = new Rational(context.rational());
@@ -933,6 +938,10 @@ public class MplotListener : MplotBaseListener
             {
                 lines.Add($"set xtics {XTicMin.ToDecimalString()}, {XTicIncrement.ToDecimalString()}, {XTicMax.ToDecimalString()}");
             }
+        }
+        else if (XTicIncrement is not null)
+        {
+            lines.Add($"set xtics {XTicIncrement.ToDecimalString()}");
         }
 
         if (_additionalXTics.Count > 0)
