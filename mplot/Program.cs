@@ -211,10 +211,9 @@ class Program
                     return 1;
                 }
 
-                string writeGnuplot = listener.WriteGnuplot();
-
                 if (compile)
                 {
+                    string writeGnuplot = listener.WriteGnuplot();
                     // Attempt to pipe string into gnuplot
                     ProcessStartInfo startInfo = new ProcessStartInfo();
                     startInfo.FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "gnuplot.exe" : "gnuplot";
@@ -281,6 +280,7 @@ class Program
                     );
 
                     Encoding e = new UTF8Encoding(false);
+                    string writeGnuplot = listener.WriteGnuplot();
                     File.WriteAllText(gnuplotFilename, writeGnuplot, e);
                 }
                 else if (printDependencies)
@@ -327,7 +327,7 @@ class Program
                 }
                 else
                 {
-                    Console.Write(writeGnuplot);
+                    Console.Write(listener.WriteGnuplot());
                 }
 
             }
