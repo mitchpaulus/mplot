@@ -67,6 +67,8 @@ public class MplotListener : MplotBaseListener
     public Rational? XTicIncrement = null;
 
     public MplotArray<string> XTicLabels = new("X Tic Labels");
+    public MplotArray<string> YTicLabels = new("Y Tic Labels");
+    public MplotArray<string> Y2TicLabels = new("Y2 Tic Labels");
 
     public bool TicsOut = false;
 
@@ -79,6 +81,10 @@ public class MplotListener : MplotBaseListener
     public Rational? YTicMin = null;
     public Rational? YTicMax = null;
     public Rational? YTicIncrement = null;
+
+    public Rational? Y2TicMin = null;
+    public Rational? Y2TicMax = null;
+    public Rational? Y2TicIncrement = null;
     public Rational Width { get; set; } = new(6);
 
     public Rational Height { get; set; } = new(4);
@@ -313,6 +319,14 @@ public class MplotListener : MplotBaseListener
         YTicMax = new Rational(context.rational(2));
     }
 
+    public override void EnterY2tics(MplotParser.Y2ticsContext context)
+    {
+        Y2TicMin = new Rational(context.rational(0));
+        Y2TicIncrement = new Rational(context.rational(1));
+        Y2TicMax = new Rational(context.rational(2));
+    }
+
+
     public override void EnterXStep(MplotParser.XStepContext context)
     {
         XTicIncrement = new Rational(context.rational());
@@ -518,6 +532,18 @@ public class MplotListener : MplotBaseListener
     {
         var names = context.stringArray().argString().Select(node => node.ToMPlotString().GetString(_stringArgs).Trim()).ToList();
         XTicLabels.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
+    }
+
+    public override void EnterYticlabels(MplotParser.YticlabelsContext context)
+    {
+        var names = context.stringArray().argString().Select(node => node.ToMPlotString().GetString(_stringArgs).Trim()).ToList();
+        YTicLabels.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
+    }
+
+    public override void EnterY2ticlabels(MplotParser.Y2ticlabelsContext context)
+    {
+        var names = context.stringArray().argString().Select(node => node.ToMPlotString().GetString(_stringArgs).Trim()).ToList();
+        Y2TicLabels.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
     }
 
     public override void EnterMarker(MplotParser.MarkerContext context)
@@ -828,33 +854,81 @@ public class MplotListener : MplotBaseListener
         FontSize = int.Parse(context.INT().GetText());
     }
 
-    public List<string> GnuplotCheck()
+    private List<string> TicCheck(MplotArray<string> labels, Rational? min, Rational? max, Rational? inc, string axis)
     {
         List<string> checks = new();
-
         if (!XTicLabels.UseDefault && XTicMin is null)
         {
-            checks.Add($"Explicit x tic labels were provided, but no explicit x tic range (`xtics`) was provided.\n");
+            checks.Add($"Explicit {axis} tic labels were provided, but no explicit {axis} tic range (`{axis}tics`) was provided.\n");
         }
 
-
-        if (XTicMin is not null && XTicMax is not null && XTicIncrement is not null)
+        if (min is not null && max is not null && inc is not null)
         {
-            if (!XTicLabels.UseDefault)
+            if (!labels.UseDefault)
             {
-                if (XTicLabels.Mode() == MplotArrayMode.Normal)
+                if (labels.Mode() == MplotArrayMode.Normal)
                 {
-                    Rational division = (XTicMax - XTicMin) / XTicIncrement;
+                    Rational division = (max - min) / inc;
                     int numTicks = division.IsInt() ? (int)division + 1 : (int)division.Ceiling() ;
-                    if (XTicLabels.Length != numTicks)
+                    if (labels.Length != numTicks)
                     {
-                        checks.Add($"The supplied number of x tic labels ({XTicLabels.Length}) does not equal the number of tics ({numTicks}).\n");
+                        checks.Add($"The supplied number of {axis} tic labels ({labels.Length}) does not equal the number of tics ({numTicks}).\n");
                     }
                 }
             }
         }
 
         return checks;
+    }
+
+    public List<string> GnuplotCheck()
+    {
+
+        List<string> checks = new();
+
+        checks.AddRange(TicCheck(XTicLabels, XTicMin, XTicMax, XTicIncrement, "x"));
+        checks.AddRange(TicCheck(YTicLabels, YTicMin, YTicMax, YTicIncrement, "y"));
+         checks.AddRange(TicCheck(Y2TicLabels, Y2TicMin, Y2TicMax, Y2TicIncrement, "y2"));
+
+        return checks;
+    }
+
+    private void HandleTics(MplotArray<string> labels, Rational? min, Rational? max, Rational? inc, string gnuplot, List<string> lines)
+    {
+        if (min is not null && max is not null && inc is not null)
+        {
+            if (!labels.UseDefault)
+            {
+                Rational tic = min;
+                StringBuilder b = new();
+                b.Append("(");
+                int index = 0;
+                string label = labels[index];
+                b.Append($"{label.ToGnuPlotString()} {tic.ToDecimalString()}");
+                tic += inc;
+                index++;
+
+                while (tic <= max)
+                {
+                    label = labels[index];
+                    b.Append($", {label.ToGnuPlotString()} {tic.ToDecimalString()}");
+                    tic += inc;
+                    index++;
+                }
+
+                b.Append(")");
+
+                lines.Add($"set {gnuplot} {b}");
+            }
+            else
+            {
+                lines.Add($"set {gnuplot} {min.ToDecimalString()}, {inc.ToDecimalString()}, {max.ToDecimalString()}");
+            }
+        }
+        else if (inc is not null)
+        {
+            lines.Add($"set {gnuplot} {inc.ToDecimalString()}");
+        }
     }
 
 
@@ -909,40 +983,9 @@ public class MplotListener : MplotBaseListener
         if (!YMin.IsAuto || !YMax.IsAuto) lines.Add($"set yrange [{YMin.ToGnuplot()}:{YMax.ToGnuplot()}]");
         if (!Y2Min.IsAuto || !Y2Max.IsAuto) lines.Add($"set y2range [{Y2Min.ToGnuplot()}:{Y2Max.ToGnuplot()}]");
 
-        if (XTicMin is not null && XTicMax is not null && XTicIncrement is not null)
-        {
-            if (!XTicLabels.UseDefault)
-            {
-                Rational tic = XTicMin;
-                StringBuilder b = new();
-                b.Append("(");
-                int index = 0;
-                string label = XTicLabels[index];
-                b.Append($"{label.ToGnuPlotString()} {tic.ToDecimalString()}");
-                tic += XTicIncrement;
-                index++;
-
-                while (tic <= XTicMax)
-                {
-                    label = XTicLabels[index];
-                    b.Append($", {label.ToGnuPlotString()} {tic.ToDecimalString()}");
-                    tic += XTicIncrement;
-                    index++;
-                }
-
-                b.Append(")");
-
-                lines.Add($"set xtics {b}");
-            }
-            else
-            {
-                lines.Add($"set xtics {XTicMin.ToDecimalString()}, {XTicIncrement.ToDecimalString()}, {XTicMax.ToDecimalString()}");
-            }
-        }
-        else if (XTicIncrement is not null)
-        {
-            lines.Add($"set xtics {XTicIncrement.ToDecimalString()}");
-        }
+        HandleTics(XTicLabels, XTicMin, XTicMax, XTicIncrement, "xtic", lines);
+        HandleTics(YTicLabels, YTicMin, YTicMax, YTicIncrement, "ytic", lines);
+        HandleTics(Y2TicLabels, Y2TicMin, Y2TicMax, Y2TicIncrement, "y2tic", lines);
 
         if (_additionalXTics.Count > 0)
         {
@@ -954,11 +997,6 @@ public class MplotListener : MplotBaseListener
             lines.Add($"set x2tics add ({string.Join(", ", _additionalXTics2.Select(tic => tic.ToGnuplot()))})");
             lines.Add("set link x2");
             lines.Add("set format x2 \"\"");
-        }
-
-        if (YTicMin is not null && YTicMax is not null && YTicIncrement is not null)
-        {
-            lines.Add($"set ytics {YTicMin.ToDecimalString()}, {YTicIncrement.ToDecimalString()}, {YTicMax.ToDecimalString()}");
         }
 
         if (_additionalYTics.Count > 0)

@@ -54,8 +54,11 @@ element
   | xticAdd2
   | xticlabels
   | ytics
+  | y2tics
   | yticAdd
   | yticAdd2
+  | yticlabels
+  | y2ticlabels
   | gnuplotLiteral
   | dpi
   | commandSource
@@ -130,8 +133,11 @@ firstAsterisk : ASTERISK ;
 // xtics min step max
 xtics : 'xtics' rational (COMMA_CHAR | COLON)? rational (COMMA_CHAR | COLON)? rational ;
 ytics : 'ytics' rational (COMMA_CHAR | COLON)? rational (COMMA_CHAR | COLON)? rational ;
+y2tics : 'y2tics' rational (COMMA_CHAR | COLON)? rational (COMMA_CHAR | COLON)? rational ;
 
 xticlabels : 'xticlabels' stringArray ;
+yticlabels : 'yticlabels' stringArray ;
+y2ticlabels : 'y2ticlabels' stringArray ;
 
 ticsOut : TICS_OUT ;
 
@@ -221,7 +227,7 @@ TIME_KEYWORD : 'time' ;
 
 hist : HIST ;
 HIST : 'hist' | 'histogram' ;
-BINSIZE : 'binsize' | 'bs' | 'binwidth' ;
+BINSIZE : 'binsize' | 'bs' | 'binwidth' | 'barwidth' ;
 
 fstep : 'fstep' ;
 
