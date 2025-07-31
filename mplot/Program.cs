@@ -185,8 +185,8 @@ class Program
         {
             foreach (var error in errorListener.Messages)
             {
-                Console.Write(error);
-                if (!error.EndsWith('\n')) Console.Write('\n');
+                Console.Error.Write(error);
+                if (!error.EndsWith('\n')) Console.Error.Write('\n');
             }
 
             return 1;
@@ -207,7 +207,7 @@ class Program
                 var checks = listener.GnuplotCheck();
                 if (checks.Any())
                 {
-                    foreach (var check in checks) Console.Write(check);
+                    foreach (var check in checks) Console.Error.Write(check);
                     return 1;
                 }
 
