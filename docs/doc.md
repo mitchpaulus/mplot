@@ -106,6 +106,6 @@ BOTTOM_LEFT : 'bl' | 'bottomleft' ;
 
 
 ```
-f sarg1 sarg2
+f sarg1 sarg2 # Passed in on CLI like mplot -s myArg
 f sarg1 ("Default")
 ```
