@@ -67,32 +67,19 @@ public class PlotViewModel : ViewModelBase
     {
         StringArguments = new ObservableCollection<StringArgumentViewModel>();
 
-        FilePathItems = new MplotArrayEditorViewModel<DataSourceItemViewModel>(_ => new DataSourceItemViewModel(),
-            new[] { new DataSourceItemViewModel() });
-        SeriesNameItems = new MplotArrayEditorViewModel<ValueViewModel<string>>(index => new ValueViewModel<string>($"Series {index + 1}"),
-            new[] { new ValueViewModel<string>("Series 1") });
-        XColumnItems = new MplotArrayEditorViewModel<ValueViewModel<string>>(_ => new ValueViewModel<string>("1"),
-            new[] { new ValueViewModel<string>("1") });
-        YColumnItems = new MplotArrayEditorViewModel<ValueViewModel<string>>(_ => new ValueViewModel<string>("2"),
-            new[] { new ValueViewModel<string>("2") });
-        MarkerItems = new MplotArrayEditorViewModel<ValueViewModel<MarkerOption>>(_ => new ValueViewModel<MarkerOption>(MarkerOption.Circle),
-            new[] { new ValueViewModel<MarkerOption>(MarkerOption.Circle) });
-        LineColorItems = new MplotArrayEditorViewModel<ValueViewModel<string>>(_ => new ValueViewModel<string>("#1f77b4"),
-            new[] { new ValueViewModel<string>("#1f77b4") });
-        LineWidthItems = new MplotArrayEditorViewModel<ValueViewModel<int>>(_ => new ValueViewModel<int>(2),
-            new[] { new ValueViewModel<int>(2) });
-        SeriesStyleItems = new MplotArrayEditorViewModel<ValueViewModel<SeriesStyleOption>>(_ => new ValueViewModel<SeriesStyleOption>(SeriesStyleOption.Scatter),
-            new[] { new ValueViewModel<SeriesStyleOption>(SeriesStyleOption.Scatter) });
-        SeparatorItems = new MplotArrayEditorViewModel<ValueViewModel<SeparatorOption>>(_ => new ValueViewModel<SeparatorOption>(SeparatorOption.Auto),
-            new[] { new ValueViewModel<SeparatorOption>(SeparatorOption.Auto) });
-        DashTypeItems = new MplotArrayEditorViewModel<ValueViewModel<DashTypeOption>>(_ => new ValueViewModel<DashTypeOption>(DashTypeOption.Solid),
-            new[] { new ValueViewModel<DashTypeOption>(DashTypeOption.Solid) });
-        YAxisSideItems = new MplotArrayEditorViewModel<ValueViewModel<YAxisSideOption>>(_ => new ValueViewModel<YAxisSideOption>(YAxisSideOption.Left),
-            new[] { new ValueViewModel<YAxisSideOption>(YAxisSideOption.Left) });
-        SkipItems = new MplotArrayEditorViewModel<ValueViewModel<int>>(_ => new ValueViewModel<int>(0),
-            new[] { new ValueViewModel<int>(0) });
-        IgnoreExpressionItems = new MplotArrayEditorViewModel<ValueViewModel<string>>(_ => new ValueViewModel<string>(string.Empty),
-            new[] { new ValueViewModel<string>(string.Empty) });
+        FilePathItems = new MplotArrayEditorViewModel<DataSourceItemViewModel>(_ => new DataSourceItemViewModel());
+        SeriesNameItems = new MplotArrayEditorViewModel<ValueViewModel<string>>(index => new ValueViewModel<string>($"Series {index + 1}"));
+        XColumnItems = new MplotArrayEditorViewModel<ValueViewModel<string>>(_ => new ValueViewModel<string>("1"));
+        YColumnItems = new MplotArrayEditorViewModel<ValueViewModel<string>>(_ => new ValueViewModel<string>("2"));
+        MarkerItems = new MplotArrayEditorViewModel<ValueViewModel<MarkerOption>>(_ => new ValueViewModel<MarkerOption>(MarkerOption.Circle));
+        LineColorItems = new MplotArrayEditorViewModel<ValueViewModel<string>>(_ => new ValueViewModel<string>("#1f77b4"));
+        LineWidthItems = new MplotArrayEditorViewModel<ValueViewModel<int>>(_ => new ValueViewModel<int>(2));
+        SeriesStyleItems = new MplotArrayEditorViewModel<ValueViewModel<SeriesStyleOption>>(_ => new ValueViewModel<SeriesStyleOption>(SeriesStyleOption.Scatter));
+        SeparatorItems = new MplotArrayEditorViewModel<ValueViewModel<SeparatorOption>>(_ => new ValueViewModel<SeparatorOption>(SeparatorOption.Auto));
+        DashTypeItems = new MplotArrayEditorViewModel<ValueViewModel<DashTypeOption>>(_ => new ValueViewModel<DashTypeOption>(DashTypeOption.Solid));
+        YAxisSideItems = new MplotArrayEditorViewModel<ValueViewModel<YAxisSideOption>>(_ => new ValueViewModel<YAxisSideOption>(YAxisSideOption.Left));
+        SkipItems = new MplotArrayEditorViewModel<ValueViewModel<int>>(_ => new ValueViewModel<int>(0));
+        IgnoreExpressionItems = new MplotArrayEditorViewModel<ValueViewModel<string>>(_ => new ValueViewModel<string>(string.Empty));
 
         AddStringArgumentCommand = new RelayCommand(AddStringArgument);
         RemoveStringArgumentCommand = new RelayCommand(_ => RemoveSelectedStringArgument(), _ => SelectedStringArgument != null);
@@ -333,19 +320,19 @@ public class PlotViewModel : ViewModelBase
         }
     }
 
-    public MplotArrayMode FilePathMode { get; set; } = MplotArrayMode.Normal;
-    public MplotArrayMode SeriesNameMode { get; set; } = MplotArrayMode.Normal;
-    public MplotArrayMode XColumnMode { get; set; } = MplotArrayMode.Normal;
-    public MplotArrayMode YColumnMode { get; set; } = MplotArrayMode.Normal;
-    public MplotArrayMode MarkerMode { get; set; } = MplotArrayMode.Normal;
-    public MplotArrayMode LineColorMode { get; set; } = MplotArrayMode.Normal;
-    public MplotArrayMode LineWidthMode { get; set; } = MplotArrayMode.Normal;
-    public MplotArrayMode SeriesStyleMode { get; set; } = MplotArrayMode.Normal;
-    public MplotArrayMode SeparatorMode { get; set; } = MplotArrayMode.Normal;
-    public MplotArrayMode DashTypeMode { get; set; } = MplotArrayMode.Normal;
-    public MplotArrayMode YAxisSideMode { get; set; } = MplotArrayMode.Normal;
-    public MplotArrayMode SkipMode { get; set; } = MplotArrayMode.Normal;
-    public MplotArrayMode IgnoreMode { get; set; } = MplotArrayMode.Normal;
+    public MplotArrayMode FilePathMode { get; set; } = MplotArrayMode.Repeat;
+    public MplotArrayMode SeriesNameMode { get; set; } = MplotArrayMode.Repeat;
+    public MplotArrayMode XColumnMode { get; set; } = MplotArrayMode.Repeat;
+    public MplotArrayMode YColumnMode { get; set; } = MplotArrayMode.Repeat;
+    public MplotArrayMode MarkerMode { get; set; } = MplotArrayMode.Repeat;
+    public MplotArrayMode LineColorMode { get; set; } = MplotArrayMode.Repeat;
+    public MplotArrayMode LineWidthMode { get; set; } = MplotArrayMode.Repeat;
+    public MplotArrayMode SeriesStyleMode { get; set; } = MplotArrayMode.Repeat;
+    public MplotArrayMode SeparatorMode { get; set; } = MplotArrayMode.Repeat;
+    public MplotArrayMode DashTypeMode { get; set; } = MplotArrayMode.Repeat;
+    public MplotArrayMode YAxisSideMode { get; set; } = MplotArrayMode.Repeat;
+    public MplotArrayMode SkipMode { get; set; } = MplotArrayMode.Repeat;
+    public MplotArrayMode IgnoreMode { get; set; } = MplotArrayMode.Repeat;
 
     public (bool Success, string? Script, string? Error) TryGenerateGnuplot()
     {

@@ -141,6 +141,10 @@
                                         <Button Content="Remove" Command="{Binding FilePathItems.RemoveCommand}"/>
                                     </StackPanel>
                                 </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding FilePathMode}" Width="150"/>
+                                </StackPanel>
                                 <ListBox ItemsSource="{Binding FilePathItems.Items}" SelectedItem="{Binding FilePathItems.SelectedItem}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -165,6 +169,10 @@
                                         <Button Content="Remove" Command="{Binding SeriesNameItems.RemoveCommand}"/>
                                     </StackPanel>
                                 </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SeriesNameMode}" Width="150"/>
+                                </StackPanel>
                                 <ListBox ItemsSource="{Binding SeriesNameItems.Items}" SelectedItem="{Binding SeriesNameItems.SelectedItem}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -184,6 +192,10 @@
                                         <Button Content="Remove" Command="{Binding XColumnItems.RemoveCommand}"/>
                                     </StackPanel>
                                 </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding XColumnMode}" Width="150"/>
+                                </StackPanel>
                                 <ListBox ItemsSource="{Binding XColumnItems.Items}" SelectedItem="{Binding XColumnItems.SelectedItem}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -203,6 +215,10 @@
                                         <Button Content="Remove" Command="{Binding YColumnItems.RemoveCommand}"/>
                                     </StackPanel>
                                 </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding YColumnMode}" Width="150"/>
+                                </StackPanel>
                                 <ListBox ItemsSource="{Binding YColumnItems.Items}" SelectedItem="{Binding YColumnItems.SelectedItem}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -222,6 +238,10 @@
                                         <Button Content="Remove" Command="{Binding MarkerItems.RemoveCommand}"/>
                                     </StackPanel>
                                 </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding MarkerMode}" Width="150"/>
+                                </StackPanel>
                                 <ListBox ItemsSource="{Binding MarkerItems.Items}" SelectedItem="{Binding MarkerItems.SelectedItem}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -242,6 +262,10 @@
                                         <Button Content="Remove" Command="{Binding LineColorItems.RemoveCommand}"/>
                                     </StackPanel>
                                 </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding LineColorMode}" Width="150"/>
+                                </StackPanel>
                                 <ListBox ItemsSource="{Binding LineColorItems.Items}" SelectedItem="{Binding LineColorItems.SelectedItem}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -261,6 +285,10 @@
                                         <Button Content="Remove" Command="{Binding LineWidthItems.RemoveCommand}"/>
                                     </StackPanel>
                                 </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding LineWidthMode}" Width="150"/>
+                                </StackPanel>
                                 <ListBox ItemsSource="{Binding LineWidthItems.Items}" SelectedItem="{Binding LineWidthItems.SelectedItem}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -280,6 +308,10 @@
                                         <Button Content="Remove" Command="{Binding SeriesStyleItems.RemoveCommand}"/>
                                     </StackPanel>
                                 </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SeriesStyleMode}" Width="150"/>
+                                </StackPanel>
                                 <ListBox ItemsSource="{Binding SeriesStyleItems.Items}" SelectedItem="{Binding SeriesStyleItems.SelectedItem}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -300,6 +332,10 @@
                                         <Button Content="Remove" Command="{Binding SeparatorItems.RemoveCommand}"/>
                                     </StackPanel>
                                 </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SeparatorMode}" Width="150"/>
+                                </StackPanel>
                                 <ListBox ItemsSource="{Binding SeparatorItems.Items}" SelectedItem="{Binding SeparatorItems.SelectedItem}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -320,6 +356,10 @@
                                         <Button Content="Remove" Command="{Binding DashTypeItems.RemoveCommand}"/>
                                     </StackPanel>
                                 </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding DashTypeMode}" Width="150"/>
+                                </StackPanel>
                                 <ListBox ItemsSource="{Binding DashTypeItems.Items}" SelectedItem="{Binding DashTypeItems.SelectedItem}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -340,6 +380,10 @@
                                         <Button Content="Remove" Command="{Binding YAxisSideItems.RemoveCommand}"/>
                                     </StackPanel>
                                 </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding YAxisSideMode}" Width="150"/>
+                                </StackPanel>
                                 <ListBox ItemsSource="{Binding YAxisSideItems.Items}" SelectedItem="{Binding YAxisSideItems.SelectedItem}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -360,6 +404,10 @@
                                         <Button Content="Remove" Command="{Binding SkipItems.RemoveCommand}"/>
                                     </StackPanel>
                                 </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SkipMode}" Width="150"/>
+                                </StackPanel>
                                 <ListBox ItemsSource="{Binding SkipItems.Items}" SelectedItem="{Binding SkipItems.SelectedItem}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -379,6 +427,10 @@
                                         <Button Content="Remove" Command="{Binding IgnoreExpressionItems.RemoveCommand}"/>
                                     </StackPanel>
                                 </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding IgnoreMode}" Width="150"/>
+                                </StackPanel>
                                 <ListBox ItemsSource="{Binding IgnoreExpressionItems.Items}" SelectedItem="{Binding IgnoreExpressionItems.SelectedItem}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -408,64 +460,6 @@
                 </DockPanel>
             </TabItem>
 
-            <TabItem Header="Array Modes">
-                <ScrollViewer>
-                    <UniformGrid Rows="0" Columns="2" Margin="0,0,0,8" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-                        <StackPanel Margin="8">
-                            <TextBlock Text="File Paths"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding FilePathMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Series Names"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SeriesNameMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="X Columns"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding XColumnMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Y Columns"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding YColumnMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Markers"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding MarkerMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Line Colors"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding LineColorMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Line Widths"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding LineWidthMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Series Styles"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SeriesStyleMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Separators"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SeparatorMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Dash Types"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding DashTypeMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Y Axis Side"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding YAxisSideMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Skip"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SkipMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Ignore"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding IgnoreMode}"/>
-                        </StackPanel>
-                    </UniformGrid>
-                </ScrollViewer>
-            </TabItem>
         </TabControl>
 
         <GridSplitter Grid.Row="0"
