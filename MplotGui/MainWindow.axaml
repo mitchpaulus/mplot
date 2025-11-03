@@ -297,8 +297,7 @@
                       VerticalAlignment="Stretch"
                       Background="#4c4c4c"
                       Cursor="SizeWestEast"
-                      ResizeDirection="Columns"
-                      ShowsPreview="True"/>
+                      ResizeDirection="Columns"/>
 
         <Border Grid.Row="0"
                 Grid.Column="2"
