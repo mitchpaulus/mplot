@@ -8,6 +8,7 @@ examples/*.png
 
 publish*/
 tests/*.png
+.avalonia-build-tasks/
 
 MplotLib/antlr/*.mplot
 
@@ -409,3 +410,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+.dotnet/
+.nuget/
+.templateengine/

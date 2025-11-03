@@ -94,6 +94,13 @@ public class MplotArray<T> : IMplotArray
         return Length == other.Length;
     }
 
+    public void Clear()
+    {
+        _elements.Clear();
+        UseDefault = true;
+        _mode = _defaultMode;
+    }
+
     int IMplotArray.Length() => Length;
 
     public override string ToString()
