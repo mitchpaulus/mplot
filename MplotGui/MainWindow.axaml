@@ -6,34 +6,18 @@
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
         x:Class="MplotGui.MainWindow"
         Title="mplot GUI">
-    <DockPanel>
-        <Border DockPanel.Dock="Right"
-                BorderBrush="#4c4c4c"
-                BorderThickness="1"
-                CornerRadius="4"
-                Padding="8"
-                Margin="0,8,8,8"
-                MinWidth="360">
-            <StackPanel>
-                <TextBlock Text="Generated mplot" FontWeight="Bold" Margin="0,0,0,8"/>
-                <TextBox Text="{Binding PreviewMplot}"
-                         AcceptsReturn="True"
-                         AcceptsTab="True"
-                         IsReadOnly="True"
-                         TextWrapping="Wrap"
-                         MinHeight="160"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-            </StackPanel>
-        </Border>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="360" MinWidth="320"/>
+        </Grid.ColumnDefinitions>
 
-        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="8" Margin="8,0,8,8">
-            <Button Content="Copy Gnuplot to Clipboard" Click="OnCopyToClipboard"/>
-            <Button Content="Generate Preview" Click="OnGeneratePreview"/>
-            <TextBlock Text="Status:" VerticalAlignment="Center" Margin="16,0,4,0"/>
-            <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center"/>
-        </StackPanel>
-
-        <TabControl Margin="8">
+        <TabControl Grid.Row="0" Grid.Column="0" Margin="8,8,4,8">
             <TabItem Header="General">
                 <ScrollViewer>
                     <StackPanel Spacing="12" Margin="0,0,0,8">
@@ -304,5 +288,48 @@
                 </ScrollViewer>
             </TabItem>
         </TabControl>
-    </DockPanel>
+
+        <GridSplitter Grid.Row="0"
+                      Grid.Column="1"
+                      Width="5"
+                      Margin="0,8,0,8"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Stretch"
+                      Background="#4c4c4c"
+                      Cursor="SizeWestEast"
+                      ResizeDirection="Columns"
+                      ShowsPreview="True"/>
+
+        <Border Grid.Row="0"
+                Grid.Column="2"
+                BorderBrush="#4c4c4c"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="8"
+                Margin="0,8,8,8"
+                MinWidth="320">
+            <StackPanel>
+                <TextBlock Text="Generated mplot" FontWeight="Bold" Margin="0,0,0,8"/>
+                <TextBox Text="{Binding PreviewMplot}"
+                         AcceptsReturn="True"
+                         AcceptsTab="True"
+                         IsReadOnly="True"
+                         TextWrapping="Wrap"
+                         MinHeight="160"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+            </StackPanel>
+        </Border>
+
+        <StackPanel Grid.Row="1"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="3"
+                    Orientation="Horizontal"
+                    Spacing="8"
+                    Margin="8,0,8,8">
+            <Button Content="Copy Gnuplot to Clipboard" Click="OnCopyToClipboard"/>
+            <Button Content="Generate Preview" Click="OnGeneratePreview"/>
+            <TextBlock Text="Status:" VerticalAlignment="Center" Margin="16,0,4,0"/>
+            <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center"/>
+        </StackPanel>
+    </Grid>
 </Window>
