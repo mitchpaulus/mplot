@@ -129,88 +129,319 @@
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="Series">
-                <DockPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,8" DockPanel.Dock="Top">
-                        <Button Content="Add Series" Command="{Binding AddSeriesCommand}"/>
-                        <Button Content="Remove Series" Command="{Binding RemoveSeriesCommand}"/>
+            <TabItem Header="Array Items">
+                <ScrollViewer>
+                    <StackPanel Spacing="12" Margin="0,0,0,8">
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8">
+                            <StackPanel Spacing="8">
+                                <DockPanel>
+                                    <TextBlock Text="File Paths" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" DockPanel.Dock="Right">
+                                        <Button Content="Add" Command="{Binding FilePathItems.AddCommand}"/>
+                                        <Button Content="Remove" Command="{Binding FilePathItems.RemoveCommand}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding FilePathMode}" Width="150"/>
+                                </StackPanel>
+                                <ListBox ItemsSource="{Binding FilePathItems.Items}" SelectedItem="{Binding FilePathItems.SelectedItem}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Spacing="8">
+                                                <ComboBox ItemsSource="{Binding DataContext.DataSourceOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          SelectedItem="{Binding DataSource}" Width="160"/>
+                                                <TextBox Text="{Binding FilePath}" Watermark="File path" IsVisible="{Binding IsFileSource}"/>
+                                                <TextBox Text="{Binding InlineData}" AcceptsReturn="True" Height="80" Watermark="Inline data" IsVisible="{Binding IsInlineSource}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8">
+                            <StackPanel Spacing="8">
+                                <DockPanel>
+                                    <TextBlock Text="Series Names" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" DockPanel.Dock="Right">
+                                        <Button Content="Add" Command="{Binding SeriesNameItems.AddCommand}"/>
+                                        <Button Content="Remove" Command="{Binding SeriesNameItems.RemoveCommand}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SeriesNameMode}" Width="150"/>
+                                </StackPanel>
+                                <ListBox ItemsSource="{Binding SeriesNameItems.Items}" SelectedItem="{Binding SeriesNameItems.SelectedItem}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBox Text="{Binding Value}"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8">
+                            <StackPanel Spacing="8">
+                                <DockPanel>
+                                    <TextBlock Text="X Columns" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" DockPanel.Dock="Right">
+                                        <Button Content="Add" Command="{Binding XColumnItems.AddCommand}"/>
+                                        <Button Content="Remove" Command="{Binding XColumnItems.RemoveCommand}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding XColumnMode}" Width="150"/>
+                                </StackPanel>
+                                <ListBox ItemsSource="{Binding XColumnItems.Items}" SelectedItem="{Binding XColumnItems.SelectedItem}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBox Text="{Binding Value}"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8">
+                            <StackPanel Spacing="8">
+                                <DockPanel>
+                                    <TextBlock Text="Y Columns" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" DockPanel.Dock="Right">
+                                        <Button Content="Add" Command="{Binding YColumnItems.AddCommand}"/>
+                                        <Button Content="Remove" Command="{Binding YColumnItems.RemoveCommand}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding YColumnMode}" Width="150"/>
+                                </StackPanel>
+                                <ListBox ItemsSource="{Binding YColumnItems.Items}" SelectedItem="{Binding YColumnItems.SelectedItem}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBox Text="{Binding Value}"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8">
+                            <StackPanel Spacing="8">
+                                <DockPanel>
+                                    <TextBlock Text="Markers" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" DockPanel.Dock="Right">
+                                        <Button Content="Add" Command="{Binding MarkerItems.AddCommand}"/>
+                                        <Button Content="Remove" Command="{Binding MarkerItems.RemoveCommand}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding MarkerMode}" Width="150"/>
+                                </StackPanel>
+                                <ListBox ItemsSource="{Binding MarkerItems.Items}" SelectedItem="{Binding MarkerItems.SelectedItem}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding DataContext.MarkerOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                      SelectedItem="{Binding Value}" Width="180"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8">
+                            <StackPanel Spacing="8">
+                                <DockPanel>
+                                    <TextBlock Text="Line Colors" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" DockPanel.Dock="Right">
+                                        <Button Content="Add" Command="{Binding LineColorItems.AddCommand}"/>
+                                        <Button Content="Remove" Command="{Binding LineColorItems.RemoveCommand}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding LineColorMode}" Width="150"/>
+                                </StackPanel>
+                                <ListBox ItemsSource="{Binding LineColorItems.Items}" SelectedItem="{Binding LineColorItems.SelectedItem}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBox Text="{Binding Value}" Width="140"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8">
+                            <StackPanel Spacing="8">
+                                <DockPanel>
+                                    <TextBlock Text="Line Widths" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" DockPanel.Dock="Right">
+                                        <Button Content="Add" Command="{Binding LineWidthItems.AddCommand}"/>
+                                        <Button Content="Remove" Command="{Binding LineWidthItems.RemoveCommand}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding LineWidthMode}" Width="150"/>
+                                </StackPanel>
+                                <ListBox ItemsSource="{Binding LineWidthItems.Items}" SelectedItem="{Binding LineWidthItems.SelectedItem}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <NumericUpDown Value="{Binding Value}" Minimum="1" Width="120"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8">
+                            <StackPanel Spacing="8">
+                                <DockPanel>
+                                    <TextBlock Text="Series Styles" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" DockPanel.Dock="Right">
+                                        <Button Content="Add" Command="{Binding SeriesStyleItems.AddCommand}"/>
+                                        <Button Content="Remove" Command="{Binding SeriesStyleItems.RemoveCommand}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SeriesStyleMode}" Width="150"/>
+                                </StackPanel>
+                                <ListBox ItemsSource="{Binding SeriesStyleItems.Items}" SelectedItem="{Binding SeriesStyleItems.SelectedItem}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding DataContext.SeriesStyleOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                      SelectedItem="{Binding Value}" Width="180"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8">
+                            <StackPanel Spacing="8">
+                                <DockPanel>
+                                    <TextBlock Text="Separators" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" DockPanel.Dock="Right">
+                                        <Button Content="Add" Command="{Binding SeparatorItems.AddCommand}"/>
+                                        <Button Content="Remove" Command="{Binding SeparatorItems.RemoveCommand}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SeparatorMode}" Width="150"/>
+                                </StackPanel>
+                                <ListBox ItemsSource="{Binding SeparatorItems.Items}" SelectedItem="{Binding SeparatorItems.SelectedItem}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding DataContext.SeparatorOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                      SelectedItem="{Binding Value}" Width="180"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8">
+                            <StackPanel Spacing="8">
+                                <DockPanel>
+                                    <TextBlock Text="Dash Types" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" DockPanel.Dock="Right">
+                                        <Button Content="Add" Command="{Binding DashTypeItems.AddCommand}"/>
+                                        <Button Content="Remove" Command="{Binding DashTypeItems.RemoveCommand}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding DashTypeMode}" Width="150"/>
+                                </StackPanel>
+                                <ListBox ItemsSource="{Binding DashTypeItems.Items}" SelectedItem="{Binding DashTypeItems.SelectedItem}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding DataContext.DashTypeOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                      SelectedItem="{Binding Value}" Width="180"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8">
+                            <StackPanel Spacing="8">
+                                <DockPanel>
+                                    <TextBlock Text="Y Axis Side" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" DockPanel.Dock="Right">
+                                        <Button Content="Add" Command="{Binding YAxisSideItems.AddCommand}"/>
+                                        <Button Content="Remove" Command="{Binding YAxisSideItems.RemoveCommand}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding YAxisSideMode}" Width="150"/>
+                                </StackPanel>
+                                <ListBox ItemsSource="{Binding YAxisSideItems.Items}" SelectedItem="{Binding YAxisSideItems.SelectedItem}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding DataContext.YAxisSideOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                      SelectedItem="{Binding Value}" Width="180"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8">
+                            <StackPanel Spacing="8">
+                                <DockPanel>
+                                    <TextBlock Text="Skip" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" DockPanel.Dock="Right">
+                                        <Button Content="Add" Command="{Binding SkipItems.AddCommand}"/>
+                                        <Button Content="Remove" Command="{Binding SkipItems.RemoveCommand}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SkipMode}" Width="150"/>
+                                </StackPanel>
+                                <ListBox ItemsSource="{Binding SkipItems.Items}" SelectedItem="{Binding SkipItems.SelectedItem}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <NumericUpDown Value="{Binding Value}" Minimum="0" Width="120"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8">
+                            <StackPanel Spacing="8">
+                                <DockPanel>
+                                    <TextBlock Text="Ignore Expressions" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" DockPanel.Dock="Right">
+                                        <Button Content="Add" Command="{Binding IgnoreExpressionItems.AddCommand}"/>
+                                        <Button Content="Remove" Command="{Binding IgnoreExpressionItems.RemoveCommand}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Mode" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding IgnoreMode}" Width="150"/>
+                                </StackPanel>
+                                <ListBox ItemsSource="{Binding IgnoreExpressionItems.Items}" SelectedItem="{Binding IgnoreExpressionItems.SelectedItem}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBox Text="{Binding Value}" Width="200"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
-                    <ListBox ItemsSource="{Binding Series}" SelectedItem="{Binding SelectedSeries}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,0,0,8">
-                                    <Grid ColumnDefinitions="120,*,120" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
-                                        <TextBlock Text="Name" Grid.Column="0" Margin="0,0,8,4"/>
-                                        <TextBox Text="{Binding SeriesName}" Grid.Column="1" Margin="0,0,8,4"/>
-                                        <ComboBox ItemsSource="{Binding DataContext.DataSourceOptions, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                  SelectedItem="{Binding DataSource}" Grid.Column="2" Margin="0,0,0,4"/>
-
-                                        <TextBlock Text="File Path" Grid.Row="1" Grid.Column="0" Margin="0,0,8,4"/>
-                                        <TextBox Text="{Binding FilePath}" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,4"/>
-
-                                        <TextBlock Text="Inline Data" Grid.Row="2" Grid.Column="0" Margin="0,0,8,4"/>
-                                        <TextBox Text="{Binding InlineData}" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,4" AcceptsReturn="True" Height="60"/>
-
-                                        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Spacing="12">
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="X" VerticalAlignment="Center"/>
-                                                <TextBox Text="{Binding XColumn}" Width="60"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="Y" VerticalAlignment="Center"/>
-                                                <TextBox Text="{Binding YColumn}" Width="60"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="Style" VerticalAlignment="Center"/>
-                                                <ComboBox ItemsSource="{Binding DataContext.SeriesStyleOptions, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                          SelectedItem="{Binding SeriesStyle}" Width="120"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="Marker" VerticalAlignment="Center"/>
-                                                <ComboBox ItemsSource="{Binding DataContext.MarkerOptions, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                          SelectedItem="{Binding Marker}" Width="120"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="Separator" VerticalAlignment="Center"/>
-                                                <ComboBox ItemsSource="{Binding DataContext.SeparatorOptions, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                          SelectedItem="{Binding Separator}" Width="120"/>
-                                            </StackPanel>
-                                        </StackPanel>
-
-                                        <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Spacing="12">
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="Line Color" VerticalAlignment="Center"/>
-                                                <TextBox Text="{Binding LineColorHex}" Width="120"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="Line Width" VerticalAlignment="Center"/>
-                                                <NumericUpDown Value="{Binding LineWidth}" Minimum="1" Width="100"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="Dash" VerticalAlignment="Center"/>
-                                                <ComboBox ItemsSource="{Binding DataContext.DashTypeOptions, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                          SelectedItem="{Binding DashType}" Width="120"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="Y Axis" VerticalAlignment="Center"/>
-                                                <ComboBox ItemsSource="{Binding DataContext.YAxisSideOptions, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                          SelectedItem="{Binding YAxisSide}" Width="120"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="Skip" VerticalAlignment="Center"/>
-                                                <NumericUpDown Value="{Binding Skip}" Minimum="0" Width="80"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock Text="Ignore" VerticalAlignment="Center"/>
-                                                <TextBox Text="{Binding IgnoreExpression}" Width="160"/>
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </DockPanel>
+                </ScrollViewer>
             </TabItem>
 
             <TabItem Header="String Arguments">
@@ -229,64 +460,6 @@
                 </DockPanel>
             </TabItem>
 
-            <TabItem Header="Array Modes">
-                <ScrollViewer>
-                    <UniformGrid Rows="0" Columns="2" Margin="0,0,0,8" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-                        <StackPanel Margin="8">
-                            <TextBlock Text="File Paths"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding FilePathMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Series Names"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SeriesNameMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="X Columns"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding XColumnMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Y Columns"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding YColumnMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Markers"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding MarkerMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Line Colors"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding LineColorMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Line Widths"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding LineWidthMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Series Styles"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SeriesStyleMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Separators"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SeparatorMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Dash Types"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding DashTypeMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Y Axis Side"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding YAxisSideMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Skip"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SkipMode}"/>
-                        </StackPanel>
-                        <StackPanel Margin="8">
-                            <TextBlock Text="Ignore"/>
-                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding IgnoreMode}"/>
-                        </StackPanel>
-                    </UniformGrid>
-                </ScrollViewer>
-            </TabItem>
         </TabControl>
 
         <GridSplitter Grid.Row="0"
