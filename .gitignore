@@ -5,6 +5,10 @@
 .idea/
 examples/*.png
 .redo/
+.dotnet/
+.avalonia-build-tasks/
+.templateengine/
+examples.mplot
 
 publish*/
 tests/*.png
