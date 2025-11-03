@@ -65,11 +65,35 @@ public class PlotViewModel : ViewModelBase
 
     public PlotViewModel()
     {
-        Series = new ObservableCollection<SeriesViewModel> { new SeriesViewModel() };
         StringArguments = new ObservableCollection<StringArgumentViewModel>();
 
-        AddSeriesCommand = new RelayCommand(AddSeries);
-        RemoveSeriesCommand = new RelayCommand(_ => RemoveSelectedSeries(), _ => SelectedSeries != null);
+        FilePathItems = new MplotArrayEditorViewModel<DataSourceItemViewModel>(_ => new DataSourceItemViewModel(),
+            new[] { new DataSourceItemViewModel() });
+        SeriesNameItems = new MplotArrayEditorViewModel<ValueViewModel<string>>(index => new ValueViewModel<string>($"Series {index + 1}"),
+            new[] { new ValueViewModel<string>("Series 1") });
+        XColumnItems = new MplotArrayEditorViewModel<ValueViewModel<string>>(_ => new ValueViewModel<string>("1"),
+            new[] { new ValueViewModel<string>("1") });
+        YColumnItems = new MplotArrayEditorViewModel<ValueViewModel<string>>(_ => new ValueViewModel<string>("2"),
+            new[] { new ValueViewModel<string>("2") });
+        MarkerItems = new MplotArrayEditorViewModel<ValueViewModel<MarkerOption>>(_ => new ValueViewModel<MarkerOption>(MarkerOption.Circle),
+            new[] { new ValueViewModel<MarkerOption>(MarkerOption.Circle) });
+        LineColorItems = new MplotArrayEditorViewModel<ValueViewModel<string>>(_ => new ValueViewModel<string>("#1f77b4"),
+            new[] { new ValueViewModel<string>("#1f77b4") });
+        LineWidthItems = new MplotArrayEditorViewModel<ValueViewModel<int>>(_ => new ValueViewModel<int>(2),
+            new[] { new ValueViewModel<int>(2) });
+        SeriesStyleItems = new MplotArrayEditorViewModel<ValueViewModel<SeriesStyleOption>>(_ => new ValueViewModel<SeriesStyleOption>(SeriesStyleOption.Scatter),
+            new[] { new ValueViewModel<SeriesStyleOption>(SeriesStyleOption.Scatter) });
+        SeparatorItems = new MplotArrayEditorViewModel<ValueViewModel<SeparatorOption>>(_ => new ValueViewModel<SeparatorOption>(SeparatorOption.Auto),
+            new[] { new ValueViewModel<SeparatorOption>(SeparatorOption.Auto) });
+        DashTypeItems = new MplotArrayEditorViewModel<ValueViewModel<DashTypeOption>>(_ => new ValueViewModel<DashTypeOption>(DashTypeOption.Solid),
+            new[] { new ValueViewModel<DashTypeOption>(DashTypeOption.Solid) });
+        YAxisSideItems = new MplotArrayEditorViewModel<ValueViewModel<YAxisSideOption>>(_ => new ValueViewModel<YAxisSideOption>(YAxisSideOption.Left),
+            new[] { new ValueViewModel<YAxisSideOption>(YAxisSideOption.Left) });
+        SkipItems = new MplotArrayEditorViewModel<ValueViewModel<int>>(_ => new ValueViewModel<int>(0),
+            new[] { new ValueViewModel<int>(0) });
+        IgnoreExpressionItems = new MplotArrayEditorViewModel<ValueViewModel<string>>(_ => new ValueViewModel<string>(string.Empty),
+            new[] { new ValueViewModel<string>(string.Empty) });
+
         AddStringArgumentCommand = new RelayCommand(AddStringArgument);
         RemoveStringArgumentCommand = new RelayCommand(_ => RemoveSelectedStringArgument(), _ => SelectedStringArgument != null);
     }
@@ -84,20 +108,19 @@ public class PlotViewModel : ViewModelBase
     public Array DataSourceOptions => Enum.GetValues(typeof(DataSourceOption));
     public Array ArrayModeOptions => Enum.GetValues(typeof(MplotArrayMode));
 
-    public ObservableCollection<SeriesViewModel> Series { get; }
-
-    private SeriesViewModel? _selectedSeries;
-    public SeriesViewModel? SelectedSeries
-    {
-        get => _selectedSeries;
-        set
-        {
-            if (SetProperty(ref _selectedSeries, value))
-            {
-                RemoveSeriesCommand.RaiseCanExecuteChanged();
-            }
-        }
-    }
+    public MplotArrayEditorViewModel<DataSourceItemViewModel> FilePathItems { get; }
+    public MplotArrayEditorViewModel<ValueViewModel<string>> SeriesNameItems { get; }
+    public MplotArrayEditorViewModel<ValueViewModel<string>> XColumnItems { get; }
+    public MplotArrayEditorViewModel<ValueViewModel<string>> YColumnItems { get; }
+    public MplotArrayEditorViewModel<ValueViewModel<MarkerOption>> MarkerItems { get; }
+    public MplotArrayEditorViewModel<ValueViewModel<string>> LineColorItems { get; }
+    public MplotArrayEditorViewModel<ValueViewModel<int>> LineWidthItems { get; }
+    public MplotArrayEditorViewModel<ValueViewModel<SeriesStyleOption>> SeriesStyleItems { get; }
+    public MplotArrayEditorViewModel<ValueViewModel<SeparatorOption>> SeparatorItems { get; }
+    public MplotArrayEditorViewModel<ValueViewModel<DashTypeOption>> DashTypeItems { get; }
+    public MplotArrayEditorViewModel<ValueViewModel<YAxisSideOption>> YAxisSideItems { get; }
+    public MplotArrayEditorViewModel<ValueViewModel<int>> SkipItems { get; }
+    public MplotArrayEditorViewModel<ValueViewModel<string>> IgnoreExpressionItems { get; }
 
     public ObservableCollection<StringArgumentViewModel> StringArguments { get; }
 
@@ -113,9 +136,6 @@ public class PlotViewModel : ViewModelBase
             }
         }
     }
-
-    public RelayCommand AddSeriesCommand { get; }
-    public RelayCommand RemoveSeriesCommand { get; }
 
     public RelayCommand AddStringArgumentCommand { get; }
     public RelayCommand RemoveStringArgumentCommand { get; }
@@ -416,32 +436,80 @@ public class PlotViewModel : ViewModelBase
             listener.YAxisSidesArray.SetMode(YAxisSideMode);
             listener.Ignores.SetMode(IgnoreMode);
 
-            for (int i = 0; i < Series.Count; i++)
+            int inlineIndex = 0;
+            foreach (var source in FilePathItems.Items)
             {
-                var series = Series[i];
-                DataSource dataSource = series.DataSource == DataSourceOption.Inline
-                    ? new InlineDataSource(series.InlineData, $"inline_{i}")
-                    : new FileSource(series.FilePath, NoneMarker.None);
+                DataSource dataSource = source.DataSource == DataSourceOption.Inline
+                    ? new InlineDataSource(source.InlineData, $"inline_{inlineIndex++}")
+                    : new FileSource(source.FilePath, NoneMarker.None);
                 listener.FilePathArray.Add(dataSource);
-                listener.SeriesNameArray.Add(string.IsNullOrWhiteSpace(series.SeriesName) ? $"Series {i + 1}" : series.SeriesName);
-                listener.XcolsArray.Add(CreateColumnSelector(series.XColumn, stringArgs));
-                listener.YcolsArray.Add(CreateColumnSelector(series.YColumn, stringArgs));
-                listener.MarkerArray.Add(MapMarker(series.Marker));
-                listener.LineColorArray.Add(ToColor(series.LineColorHex));
-                listener.LineWidthArray.Add(series.LineWidth);
-                listener.PlotSeriesStyleArray.Add(MapSeriesStyle(series.SeriesStyle));
-                listener.SeparatorArray.Add(MapSeparator(series.Separator));
-                listener.DashTypeArray.Add(MapDashType(series.DashType));
-                listener.SkipArray.Add(series.Skip);
-                listener.YAxisSidesArray.Add(series.YAxisSide == YAxisSideOption.Left ? YAxisSide.Left : YAxisSide.Right);
+            }
 
-                if (string.IsNullOrWhiteSpace(series.IgnoreExpression))
+            foreach (var (seriesName, index) in SeriesNameItems.Items.Select((value, index) => (value, index)))
+            {
+                string value = string.IsNullOrWhiteSpace(seriesName.Value) ? $"Series {index + 1}" : seriesName.Value;
+                listener.SeriesNameArray.Add(value);
+            }
+
+            foreach (var column in XColumnItems.Items)
+            {
+                listener.XcolsArray.Add(CreateColumnSelector(column.Value, stringArgs));
+            }
+
+            foreach (var column in YColumnItems.Items)
+            {
+                listener.YcolsArray.Add(CreateColumnSelector(column.Value, stringArgs));
+            }
+
+            foreach (var marker in MarkerItems.Items)
+            {
+                listener.MarkerArray.Add(MapMarker(marker.Value));
+            }
+
+            foreach (var color in LineColorItems.Items)
+            {
+                listener.LineColorArray.Add(ToColor(color.Value));
+            }
+
+            foreach (var width in LineWidthItems.Items)
+            {
+                listener.LineWidthArray.Add(width.Value);
+            }
+
+            foreach (var style in SeriesStyleItems.Items)
+            {
+                listener.PlotSeriesStyleArray.Add(MapSeriesStyle(style.Value));
+            }
+
+            foreach (var separator in SeparatorItems.Items)
+            {
+                listener.SeparatorArray.Add(MapSeparator(separator.Value));
+            }
+
+            foreach (var dash in DashTypeItems.Items)
+            {
+                listener.DashTypeArray.Add(MapDashType(dash.Value));
+            }
+
+            foreach (var skip in SkipItems.Items)
+            {
+                listener.SkipArray.Add(skip.Value);
+            }
+
+            foreach (var axisSide in YAxisSideItems.Items)
+            {
+                listener.YAxisSidesArray.Add(axisSide.Value == YAxisSideOption.Left ? YAxisSide.Left : YAxisSide.Right);
+            }
+
+            foreach (var ignore in IgnoreExpressionItems.Items)
+            {
+                if (string.IsNullOrWhiteSpace(ignore.Value))
                 {
                     listener.Ignores.Add(NoneMarker.None);
                 }
                 else
                 {
-                    var tokens = ParseExpression(series.IgnoreExpression, stringArgs);
+                    var tokens = ParseExpression(ignore.Value, stringArgs);
                     listener.Ignores.Add(tokens);
                 }
             }
@@ -638,105 +706,194 @@ public class PlotViewModel : ViewModelBase
             }
         }
 
-        for (int i = 0; i < Series.Count; i++)
+        void AppendWithSpacing(Action action)
         {
-            var series = Series[i];
-            if (i > 0) builder.AppendLine();
-
-            if (series.DataSource == DataSourceOption.Inline)
+            int before = builder.Length;
+            action();
+            if (builder.Length > before)
             {
-                builder.AppendLine("start");
-                if (!string.IsNullOrWhiteSpace(series.InlineData))
-                {
-                    foreach (var line in series.InlineData.Replace("\r", string.Empty).Split('\n'))
-                    {
-                        builder.AppendLine(line);
-                    }
-                }
-                builder.AppendLine("end");
+                builder.AppendLine();
             }
-            else if (!string.IsNullOrWhiteSpace(series.FilePath))
-            {
-                builder.AppendLine($"f {Quote(series.FilePath)}");
-            }
-
-            builder.AppendLine($"x {series.XColumn}");
-            builder.AppendLine($"y {series.YColumn}");
-
-            string seriesName = string.IsNullOrWhiteSpace(series.SeriesName) ? $"Series {i + 1}" : series.SeriesName;
-            builder.AppendLine($"s {Quote(seriesName)}");
-
-            if (!string.IsNullOrWhiteSpace(series.LineColorHex))
-            {
-                string color = series.LineColorHex.Trim();
-                builder.AppendLine(color.StartsWith('#') ? color : "#" + color);
-            }
-
-            builder.AppendLine($"lw {series.LineWidth}");
-
-            string style = series.SeriesStyle switch
-            {
-                SeriesStyleOption.Scatter => "scatter",
-                SeriesStyleOption.Line => "line",
-                SeriesStyleOption.Boxes => "hist",
-                SeriesStyleOption.FStep => "fstep",
-                _ => string.Empty
-            };
-            if (!string.IsNullOrEmpty(style)) builder.AppendLine(style);
-
-            string marker = series.Marker switch
-            {
-                MarkerOption.None => "nomarker",
-                MarkerOption.Circle => "o",
-                MarkerOption.FilledCircle => "filledcircle",
-                MarkerOption.Square => "square",
-                MarkerOption.FilledSquare => "filledsquare",
-                MarkerOption.Plus => "plus",
-                _ => string.Empty
-            };
-            if (!string.IsNullOrEmpty(marker)) builder.AppendLine(marker);
-
-            string dash = series.DashType switch
-            {
-                DashTypeOption.Simple => "dash",
-                DashTypeOption.Solid => "nodash",
-                _ => string.Empty
-            };
-            if (!string.IsNullOrEmpty(dash)) builder.AppendLine(dash);
-
-            string separator = series.Separator switch
-            {
-                SeparatorOption.Comma => "comma",
-                SeparatorOption.Tab => "tab",
-                SeparatorOption.Whitespace => "sep \" \"",
-                _ => string.Empty
-            };
-            if (!string.IsNullOrEmpty(separator)) builder.AppendLine(separator);
-
-            if (series.Skip > 0) builder.AppendLine($"skip {series.Skip}");
-            if (series.YAxisSide == YAxisSideOption.Right) builder.AppendLine("y2");
-            if (!string.IsNullOrWhiteSpace(series.IgnoreExpression)) builder.AppendLine($"ignore {series.IgnoreExpression}");
         }
+
+        AppendWithSpacing(() =>
+        {
+            foreach (var source in FilePathItems.Items)
+            {
+                if (source.DataSource == DataSourceOption.Inline)
+                {
+                    builder.AppendLine("start");
+                    if (!string.IsNullOrWhiteSpace(source.InlineData))
+                    {
+                        foreach (var line in source.InlineData.Replace("\r", string.Empty).Split('\n'))
+                        {
+                            builder.AppendLine(line);
+                        }
+                    }
+                    builder.AppendLine("end");
+                }
+                else if (!string.IsNullOrWhiteSpace(source.FilePath))
+                {
+                    builder.AppendLine($"f {Quote(source.FilePath)}");
+                }
+            }
+        });
+
+        AppendWithSpacing(() =>
+        {
+            foreach (var column in XColumnItems.Items)
+            {
+                if (!string.IsNullOrWhiteSpace(column.Value))
+                {
+                    builder.AppendLine($"x {column.Value}");
+                }
+            }
+        });
+
+        AppendWithSpacing(() =>
+        {
+            foreach (var column in YColumnItems.Items)
+            {
+                if (!string.IsNullOrWhiteSpace(column.Value))
+                {
+                    builder.AppendLine($"y {column.Value}");
+                }
+            }
+        });
+
+        AppendWithSpacing(() =>
+        {
+            foreach (var (seriesName, index) in SeriesNameItems.Items.Select((value, index) => (value, index)))
+            {
+                string value = string.IsNullOrWhiteSpace(seriesName.Value) ? $"Series {index + 1}" : seriesName.Value;
+                builder.AppendLine($"s {Quote(value)}");
+            }
+        });
+
+        AppendWithSpacing(() =>
+        {
+            foreach (var color in LineColorItems.Items)
+            {
+                if (!string.IsNullOrWhiteSpace(color.Value))
+                {
+                    string trimmed = color.Value.Trim();
+                    builder.AppendLine(trimmed.StartsWith('#') ? trimmed : "#" + trimmed);
+                }
+            }
+        });
+
+        AppendWithSpacing(() =>
+        {
+            foreach (var width in LineWidthItems.Items)
+            {
+                builder.AppendLine($"lw {width.Value}");
+            }
+        });
+
+        AppendWithSpacing(() =>
+        {
+            foreach (var style in SeriesStyleItems.Items)
+            {
+                string styleText = style.Value switch
+                {
+                    SeriesStyleOption.Scatter => "scatter",
+                    SeriesStyleOption.Line => "line",
+                    SeriesStyleOption.Boxes => "hist",
+                    SeriesStyleOption.FStep => "fstep",
+                    _ => string.Empty
+                };
+
+                if (!string.IsNullOrEmpty(styleText)) builder.AppendLine(styleText);
+            }
+        });
+
+        AppendWithSpacing(() =>
+        {
+            foreach (var marker in MarkerItems.Items)
+            {
+                string markerText = marker.Value switch
+                {
+                    MarkerOption.None => "nomarker",
+                    MarkerOption.Circle => "o",
+                    MarkerOption.FilledCircle => "filledcircle",
+                    MarkerOption.Square => "square",
+                    MarkerOption.FilledSquare => "filledsquare",
+                    MarkerOption.Plus => "plus",
+                    MarkerOption.X => "x",
+                    MarkerOption.Line => "line",
+                    _ => string.Empty
+                };
+
+                if (!string.IsNullOrEmpty(markerText)) builder.AppendLine(markerText);
+            }
+        });
+
+        AppendWithSpacing(() =>
+        {
+            foreach (var dash in DashTypeItems.Items)
+            {
+                string dashText = dash.Value switch
+                {
+                    DashTypeOption.Simple => "dash",
+                    DashTypeOption.Solid => "nodash",
+                    _ => string.Empty
+                };
+
+                if (!string.IsNullOrEmpty(dashText)) builder.AppendLine(dashText);
+            }
+        });
+
+        AppendWithSpacing(() =>
+        {
+            foreach (var separator in SeparatorItems.Items)
+            {
+                string separatorText = separator.Value switch
+                {
+                    SeparatorOption.Comma => "comma",
+                    SeparatorOption.Tab => "tab",
+                    SeparatorOption.Whitespace => "sep \" \"",
+                    SeparatorOption.Auto => string.Empty,
+                    _ => string.Empty
+                };
+
+                if (!string.IsNullOrEmpty(separatorText)) builder.AppendLine(separatorText);
+            }
+        });
+
+        AppendWithSpacing(() =>
+        {
+            foreach (var skip in SkipItems.Items)
+            {
+                if (skip.Value > 0)
+                {
+                    builder.AppendLine($"skip {skip.Value}");
+                }
+            }
+        });
+
+        AppendWithSpacing(() =>
+        {
+            foreach (var axisSide in YAxisSideItems.Items)
+            {
+                if (axisSide.Value == YAxisSideOption.Right)
+                {
+                    builder.AppendLine("y2");
+                }
+            }
+        });
+
+        AppendWithSpacing(() =>
+        {
+            foreach (var ignore in IgnoreExpressionItems.Items)
+            {
+                if (!string.IsNullOrWhiteSpace(ignore.Value))
+                {
+                    builder.AppendLine($"ignore {ignore.Value}");
+                }
+            }
+        });
 
         return builder.ToString().TrimEnd();
-    }
-
-    private void AddSeries()
-    {
-        var series = new SeriesViewModel { SeriesName = $"Series {Series.Count + 1}" };
-        Series.Add(series);
-        SelectedSeries = series;
-    }
-
-    private void RemoveSelectedSeries()
-    {
-        if (SelectedSeries is null)
-        {
-            return;
-        }
-
-        Series.Remove(SelectedSeries);
-        SelectedSeries = Series.LastOrDefault();
     }
 
     private void AddStringArgument()
