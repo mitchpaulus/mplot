@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MplotLib", "MplotLib\MplotL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MplotCli", "MplotCli\MplotCli.csproj", "{0A7EF595-2436-49BE-9A95-CBA17F2CFA4F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MplotGui", "MplotGui\MplotGui.csproj", "{86551939-17F5-4063-B30F-0EFE5CF6881B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{0A7EF595-2436-49BE-9A95-CBA17F2CFA4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A7EF595-2436-49BE-9A95-CBA17F2CFA4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A7EF595-2436-49BE-9A95-CBA17F2CFA4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86551939-17F5-4063-B30F-0EFE5CF6881B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86551939-17F5-4063-B30F-0EFE5CF6881B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86551939-17F5-4063-B30F-0EFE5CF6881B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86551939-17F5-4063-B30F-0EFE5CF6881B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

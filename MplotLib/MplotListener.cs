@@ -33,7 +33,7 @@ public class MplotListener : MplotBaseListener
     public MplotArray<ColumnSelector> XcolsArray { get; } = new(new ColumnSpecifier(1), MplotArrayMode.Repeat, "X col specifier");
 
     public MplotArray<YAxisSide> YAxisSidesArray { get; } = new MplotArray<YAxisSide>(YAxisSide.Left, MplotArrayMode.Repeat, "Y axis side (left/right)");
-    private MplotArray<Maybe<List<MplotToken>>> Ignores { get; } = new(NoneMarker.None, MplotArrayMode.Repeat, "Ignore expression");
+    public MplotArray<Maybe<List<MplotToken>>> Ignores { get; } = new(NoneMarker.None, MplotArrayMode.Repeat, "Ignore expression");
 
     private readonly List<AdditionalTic> _additionalXTics = new();
     private readonly List<AdditionalTic> _additionalYTics = new();

@@ -1,0 +1,307 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MplotGui.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+        x:Class="MplotGui.MainWindow"
+        Title="mplot GUI">
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom"
+                BorderBrush="#4c4c4c"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="8"
+                Margin="8,8,8,0">
+            <StackPanel>
+                <TextBlock Text="Generated mplot" FontWeight="Bold" Margin="0,0,0,8"/>
+                <TextBox Text="{Binding PreviewMplot}"
+                         AcceptsReturn="True"
+                         AcceptsTab="True"
+                         IsReadOnly="True"
+                         TextWrapping="Wrap"
+                         MinHeight="160"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+            </StackPanel>
+        </Border>
+
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="8" Margin="8,0,8,8">
+            <Button Content="Copy Gnuplot to Clipboard" Click="OnCopyToClipboard"/>
+            <Button Content="Generate Preview" Click="OnGeneratePreview"/>
+            <TextBlock Text="Status:" VerticalAlignment="Center" Margin="16,0,4,0"/>
+            <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <TabControl Margin="8">
+            <TabItem Header="General">
+                <ScrollViewer>
+                    <StackPanel Spacing="12" Margin="0,0,0,8">
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,0,0,8">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="Plot" FontWeight="Bold"/>
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+                                    <TextBlock Text="Title" Grid.Row="0" Margin="0,0,8,8"/>
+                                    <TextBox Text="{Binding Title}" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="Output File" Grid.Row="1" Margin="0,0,8,8"/>
+                                    <TextBox Text="{Binding OutputFile}" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="Width" Grid.Row="2" Margin="0,0,8,8"/>
+                                    <NumericUpDown Value="{Binding Width}" Minimum="1" Grid.Row="2" Grid.Column="1" Width="120" Margin="0,0,16,8"/>
+                                    <TextBlock Text="Height" Grid.Row="2" Grid.Column="2" Margin="0,0,8,8"/>
+                                    <NumericUpDown Value="{Binding Height}" Minimum="1" Grid.Row="2" Grid.Column="3" Width="120" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="Font" Grid.Row="3" Margin="0,0,8,8"/>
+                                    <TextBox Text="{Binding FontName}" Grid.Row="3" Grid.Column="1" Margin="0,0,16,8"/>
+                                    <TextBlock Text="Font Size" Grid.Row="3" Grid.Column="2" Margin="0,0,8,8"/>
+                                    <NumericUpDown Value="{Binding FontSize}" Minimum="1" Grid.Row="3" Grid.Column="3" Width="120" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="Default DPI" Grid.Row="4" Margin="0,0,8,8"/>
+                                    <NumericUpDown Value="{Binding DefaultDpi}" Minimum="10" Maximum="1200" Grid.Row="4" Grid.Column="1" Width="120" Margin="0,0,16,8"/>
+                                    <TextBlock Text="Text DPI" Grid.Row="4" Grid.Column="2" Margin="0,0,8,8"/>
+                                    <NumericUpDown Value="{Binding TextDpi}" Minimum="10" Maximum="1200" Grid.Row="4" Grid.Column="3" Width="120" Margin="0,0,0,8"/>
+
+                                    <CheckBox Content="Grid" IsChecked="{Binding Grid}" Grid.Row="5" Grid.Column="1"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,0,0,8">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="Labels &amp; Formats" FontWeight="Bold"/>
+                                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                                    <TextBlock Text="X Label" Grid.Row="0" Margin="0,0,8,8"/>
+                                    <TextBox Text="{Binding XLabel}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,8"/>
+                                    <TextBlock Text="Y Label" Grid.Row="1" Margin="0,0,8,8"/>
+                                    <TextBox Text="{Binding YLabel}" Grid.Row="1" Grid.Column="1" Margin="0,0,0,8"/>
+                                    <TextBlock Text="Y2 Label" Grid.Row="2" Margin="0,0,8,8"/>
+                                    <TextBox Text="{Binding Y2Label}" Grid.Row="2" Grid.Column="1" Margin="0,0,0,8"/>
+                                    <CheckBox Content="Time Axis" IsChecked="{Binding TimeAxis}" Grid.Row="3" Grid.Column="1" Margin="0,0,0,8"/>
+                                    <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="1" Spacing="8">
+                                        <TextBlock Text="Time Format" VerticalAlignment="Center"/>
+                                        <TextBox Text="{Binding TimeFormat}" Width="180"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,0,0,8">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="Legend" FontWeight="Bold"/>
+                                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto">
+                                    <TextBlock Text="Mode" Grid.Row="0" Margin="0,0,8,8"/>
+                                    <ComboBox ItemsSource="{Binding LegendModeOptions}" SelectedItem="{Binding LegendMode}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,8"/>
+                                    <TextBlock Text="Position" Grid.Row="1" Margin="0,0,8,8"/>
+                                    <ComboBox ItemsSource="{Binding LegendPositionOptions}" SelectedItem="{Binding LegendPosition}" Grid.Row="1" Grid.Column="1" Margin="0,0,0,8"/>
+                                    <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1" Spacing="12">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="Columns" VerticalAlignment="Center"/>
+                                            <NumericUpDown Value="{Binding LegendColumns}" Minimum="-1" Maximum="10" Width="80"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="Rows" VerticalAlignment="Center"/>
+                                            <NumericUpDown Value="{Binding LegendRows}" Minimum="-1" Maximum="10" Width="80"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,0,0,8">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="Ranges &amp; Formats" FontWeight="Bold"/>
+                                <Grid ColumnDefinitions="Auto,*,Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                                    <TextBlock Text="X Min" Grid.Row="0" Margin="0,0,8,8"/>
+                                    <TextBox Text="{Binding XRangeMin}" Grid.Row="0" Grid.Column="1" Margin="0,0,16,8"/>
+                                    <TextBlock Text="X Max" Grid.Row="0" Grid.Column="2" Margin="0,0,8,8"/>
+                                    <TextBox Text="{Binding XRangeMax}" Grid.Row="0" Grid.Column="3" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="Y Min" Grid.Row="1" Margin="0,0,8,8"/>
+                                    <TextBox Text="{Binding YRangeMin}" Grid.Row="1" Grid.Column="1" Margin="0,0,16,8"/>
+                                    <TextBlock Text="Y Max" Grid.Row="1" Grid.Column="2" Margin="0,0,8,8"/>
+                                    <TextBox Text="{Binding YRangeMax}" Grid.Row="1" Grid.Column="3" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="Y2 Min" Grid.Row="2" Margin="0,0,8,8"/>
+                                    <TextBox Text="{Binding Y2RangeMin}" Grid.Row="2" Grid.Column="1" Margin="0,0,16,8"/>
+                                    <TextBlock Text="Y2 Max" Grid.Row="2" Grid.Column="2" Margin="0,0,8,8"/>
+                                    <TextBox Text="{Binding Y2RangeMax}" Grid.Row="2" Grid.Column="3" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="X Format" Grid.Row="3" Margin="0,0,8,0"/>
+                                    <TextBox Text="{Binding XFormat}" Grid.Row="3" Grid.Column="1" Margin="0,0,16,0"/>
+                                    <TextBlock Text="Y Format" Grid.Row="3" Grid.Column="2" Margin="0,0,8,0"/>
+                                    <TextBox Text="{Binding YFormat}" Grid.Row="3" Grid.Column="3"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Additional Gnuplot Commands" FontWeight="Bold"/>
+                                <TextBox Text="{Binding GnuplotLiterals}" AcceptsReturn="True" AcceptsTab="True" MinHeight="120" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Series">
+                <DockPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,8" DockPanel.Dock="Top">
+                        <Button Content="Add Series" Command="{Binding AddSeriesCommand}"/>
+                        <Button Content="Remove Series" Command="{Binding RemoveSeriesCommand}"/>
+                    </StackPanel>
+                    <ListBox ItemsSource="{Binding Series}" SelectedItem="{Binding SelectedSeries}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="#4c4c4c" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,0,0,8">
+                                    <Grid ColumnDefinitions="120,*,120" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                                        <TextBlock Text="Name" Grid.Column="0" Margin="0,0,8,4"/>
+                                        <TextBox Text="{Binding SeriesName}" Grid.Column="1" Margin="0,0,8,4"/>
+                                        <ComboBox ItemsSource="{Binding DataContext.DataSourceOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                  SelectedItem="{Binding DataSource}" Grid.Column="2" Margin="0,0,0,4"/>
+
+                                        <TextBlock Text="File Path" Grid.Row="1" Grid.Column="0" Margin="0,0,8,4"/>
+                                        <TextBox Text="{Binding FilePath}" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,4"/>
+
+                                        <TextBlock Text="Inline Data" Grid.Row="2" Grid.Column="0" Margin="0,0,8,4"/>
+                                        <TextBox Text="{Binding InlineData}" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,4" AcceptsReturn="True" Height="60"/>
+
+                                        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Spacing="12">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="X" VerticalAlignment="Center"/>
+                                                <TextBox Text="{Binding XColumn}" Width="60"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="Y" VerticalAlignment="Center"/>
+                                                <TextBox Text="{Binding YColumn}" Width="60"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="Style" VerticalAlignment="Center"/>
+                                                <ComboBox ItemsSource="{Binding DataContext.SeriesStyleOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          SelectedItem="{Binding SeriesStyle}" Width="120"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="Marker" VerticalAlignment="Center"/>
+                                                <ComboBox ItemsSource="{Binding DataContext.MarkerOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          SelectedItem="{Binding Marker}" Width="120"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="Separator" VerticalAlignment="Center"/>
+                                                <ComboBox ItemsSource="{Binding DataContext.SeparatorOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          SelectedItem="{Binding Separator}" Width="120"/>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Spacing="12">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="Line Color" VerticalAlignment="Center"/>
+                                                <TextBox Text="{Binding LineColorHex}" Width="120"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="Line Width" VerticalAlignment="Center"/>
+                                                <NumericUpDown Value="{Binding LineWidth}" Minimum="1" Width="100"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="Dash" VerticalAlignment="Center"/>
+                                                <ComboBox ItemsSource="{Binding DataContext.DashTypeOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          SelectedItem="{Binding DashType}" Width="120"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="Y Axis" VerticalAlignment="Center"/>
+                                                <ComboBox ItemsSource="{Binding DataContext.YAxisSideOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          SelectedItem="{Binding YAxisSide}" Width="120"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="Skip" VerticalAlignment="Center"/>
+                                                <NumericUpDown Value="{Binding Skip}" Minimum="0" Width="80"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="Ignore" VerticalAlignment="Center"/>
+                                                <TextBox Text="{Binding IgnoreExpression}" Width="160"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </TabItem>
+
+            <TabItem Header="String Arguments">
+                <DockPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,8" DockPanel.Dock="Top">
+                        <Button Content="Add" Command="{Binding AddStringArgumentCommand}"/>
+                        <Button Content="Remove" Command="{Binding RemoveStringArgumentCommand}"/>
+                    </StackPanel>
+                    <ListBox ItemsSource="{Binding StringArguments}" SelectedItem="{Binding SelectedStringArgument}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding Value}" Margin="0,0,0,8"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </TabItem>
+
+            <TabItem Header="Array Modes">
+                <ScrollViewer>
+                    <UniformGrid Rows="0" Columns="2" Margin="0,0,0,8" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                        <StackPanel Margin="8">
+                            <TextBlock Text="File Paths"/>
+                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding FilePathMode}"/>
+                        </StackPanel>
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Series Names"/>
+                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SeriesNameMode}"/>
+                        </StackPanel>
+                        <StackPanel Margin="8">
+                            <TextBlock Text="X Columns"/>
+                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding XColumnMode}"/>
+                        </StackPanel>
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Y Columns"/>
+                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding YColumnMode}"/>
+                        </StackPanel>
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Markers"/>
+                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding MarkerMode}"/>
+                        </StackPanel>
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Line Colors"/>
+                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding LineColorMode}"/>
+                        </StackPanel>
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Line Widths"/>
+                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding LineWidthMode}"/>
+                        </StackPanel>
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Series Styles"/>
+                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SeriesStyleMode}"/>
+                        </StackPanel>
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Separators"/>
+                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SeparatorMode}"/>
+                        </StackPanel>
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Dash Types"/>
+                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding DashTypeMode}"/>
+                        </StackPanel>
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Y Axis Side"/>
+                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding YAxisSideMode}"/>
+                        </StackPanel>
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Skip"/>
+                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding SkipMode}"/>
+                        </StackPanel>
+                        <StackPanel Margin="8">
+                            <TextBlock Text="Ignore"/>
+                            <ComboBox ItemsSource="{Binding ArrayModeOptions}" SelectedItem="{Binding IgnoreMode}"/>
+                        </StackPanel>
+                    </UniformGrid>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>
