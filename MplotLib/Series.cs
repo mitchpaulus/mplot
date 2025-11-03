@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using System.Text;
 
-namespace mplot;
+namespace MplotLib;
 
 public class Series
 {

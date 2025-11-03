@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mplot", "mplot\mplot.csproj", "{EEE51ADB-FF0E-4598-91B2-3CB6B5A28A60}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{04599D8E-C55B-48D1-86D2-E2C57729DAA5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MplotLib", "MplotLib\MplotLib.csproj", "{3524D26E-D7CC-4F60-A2DD-FF9A0CB28762}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MplotCli", "MplotCli\MplotCli.csproj", "{0A7EF595-2436-49BE-9A95-CBA17F2CFA4F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,13 +18,17 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EEE51ADB-FF0E-4598-91B2-3CB6B5A28A60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EEE51ADB-FF0E-4598-91B2-3CB6B5A28A60}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EEE51ADB-FF0E-4598-91B2-3CB6B5A28A60}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EEE51ADB-FF0E-4598-91B2-3CB6B5A28A60}.Release|Any CPU.Build.0 = Release|Any CPU
 		{04599D8E-C55B-48D1-86D2-E2C57729DAA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{04599D8E-C55B-48D1-86D2-E2C57729DAA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04599D8E-C55B-48D1-86D2-E2C57729DAA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04599D8E-C55B-48D1-86D2-E2C57729DAA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3524D26E-D7CC-4F60-A2DD-FF9A0CB28762}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3524D26E-D7CC-4F60-A2DD-FF9A0CB28762}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3524D26E-D7CC-4F60-A2DD-FF9A0CB28762}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3524D26E-D7CC-4F60-A2DD-FF9A0CB28762}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A7EF595-2436-49BE-9A95-CBA17F2CFA4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A7EF595-2436-49BE-9A95-CBA17F2CFA4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A7EF595-2436-49BE-9A95-CBA17F2CFA4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A7EF595-2436-49BE-9A95-CBA17F2CFA4F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

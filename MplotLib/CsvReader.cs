@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace mplot;
+namespace MplotLib;
 
 public class CsvReader
 {

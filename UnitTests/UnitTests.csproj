@@ -24,7 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\mplot\mplot.csproj" />
+      <ProjectReference Include="..\MplotLib\MplotLib.csproj" />
     </ItemGroup>
 
 </Project>

@@ -4,7 +4,7 @@ using Antlr4.Runtime.Atn;
 using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
 using OneOf;
 
-namespace mplot;
+namespace MplotLib;
 
 public class Evaluator
 {

@@ -1,6 +1,6 @@
 using Antlr4.Runtime.Tree;
 
-namespace mplot;
+namespace MplotLib;
 
 public class MplotArray<T> : IMplotArray
 {
