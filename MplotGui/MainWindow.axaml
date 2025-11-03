@@ -147,30 +147,8 @@
                                             <StackPanel Spacing="8">
                                                 <ComboBox ItemsSource="{Binding DataContext.DataSourceOptions, RelativeSource={RelativeSource AncestorType=Window}}"
                                                           SelectedItem="{Binding DataSource}" Width="160"/>
-                                                <TextBox Text="{Binding FilePath}" Watermark="File path">
-                                                    <TextBox.Styles>
-                                                        <Style Selector="TextBox">
-                                                            <Setter Property="IsVisible" Value="False"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding DataSource}" Value="File">
-                                                                    <Setter Property="IsVisible" Value="True"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBox.Styles>
-                                                </TextBox>
-                                                <TextBox Text="{Binding InlineData}" AcceptsReturn="True" Height="80" Watermark="Inline data">
-                                                    <TextBox.Styles>
-                                                        <Style Selector="TextBox">
-                                                            <Setter Property="IsVisible" Value="False"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding DataSource}" Value="Inline">
-                                                                    <Setter Property="IsVisible" Value="True"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBox.Styles>
-                                                </TextBox>
+                                                <TextBox Text="{Binding FilePath}" Watermark="File path" IsVisible="{Binding IsFileSource}"/>
+                                                <TextBox Text="{Binding InlineData}" AcceptsReturn="True" Height="80" Watermark="Inline data" IsVisible="{Binding IsInlineSource}"/>
                                             </StackPanel>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>

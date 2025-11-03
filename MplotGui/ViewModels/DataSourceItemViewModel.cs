@@ -9,7 +9,14 @@ public class DataSourceItemViewModel : ViewModelBase
     public DataSourceOption DataSource
     {
         get => _dataSource;
-        set => SetProperty(ref _dataSource, value);
+        set
+        {
+            if (SetProperty(ref _dataSource, value))
+            {
+                OnPropertyChanged(nameof(IsFileSource));
+                OnPropertyChanged(nameof(IsInlineSource));
+            }
+        }
     }
 
     public string FilePath
@@ -23,4 +30,8 @@ public class DataSourceItemViewModel : ViewModelBase
         get => _inlineData;
         set => SetProperty(ref _inlineData, value);
     }
+
+    public bool IsFileSource => DataSource == DataSourceOption.File;
+
+    public bool IsInlineSource => DataSource == DataSourceOption.Inline;
 }
