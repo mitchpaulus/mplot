@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace mplot;
+namespace MplotLib;
 
 public class CcllcColors
 {

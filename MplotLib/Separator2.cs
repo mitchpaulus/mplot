@@ -1,6 +1,6 @@
 ﻿using OneOf;
 
-namespace mplot;
+namespace MplotLib;
 
 public class Separator2 : OneOfBase<AutoSeparator, Separator>
 {

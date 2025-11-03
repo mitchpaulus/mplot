@@ -4,7 +4,7 @@ using System.Text;
 using OfficeOpenXml;
 using OneOf;
 
-namespace mplot;
+namespace MplotLib;
 
 public class DataSource : OneOfBase<FileSource, InlineDataSource, CommandDataSource, StdInSource>
 {

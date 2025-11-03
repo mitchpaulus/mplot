@@ -1,6 +1,6 @@
 using OneOf;
 
-namespace mplot;
+namespace MplotLib;
 
 public class RangeSpec : OneOfBase<Rational, AutoRange, DateTime>
 {

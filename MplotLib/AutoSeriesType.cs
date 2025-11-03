@@ -1,7 +1,7 @@
 using System.Text;
 using OneOf;
 
-namespace mplot;
+namespace MplotLib;
 
 public static class AutoSeriesType
 {

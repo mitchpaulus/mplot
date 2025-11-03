@@ -1,4 +1,4 @@
-﻿namespace mplot;
+﻿namespace MplotLib;
 
 public abstract class DashType
 {
