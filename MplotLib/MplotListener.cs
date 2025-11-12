@@ -28,7 +28,9 @@ public class MplotListener : MplotBaseListener
     public string? XLabel { get; set; }
     public string? YLabel { get; set; }
 
+    public string? X2Label { get; set; } = null;
     public string? Y2Label { get; set; } = null;
+
     public MplotArray<ColumnSelector> YcolsArray { get; } = new(new ColumnSpecifier(2), MplotArrayMode.Repeat, "Y col specifier");
     public MplotArray<ColumnSelector> XcolsArray { get; } = new(new ColumnSpecifier(1), MplotArrayMode.Repeat, "X col specifier");
 
@@ -262,12 +264,10 @@ public class MplotListener : MplotBaseListener
 
     public string ParseArgString(MplotParser.ArgStringContext ctx) => ctx.ToMPlotString().GetString(_stringArgs).Trim();
 
-    public string ParseXLabelContext(MplotParser.XlabelContext context) => context.argString().ToMPlotString().GetString(_stringArgs).Trim();
-    public string ParseYLabelContext(MplotParser.YlabelContext context) => context.argString().ToMPlotString().GetString(_stringArgs).Trim();
+    public override void EnterXlabel(MplotParser.XlabelContext context) => XLabel = ParseArgString(context.argString());
+    public override void EnterYlabel(MplotParser.YlabelContext context) => YLabel = ParseArgString(context.argString());
 
-    public override void EnterXlabel(MplotParser.XlabelContext context) => XLabel = ParseXLabelContext(context);
-    public override void EnterYlabel(MplotParser.YlabelContext context) => YLabel = ParseYLabelContext(context);
-
+    public override void EnterX2label(MplotParser.X2labelContext context) => X2Label = ParseArgString(context.argString());
     public override void EnterY2label(MplotParser.Y2labelContext context) => Y2Label = ParseArgString(context.argString());
 
     public override void EnterFile(MplotParser.FileContext context)
@@ -977,6 +977,7 @@ public class MplotListener : MplotBaseListener
             lines.Add($"set ylabel \"{seriesList[0].Name}\"");
         }
 
+        if (!string.IsNullOrWhiteSpace(X2Label)) lines.Add($"set x2label {X2Label.ToGnuPlotString()}");
         if (!string.IsNullOrWhiteSpace(Y2Label)) lines.Add($"set y2label {Y2Label.ToGnuPlotString()}");
 
         if (!XMin.IsAuto || !XMax.IsAuto) lines.Add($"set xrange [{XMin.ToGnuplot()}:{XMax.ToGnuplot()}]");
@@ -995,8 +996,8 @@ public class MplotListener : MplotBaseListener
         if (_additionalXTics2.Count > 0)
         {
             lines.Add($"set x2tics add ({string.Join(", ", _additionalXTics2.Select(tic => tic.ToGnuplot()))})");
-            lines.Add("set link x2");
-            lines.Add("set format x2 \"\"");
+            lines.Add("set link x2"); // Forces same range, scale, and direction as x1 axis.
+            // lines.Add("set format x2 \"\"");
         }
 
         if (_additionalYTics.Count > 0)
@@ -1014,7 +1015,7 @@ public class MplotListener : MplotBaseListener
         {
             lines.Add($"set y2tics add ({string.Join(", ", _additionalYTics2.Select(tic => tic.ToGnuplot()))})");
             lines.Add($"set link y2");
-            lines.Add("set format y2 \"\"");
+            // lines.Add("set format y2 \"\"");
         }
 
         if (TicsOut)

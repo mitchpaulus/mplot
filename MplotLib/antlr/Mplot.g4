@@ -83,6 +83,7 @@ series     : ('s' | 'series') stringArray ;
 skip       : 'skip' intArray ;
 title      : ('ct' | 'charttitle' | 'title' | 't') argString ;
 xlabel     : ('xl' | 'xlabel' | 'xt' | 'xtitle') argString ;
+x2label     : ('xl2' | 'x2l' | 'xlabel2' | 'x2label') argString ;
 xcol       : ('x' | 'xcol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 xexp       : 'xexp' ASTERISK? expression ;
 yexp       : 'yexp' ASTERISK? expression ;
@@ -133,7 +134,7 @@ firstAsterisk : ASTERISK ;
 // xtics min step max
 xtics : 'xtics' rational (COMMA_CHAR | COLON)? rational (COMMA_CHAR | COLON)? rational ;
 ytics : 'ytics' rational (COMMA_CHAR | COLON)? rational (COMMA_CHAR | COLON)? rational ;
-y2tics : 'y2tics' rational (COMMA_CHAR | COLON)? rational (COMMA_CHAR | COLON)? rational ;
+y2tics : ('y2tics' | 'ytics2') rational (COMMA_CHAR | COLON)? rational (COMMA_CHAR | COLON)? rational ;
 
 xticlabels : 'xticlabels' stringArray ;
 yticlabels : 'yticlabels' stringArray ;
