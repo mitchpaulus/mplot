@@ -26,7 +26,7 @@ public static class Extensions
 
     public static List<string> GetStrings(this MplotParser.StringCountContext stringCountContext, List<string> stringArgs)
     {
-        int count = stringCountContext.count() is null ? 1 : int.Parse(stringCountContext.count().GetText());
+        int count = stringCountContext.count() is null ? 1 : int.Parse(stringCountContext.count().INT().GetText());
         return Enumerable.Repeat(stringCountContext.argString().ToMPlotString().GetString(stringArgs), count).ToList();
     }
 
