@@ -272,6 +272,7 @@ RED : 'red' ;
 GREEN : 'green' ;
 BLUE : 'blue' ;
 BLACK : 'black' ;
+ORANGE : 'orange' ;
 
 CCLLC_BLUE : 'ccblue' | 'ccllcblue' ;
 CCLLC_GRAY : 'ccgray' | 'ccllcgray' ;
@@ -286,6 +287,7 @@ knownColor
   | GREEN        # GreenColor
   | BLUE         # BlueColor
   | BLACK        # BlackColor
+  | ORANGE       # OrangeColor
   | CCLLC_BLUE   # CcllcBlueColor
   | CCLLC_GRAY   # CcllcGray
   | CCLLC_MAROON # CcllcMaroon

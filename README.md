@@ -54,5 +54,5 @@ top right ul upperleft ur upperright
 {- colors -}
 #000000 {- hex -}
 rgb 123 124 125 {- rgb -}
-red green blue ccblue ccgray ccmaroon ccgreen ccyellow {- named -}
+red green blue black orange ccblue ccgray ccmaroon ccgreen ccyellow {- named -}
 ```

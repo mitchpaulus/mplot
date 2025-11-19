@@ -366,6 +366,6 @@ internal static class Program
         Console.Write("{- colors -}\n");
         Console.Write("#000000 {- hex -}\n");
         Console.Write("rgb 123 124 125 {- rgb -}\n");
-        Console.Write("red green blue ccblue ccgray ccmaroon ccgreen ccyellow {- named -}\n");
+        Console.Write("red green blue black orange ccblue ccgray ccmaroon ccgreen ccyellow {- named -}\n");
     }
 }
