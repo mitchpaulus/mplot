@@ -64,12 +64,21 @@ public class MplotListener : MplotBaseListener
     public RangeSpec XMin { get; set; } = AutoRange.Auto();
     public RangeSpec XMax { get; set; } = AutoRange.Auto();
 
+    public RangeSpec X2Min { get; set; } = AutoRange.Auto();
+    public RangeSpec X2Max { get; set; } = AutoRange.Auto();
+
+
     public Rational? XTicMin = null;
     public Rational? XTicMax = null;
     public Rational? XTicIncrement = null;
 
+    public Rational? X2TicMin = null;
+    public Rational? X2TicMax = null;
+    public Rational? X2TicIncrement = null;
+
     public MplotArray<string> XTicLabels = new("X Tic Labels");
     public MplotArray<string> YTicLabels = new("Y Tic Labels");
+    public MplotArray<string> X2TicLabels = new("X2 Tic Labels");
     public MplotArray<string> Y2TicLabels = new("Y2 Tic Labels");
 
     public bool TicsOut = false;
@@ -319,6 +328,13 @@ public class MplotListener : MplotBaseListener
         YTicMax = new Rational(context.rational(2));
     }
 
+    public override void EnterX2tics(MplotParser.X2ticsContext context)
+    {
+        X2TicMin = new Rational(context.rational(0));
+        X2TicIncrement = new Rational(context.rational(1));
+        X2TicMax = new Rational(context.rational(2));
+    }
+
     public override void EnterY2tics(MplotParser.Y2ticsContext context)
     {
         Y2TicMin = new Rational(context.rational(0));
@@ -397,6 +413,13 @@ public class MplotListener : MplotBaseListener
     {
         YMin = context.range().lowLimit.ToRangeSpec();
         YMax = context.range().highLimit.ToRangeSpec();
+    }
+
+
+    public override void EnterX2range(MplotParser.X2rangeContext context)
+    {
+        X2Min = context.range().lowLimit.ToRangeSpec();
+        X2Max = context.range().highLimit.ToRangeSpec();
     }
 
     public override void EnterY2range(MplotParser.Y2rangeContext context)
@@ -538,6 +561,12 @@ public class MplotListener : MplotBaseListener
     {
         var names = context.stringArray().argString().Select(node => node.ToMPlotString().GetString(_stringArgs).Trim()).ToList();
         YTicLabels.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
+    }
+
+    public override void EnterX2ticlabels(MplotParser.X2ticlabelsContext context)
+    {
+        var names = context.stringArray().argString().Select(node => node.ToMPlotString().GetString(_stringArgs).Trim()).ToList();
+        X2TicLabels.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
     }
 
     public override void EnterY2ticlabels(MplotParser.Y2ticlabelsContext context)
@@ -888,6 +917,7 @@ public class MplotListener : MplotBaseListener
 
         checks.AddRange(TicCheck(XTicLabels, XTicMin, XTicMax, XTicIncrement, "x"));
         checks.AddRange(TicCheck(YTicLabels, YTicMin, YTicMax, YTicIncrement, "y"));
+         checks.AddRange(TicCheck(X2TicLabels, X2TicMin, X2TicMax, X2TicIncrement, "x2"));
          checks.AddRange(TicCheck(Y2TicLabels, Y2TicMin, Y2TicMax, Y2TicIncrement, "y2"));
 
         return checks;
@@ -982,11 +1012,18 @@ public class MplotListener : MplotBaseListener
 
         if (!XMin.IsAuto || !XMax.IsAuto) lines.Add($"set xrange [{XMin.ToGnuplot()}:{XMax.ToGnuplot()}]");
         if (!YMin.IsAuto || !YMax.IsAuto) lines.Add($"set yrange [{YMin.ToGnuplot()}:{YMax.ToGnuplot()}]");
+        if (!X2Min.IsAuto || !X2Max.IsAuto) lines.Add($"set x2range [{X2Min.ToGnuplot()}:{X2Max.ToGnuplot()}]");
         if (!Y2Min.IsAuto || !Y2Max.IsAuto) lines.Add($"set y2range [{Y2Min.ToGnuplot()}:{Y2Max.ToGnuplot()}]");
 
         HandleTics(XTicLabels, XTicMin, XTicMax, XTicIncrement, "xtic", lines);
         HandleTics(YTicLabels, YTicMin, YTicMax, YTicIncrement, "ytic", lines);
+        HandleTics(X2TicLabels, X2TicMin, X2TicMax, X2TicIncrement, "x2tic", lines);
         HandleTics(Y2TicLabels, Y2TicMin, Y2TicMax, Y2TicIncrement, "y2tic", lines);
+
+        if (!X2Min.IsAuto || !X2Max.IsAuto || X2TicMin is not null || X2TicIncrement is not null || X2TicMax is not null)
+        {
+            lines.Add("set xtics nomirror");
+        }
 
         if (_additionalXTics.Count > 0)
         {
@@ -1000,21 +1037,28 @@ public class MplotListener : MplotBaseListener
             // lines.Add("set format x2 \"\"");
         }
 
+        // Y1 TICS
         if (_additionalYTics.Count > 0)
         {
             lines.Add($"set ytics add ({string.Join(", ", _additionalYTics.Select(tic => tic.ToGnuplot()))})");
         }
 
+        // Y2 TICS
+        if (!Y2Min.IsAuto || !Y2Max.IsAuto || Y2TicMin is not null || Y2TicIncrement is not null || Y2TicMax is not null)
+        {
+            lines.Add("set ytics nomirror");
+        }
+
         if (YAxisSidesArray.Elements().Any(side => side == YAxisSide.Right))
         {
             lines.Add("set y2tics");
-            lines.Add("set ytics nomirror");
+            // lines.Add("set ytics nomirror");
         }
 
         if (_additionalYTics2.Count > 0)
         {
             lines.Add($"set y2tics add ({string.Join(", ", _additionalYTics2.Select(tic => tic.ToGnuplot()))})");
-            lines.Add($"set link y2");
+            // lines.Add($"set link y2");
             // lines.Add("set format y2 \"\"");
         }
 

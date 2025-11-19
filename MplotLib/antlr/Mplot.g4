@@ -6,6 +6,7 @@ plot : element* ;
 
 element
   : xlabel
+  | x2label
   | ylabel
   | y2label
   | labels
@@ -34,6 +35,7 @@ element
   | xmin
   | xmax
   | yrange
+  | x2range
   | y2range
   | ymin
   | ymax
@@ -54,6 +56,7 @@ element
   | xticAdd2
   | xticlabels
   | ytics
+  | x2tics
   | y2tics
   | yticAdd
   | yticAdd2
@@ -91,6 +94,7 @@ xformat    : ('xf' | 'xticformat' | 'xformat') STRING ;
 yformat    : ('yf' | 'yticformat' | 'yformat') STRING ;
 xrange     : ('xr' | 'xrange' | 'xlim' | 'xlimit') range ;
 yrange     : ('yr' | 'yrange' | 'ylim' | 'ylimit') range ;
+x2range     : ('xr2' | 'xrange2' | 'xlim2' | 'xlimit2' | 'x2r' | 'x2range' | 'x2lim' | 'x2limit') range ;
 y2range     : ('yr2' | 'yrange2' | 'ylim2' | 'ylimit2' | 'y2r' | 'y2range' | 'y2lim' | 'y2limit') range ;
 xmin       : ('xmin' | 'xlow') rangeItem ;
 xmax       : ('xmax' | 'xhigh') rangeItem ;
@@ -135,9 +139,11 @@ firstAsterisk : ASTERISK ;
 xtics : 'xtics' rational (COMMA_CHAR | COLON)? rational (COMMA_CHAR | COLON)? rational ;
 ytics : 'ytics' rational (COMMA_CHAR | COLON)? rational (COMMA_CHAR | COLON)? rational ;
 y2tics : ('y2tics' | 'ytics2') rational (COMMA_CHAR | COLON)? rational (COMMA_CHAR | COLON)? rational ;
+x2tics : ('x2tics' | 'xtics2') rational (COMMA_CHAR | COLON)? rational (COMMA_CHAR | COLON)? rational ;
 
 xticlabels : 'xticlabels' stringArray ;
 yticlabels : 'yticlabels' stringArray ;
+x2ticlabels : 'x2ticlabels' stringArray ;
 y2ticlabels : 'y2ticlabels' stringArray ;
 
 ticsOut : TICS_OUT ;
