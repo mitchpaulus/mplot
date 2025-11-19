@@ -84,6 +84,7 @@ public class Series
 
         b.Append($" linecolor {_lineColor.ToGnuplot()}");
         if (!string.IsNullOrWhiteSpace(title)) b.Append($" {title}");
+        else b.Append(" notitle");
 
         return b.ToString();
     }
