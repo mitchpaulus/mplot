@@ -42,6 +42,7 @@ o + -
 s "Series 1" "Series 2"
 
 lw 2 {- line width -}
+dt ".-" "--" {- dash types -}
 
 {- time axis settings -}
 time
@@ -56,3 +57,5 @@ top right ul upperleft ur upperright
 rgb 123 124 125 {- rgb -}
 red green blue black orange ccblue ccgray ccmaroon ccgreen ccyellow {- named -}
 ```
+
+`dashtype` (or the shorthand `dt`) accepts one or more strings containing only `.`, `-`, `_`, or space to describe the dash sequence used for subsequent series. Repeat (`*`) and cycle keywords apply the same way they do for other arrays.

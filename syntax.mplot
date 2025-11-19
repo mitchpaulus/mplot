@@ -38,6 +38,7 @@ o + -
 s "Series 1" "Series 2"
 
 lw 2 {- line width -}
+dt ".-" "--" {- dash types -}
 
 {- time axis settings -}
 time

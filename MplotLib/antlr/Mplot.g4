@@ -189,7 +189,10 @@ markerType
   | ('nomarker' | 'nomark') # NoMarker
   ;
 
-dash : dashType (count | ASTERISK | CYCLE)? ;
+dash
+  : dashType (count | ASTERISK | CYCLE)? # NamedDash
+  | ('dashtype' | 'dt') (argString | ASTERISK | CYCLE)+ # CustomDash
+  ;
 
 dashType
   : ('dashed' | 'dash') # DashedLine

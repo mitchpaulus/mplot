@@ -587,25 +587,19 @@ public class MplotListener : MplotBaseListener
         }
     }
 
-    public override void EnterDash(MplotParser.DashContext context)
+    public override void EnterNamedDash(MplotParser.NamedDashContext context)
     {
-        DashType dt;
-        if (context.dashType() is MplotParser.DashedLineContext)
+        DashType dt = context.dashType() switch
         {
-            dt = new SimpleDash();
-        }
-        else if (context.dashType() is MplotParser.SolidLineContext)
-        {
-            dt = new SolidDash();
-        }
-        else
-        {
-            throw new NotImplementedException();
-        }
+            MplotParser.DashedLineContext => new SimpleDash(),
+            MplotParser.SolidLineContext => new SolidDash(),
+            _ => throw new NotImplementedException()
+        };
 
         if (context.count() is { } countContext)
         {
-            for (int i = 0; i < int.Parse(countContext.INT().GetText()); i++)
+            var count = int.Parse(countContext.INT().GetText());
+            for (int i = 0; i < count; i++)
             {
                 DashTypeArray.Add(dt);
             }
@@ -623,6 +617,24 @@ public class MplotListener : MplotBaseListener
         else
         {
             DashTypeArray.Add(dt);
+        }
+    }
+
+    public override void EnterCustomDash(MplotParser.CustomDashContext context)
+    {
+        foreach (var arg in context.argString())
+        {
+            string pattern = arg.ToMPlotString().GetString(_stringArgs);
+            DashTypeArray.Add(new CustomDash(pattern));
+        }
+
+        if (context.ASTERISK().Length > 0)
+        {
+            DashTypeArray.SetMode(MplotArrayMode.Repeat);
+        }
+        else if (context.CYCLE().Length > 0)
+        {
+            DashTypeArray.SetMode(MplotArrayMode.Cycle);
         }
     }
 

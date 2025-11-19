@@ -354,6 +354,7 @@ internal static class Program
         Console.Write("s \"Series 1\" \"Series 2\"\n");
         Console.Write("\n");
         Console.Write("lw 2 {- line width -}\n");
+        Console.Write("dt \".-\" \"--\" {- dash types -}\n");
         Console.Write("\n");
         Console.Write("{- time axis settings -}\n");
         Console.Write("time\n");

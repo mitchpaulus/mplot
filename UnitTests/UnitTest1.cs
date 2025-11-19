@@ -102,4 +102,17 @@ public class Tests
         string fullPath = Path.GetFullPath(path1, otherDir);
         Console.WriteLine(fullPath);
     }
+
+    [Test]
+    public void CustomDash_InvalidCharacter_Throws()
+    {
+        Assert.Throws<ArgumentException>(() => new CustomDash("abc"));
+    }
+
+    [Test]
+    public void CustomDash_ToGnuplot_WritesPattern()
+    {
+        CustomDash dash = new(".- _");
+        Assert.That(dash.ToGnuplot(), Is.EqualTo("dashtype \".- _\""));
+    }
 }
