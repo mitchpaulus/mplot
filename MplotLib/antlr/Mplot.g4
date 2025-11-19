@@ -201,7 +201,7 @@ dashType
 
 MARKER : 'marker' | 'm' ;
 
-stringArray : (argString | ASTERISK | CYCLE)+ ;
+stringArray : (stringCount | ASTERISK | CYCLE)+ ;
 intArray : (INT | ASTERISK | CYCLE)+ ;
 rationalArray : (rational | ASTERISK | CYCLE)+ ;
 colorArray : (hexColor | rgbColor | knownColor | ASTERISK | CYCLE)+ ;

@@ -24,6 +24,12 @@ public static class Extensions
     public static List<IndexedItem<T>> WithIndex<T>(this IEnumerable<T> list, int init = 0) =>
         list.Select((arg1, i) => new IndexedItem<T>(i + init, arg1)).ToList();
 
+    public static List<string> GetStrings(this MplotParser.StringCountContext stringCountContext, List<string> stringArgs)
+    {
+        int count = stringCountContext.count() is null ? 1 : int.Parse(stringCountContext.count().GetText());
+        return Enumerable.Repeat(stringCountContext.argString().ToMPlotString().GetString(stringArgs), count).ToList();
+    }
+
     public static string ToGnuplot(this Color color)
     {
         // Get r in Hex format (FF)

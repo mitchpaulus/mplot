@@ -283,7 +283,7 @@ public class MplotListener : MplotBaseListener
     {
         bool repeat = context.stringArray().ASTERISK() is not null;
         bool cycle = context.stringArray().CYCLE() is not null;
-        FilePathArray.Update(context.stringArray().argString().Select(node => (DataSource)new FileSource(node.ToMPlotString().GetString(_stringArgs), _fileInfo)).ToList(), cycle, repeat);
+        FilePathArray.Update(context.stringArray().stringCount().SelectMany(countContext => countContext.GetStrings(_stringArgs)).Select(s => (DataSource)new FileSource(s, _fileInfo)).ToList(), cycle, repeat);
     }
 
     public override void EnterStdinInput(MplotParser.StdinInputContext context)
@@ -513,7 +513,7 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterSeparator(MplotParser.SeparatorContext context)
     {
-        var separatorText = context.stringArray().argString().Select(s => s.ToMPlotString().GetString(_stringArgs)).ToList();
+        var separatorText = context.stringArray().stringCount().SelectMany(s => s.GetStrings(_stringArgs)).ToList();
         CharactersSeparator charactersSeparator = new(separatorText[0]);
 
         SeparatorArray.Update(separatorText.Select(s => (Separator2)new CharactersSeparator(s)).ToList(),
@@ -553,25 +553,25 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterXticlabels(MplotParser.XticlabelsContext context)
     {
-        var names = context.stringArray().argString().Select(node => node.ToMPlotString().GetString(_stringArgs).Trim()).ToList();
+        var names = context.stringArray().stringCount().SelectMany(s => s.GetStrings(_stringArgs)).Select(s => s.Trim()).ToList();
         XTicLabels.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
     }
 
     public override void EnterYticlabels(MplotParser.YticlabelsContext context)
     {
-        var names = context.stringArray().argString().Select(node => node.ToMPlotString().GetString(_stringArgs).Trim()).ToList();
+        var names = context.stringArray().stringCount().SelectMany(s => s.GetStrings(_stringArgs)).Select(s => s.Trim()).ToList();
         YTicLabels.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
     }
 
     public override void EnterX2ticlabels(MplotParser.X2ticlabelsContext context)
     {
-        var names = context.stringArray().argString().Select(node => node.ToMPlotString().GetString(_stringArgs).Trim()).ToList();
+        var names = context.stringArray().stringCount().SelectMany(s => s.GetStrings(_stringArgs)).Select(s => s.Trim()).ToList();
         X2TicLabels.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
     }
 
     public override void EnterY2ticlabels(MplotParser.Y2ticlabelsContext context)
     {
-        var names = context.stringArray().argString().Select(node => node.ToMPlotString().GetString(_stringArgs).Trim()).ToList();
+        var names = context.stringArray().stringCount().SelectMany(s => s.GetStrings(_stringArgs)).Select(s => s.Trim()).ToList();
         Y2TicLabels.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
     }
 
@@ -841,7 +841,7 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterSeries(MplotParser.SeriesContext context)
     {
-        var names = context.stringArray().argString().Select(node => node.ToMPlotString().GetString(_stringArgs).Trim()).ToList();
+        var names = context.stringArray().stringCount().SelectMany(s => s.GetStrings(_stringArgs)).Select(s => s.Trim()).ToList();
         SeriesNameArray.Update(names, context.stringArray().CYCLE().Any(), context.stringArray().ASTERISK().Any());
     }
 
