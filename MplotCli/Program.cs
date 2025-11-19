@@ -355,6 +355,7 @@ internal static class Program
         Console.Write("\n");
         Console.Write("lw 2 {- line width -}\n");
         Console.Write("dt \".-\" \"--\" {- dash types -}\n");
+        Console.Write("text \"My Label\" 10 20 {- place a text annotation -}\n");
         Console.Write("\n");
         Console.Write("{- time axis settings -}\n");
         Console.Write("time\n");

@@ -39,6 +39,8 @@ s "Series 1" "Series 2"
 
 lw 2 {- line width -}
 dt ".-" "--" {- dash types -}
+text "My Label" 10 20 {- place a text annotation -}
+text 10 20 "My Label" {- string may also come last -}
 
 {- time axis settings -}
 time

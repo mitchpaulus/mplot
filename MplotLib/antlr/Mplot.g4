@@ -74,6 +74,7 @@ element
   | dash
   | axisSide
   | xStep
+  | textLabel
   ;
 
 file       : ('f' | 'file') stringArray ;
@@ -118,6 +119,10 @@ lmargin : ('lmargin' | 'lm') rational ;
 rmargin : ('rmargin' | 'rm') rational ;
 axisSide : side=('y1' | 'y2') (count | CYCLE | ASTERISK)? ;
 xStep : ('xstep' | 'xstepwidth') rational ;
+textLabel
+  : 'text' argString rational rational
+  | 'text' rational rational argString
+  ;
 
 stdinInput : STDIN ASTERISK? ;
 STDIN : 'stdin' ;

@@ -43,6 +43,8 @@ public class MplotListener : MplotBaseListener
     private readonly List<AdditionalTic> _additionalXTics2 = new();
     private readonly List<AdditionalTic> _additionalYTics2 = new();
 
+    public List<TextLabel> TextLabels { get; } = new();
+
     private Maybe<Rational> _lmargin = NoneMarker.None;
     private Maybe<Rational> _rmargin = NoneMarker.None;
 
@@ -876,6 +878,9 @@ public class MplotListener : MplotBaseListener
         _currentVar++;
     }
 
+    public override void EnterTextLabel(MplotParser.TextLabelContext context) =>
+        AddTextLabel(context.argString(), context.rational(0), context.rational(1));
+
     public override void EnterCommandSource(MplotParser.CommandSourceContext context)
     {
         var arguments = context.STRING().Select(s => s.GetText().UnescapeMplotString()).ToList();
@@ -894,6 +899,14 @@ public class MplotListener : MplotBaseListener
     public override void EnterFontSize(MplotParser.FontSizeContext context)
     {
         FontSize = int.Parse(context.INT().GetText());
+    }
+
+    private void AddTextLabel(MplotParser.ArgStringContext context, MplotParser.RationalContext x, MplotParser.RationalContext y)
+    {
+        string labelText = context.ToMPlotString().GetString(_stringArgs);
+        Rational xValue = new(x);
+        Rational yValue = new(y);
+        TextLabels.Add(new TextLabel(labelText, xValue, yValue));
     }
 
     private List<string> TicCheck(MplotArray<string> labels, Rational? min, Rational? max, Rational? inc, string axis)
@@ -998,6 +1011,14 @@ public class MplotListener : MplotBaseListener
         }
 
         lines.AddRange(GnuplotLiterals);
+
+        if (TextLabels.Count > 0)
+        {
+            foreach (var (label, index) in TextLabels.Select((value, idx) => (value, idx + 1)))
+            {
+                lines.Add(label.ToGnuplot(index));
+            }
+        }
 
         // TODO: escape characters
         if (!string.IsNullOrWhiteSpace(OutputFile)) lines.Add($"set output \"{OutputFile}\"");
@@ -1400,6 +1421,11 @@ public class AdditionalTic
         // TODO: escape stuff for label.
         return $"\"{Label?.Trim() ?? ""}\" {Rational.ToDecimalString()}";
     }
+}
+
+public record TextLabel(string Text, Rational X, Rational Y)
+{
+    public string ToGnuplot(int index) => $"set label {index} {Text.ToGnuPlotString()} at {X.ToDecimalString()},{Y.ToDecimalString()}";
 }
 
 public class Maybe<T> : OneOfBase<T, NoneMarker>
