@@ -75,6 +75,7 @@ element
   | axisSide
   | xStep
   | textLabel
+  | arrow
   ;
 
 file       : ('f' | 'file') stringArray ;
@@ -122,6 +123,10 @@ xStep : ('xstep' | 'xstepwidth') rational ;
 textLabel
   : 'text' argString rational rational
   | 'text' rational rational argString
+  ;
+
+arrow
+  : 'arrow' rational rational rational rational
   ;
 
 stdinInput : STDIN ASTERISK? ;

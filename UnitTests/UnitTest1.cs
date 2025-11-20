@@ -152,6 +152,40 @@ text 15 25 ""Later""
         Assert.That(gnuplot, Does.Contain("set label 1 \"Later\" at 15,25"));
     }
 
+    [Test]
+    public void Arrow_WritesSetArrow()
+    {
+        const string script = @"start
+1 2
+end
+s ""Series 1""
+x 1
+y 2
+arrow 10 20 35 45
+";
+        var listener = ParseScript(script);
+        string gnuplot = listener.WriteGnuplot();
+        Assert.That(gnuplot, Does.Contain("set arrow 1 from 10,20 to 35,45 head filled lw 2"));
+    }
+
+    [Test]
+    public void Arrow_MultipleArrows_IncrementIndex()
+    {
+        const string script = @"start
+1 2
+end
+s ""Series 1""
+x 1
+y 2
+arrow 0 0 10 10
+arrow 10 10 20 5
+";
+        var listener = ParseScript(script);
+        string gnuplot = listener.WriteGnuplot();
+        Assert.That(gnuplot, Does.Contain("set arrow 1 from 0,0 to 10,10 head filled lw 2"));
+        Assert.That(gnuplot, Does.Contain("set arrow 2 from 10,10 to 20,5 head filled lw 2"));
+    }
+
     private static MplotListener ParseScript(string script)
     {
         AntlrInputStream inputStream = new(script);

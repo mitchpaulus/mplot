@@ -44,6 +44,7 @@ public class MplotListener : MplotBaseListener
     private readonly List<AdditionalTic> _additionalYTics2 = new();
 
     public List<TextLabel> TextLabels { get; } = new();
+    public List<ArrowAnnotation> Arrows { get; } = new();
 
     private Maybe<Rational> _lmargin = NoneMarker.None;
     private Maybe<Rational> _rmargin = NoneMarker.None;
@@ -881,6 +882,9 @@ public class MplotListener : MplotBaseListener
     public override void EnterTextLabel(MplotParser.TextLabelContext context) =>
         AddTextLabel(context.argString(), context.rational(0), context.rational(1));
 
+    public override void EnterArrow(MplotParser.ArrowContext context) =>
+        AddArrow(context.rational(0), context.rational(1), context.rational(2), context.rational(3));
+
     public override void EnterCommandSource(MplotParser.CommandSourceContext context)
     {
         var arguments = context.STRING().Select(s => s.GetText().UnescapeMplotString()).ToList();
@@ -907,6 +911,15 @@ public class MplotListener : MplotBaseListener
         Rational xValue = new(x);
         Rational yValue = new(y);
         TextLabels.Add(new TextLabel(labelText, xValue, yValue));
+    }
+
+    private void AddArrow(MplotParser.RationalContext x1, MplotParser.RationalContext y1, MplotParser.RationalContext x2, MplotParser.RationalContext y2)
+    {
+        Rational xStart = new(x1);
+        Rational yStart = new(y1);
+        Rational xEnd = new(x2);
+        Rational yEnd = new(y2);
+        Arrows.Add(new ArrowAnnotation(xStart, yStart, xEnd, yEnd));
     }
 
     private List<string> TicCheck(MplotArray<string> labels, Rational? min, Rational? max, Rational? inc, string axis)
@@ -1017,6 +1030,14 @@ public class MplotListener : MplotBaseListener
             foreach (var (label, index) in TextLabels.Select((value, idx) => (value, idx + 1)))
             {
                 lines.Add(label.ToGnuplot(index));
+            }
+        }
+
+        if (Arrows.Count > 0)
+        {
+            foreach (var (arrow, index) in Arrows.Select((value, idx) => (value, idx + 1)))
+            {
+                lines.Add(arrow.ToGnuplot(index));
             }
         }
 
@@ -1426,6 +1447,12 @@ public class AdditionalTic
 public record TextLabel(string Text, Rational X, Rational Y)
 {
     public string ToGnuplot(int index) => $"set label {index} {Text.ToGnuPlotString()} at {X.ToDecimalString()},{Y.ToDecimalString()}";
+}
+
+public record ArrowAnnotation(Rational X1, Rational Y1, Rational X2, Rational Y2)
+{
+    public string ToGnuplot(int index) =>
+        $"set arrow {index} from {X1.ToDecimalString()},{Y1.ToDecimalString()} to {X2.ToDecimalString()},{Y2.ToDecimalString()} head filled lw 2";
 }
 
 public class Maybe<T> : OneOfBase<T, NoneMarker>

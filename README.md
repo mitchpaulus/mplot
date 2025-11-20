@@ -44,6 +44,7 @@ s "Series 1" "Series 2"
 lw 2 {- line width -}
 dt ".-" "--" {- dash types -}
 text "My Label" 10 20 {- place a text annotation -}
+arrow 10 20 30 35 {- draw an arrow annotation -}
 
 {- time axis settings -}
 time
@@ -61,4 +62,4 @@ red green blue black orange ccblue ccgray ccmaroon ccgreen ccyellow {- named -}
 
 `dashtype` (or the shorthand `dt`) accepts one or more strings containing only `.`, `-`, `_`, or space to describe the dash sequence used for subsequent series. Repeat (`*`) and cycle keywords apply the same way they do for other arrays.
 
-Use the `text` command to drop arbitrary labels: `text "Peak" 42 7.5` becomes `set label n at 42,7.5` in gnuplot (one-based `n` increments per label). Prefer the string first or last—`text 42 7.5 "Peak"` is also valid.
+Use the `text` command to drop arbitrary labels: `text "Peak" 42 7.5` becomes `set label n at 42,7.5` in gnuplot (one-based `n` increments per label). Prefer the string first or last—`text 42 7.5 "Peak"` is also valid. The `arrow` command emits `set arrow n from x1,y1 to x2,y2 head filled lw 2`, for example `arrow 10 20 30 40`.
