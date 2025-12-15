@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
-    <PackageReference Include="EPPlus" Version="8.3.0" />
+    <PackageReference Include="EPPlus" Version="8.4.0" />
     <PackageReference Include="OneOf" Version="3.0.271" />
   </ItemGroup>
 
