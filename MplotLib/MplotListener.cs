@@ -1059,7 +1059,25 @@ public class MplotListener : MplotBaseListener
         if (!string.IsNullOrWhiteSpace(YLabel)) lines.Add($"set ylabel {YLabel.ToGnuPlotString()}");
         else if (seriesList.Count == 1)
         {
-            lines.Add($"set ylabel \"{seriesList[0].Name}\"");
+            string? autoYLabel = null;
+
+            if (!SeriesNameArray.UseDefault)
+            {
+                autoYLabel = seriesList[0].Name;
+            }
+            else
+            {
+                var ySelector = YcolsArray[0];
+                autoYLabel = ySelector.Match(
+                    columnSpecifier => columnSpecifier.UseString ? columnSpecifier.ColumnName : null,
+                    _ => null
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(autoYLabel))
+            {
+                lines.Add($"set ylabel \"{autoYLabel}\"");
+            }
         }
 
         if (!string.IsNullOrWhiteSpace(X2Label)) lines.Add($"set x2label {X2Label.ToGnuPlotString()}");
