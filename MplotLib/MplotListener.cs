@@ -1071,7 +1071,7 @@ public class MplotListener : MplotBaseListener
                 autoYLabel = ySelector.Match(
                     columnSpecifier => columnSpecifier.UseString ? columnSpecifier.ColumnName : null,
                     _ => null
-                );
+                )?.Replace("_", "\\\\_"); // Need to escape for enhanced
             }
 
             if (!string.IsNullOrWhiteSpace(autoYLabel))
