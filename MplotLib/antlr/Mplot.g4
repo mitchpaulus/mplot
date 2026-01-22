@@ -206,7 +206,7 @@ dash
 
 dashType
   : ('dashed' | 'dash') # DashedLine
-  | ('nodash') # SolidLine
+  | ('nodash' | 'solid') # SolidLine
   ;
 
 MARKER : 'marker' | 'm' ;

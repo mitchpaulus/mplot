@@ -1088,10 +1088,10 @@ public class MplotListener : MplotBaseListener
         if (!X2Min.IsAuto || !X2Max.IsAuto) lines.Add($"set x2range [{X2Min.ToGnuplot()}:{X2Max.ToGnuplot()}]");
         if (!Y2Min.IsAuto || !Y2Max.IsAuto) lines.Add($"set y2range [{Y2Min.ToGnuplot()}:{Y2Max.ToGnuplot()}]");
 
-        HandleTics(XTicLabels, XTicMin, XTicMax, XTicIncrement, "xtic", lines);
-        HandleTics(YTicLabels, YTicMin, YTicMax, YTicIncrement, "ytic", lines);
-        HandleTics(X2TicLabels, X2TicMin, X2TicMax, X2TicIncrement, "x2tic", lines);
-        HandleTics(Y2TicLabels, Y2TicMin, Y2TicMax, Y2TicIncrement, "y2tic", lines);
+        HandleTics(XTicLabels, XTicMin, XTicMax, XTicIncrement, "xtics", lines);
+        HandleTics(YTicLabels, YTicMin, YTicMax, YTicIncrement, "ytics", lines);
+        HandleTics(X2TicLabels, X2TicMin, X2TicMax, X2TicIncrement, "x2tics", lines);
+        HandleTics(Y2TicLabels, Y2TicMin, Y2TicMax, Y2TicIncrement, "y2tics", lines);
 
         if (!X2Min.IsAuto || !X2Max.IsAuto || X2TicMin is not null || X2TicIncrement is not null || X2TicMax is not null)
         {
