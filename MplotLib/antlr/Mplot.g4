@@ -216,8 +216,8 @@ intArray : (INT | ASTERISK | CYCLE)+ ;
 rationalArray : (rational | ASTERISK | CYCLE)+ ;
 colorArray : (hexColor | rgbColor | knownColor | ASTERISK | CYCLE)+ ;
 
-legendCols : ('legendcols' | 'keycols' | 'cols') INT ;
-legendRows : ('legendrows' | 'keyrows' | 'rows') INT ;
+legendCols : ('legendcols' | 'keycols' | 'cols' | 'numcols' | 'maxcols') INT ;
+legendRows : ('legendrows' | 'keyrows' | 'rows' | 'numrows' | 'maxrows') INT ;
 
 separator_type
   : commaSeparator ASTERISK? # CommaSep
