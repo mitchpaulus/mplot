@@ -39,10 +39,10 @@ public class Series
         StringBuilder b = new();
 
         string skipText = _skip == 0 ? "" : $" skip {_skip}";
-        string title = string.IsNullOrWhiteSpace(Name) ? "" : $" title \"{Name}\"";
+        string title = string.IsNullOrWhiteSpace(Name) ? "" : $" title {Name.ToGnuPlotString()}";
 
         string source = FilePath.Match(
-            fileSource => $"\"{fileSource.Filepath}\"",
+            fileSource => fileSource.Filepath.ToGnuPlotString(),
             inlineDataSource => "$" + inlineDataSource.VariableName,
             cmdDataSource => cmdDataSource.ToGnuPlotString(),
             _ => "'-'"

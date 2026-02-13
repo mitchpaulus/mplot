@@ -208,8 +208,8 @@ public class MplotListener : MplotBaseListener
             if (TimeAxis)
             {
                 xColSpecifier = TimeFormat.Match(
-                    tf => $"(timecolumn(1, \"{tf}\"))",
-                    _ => "(timecolumn(1, \"%Y-%m-%d %H:%M\"))"
+                    tf => $"(timecolumn(1, {tf.ToGnuPlotString()}))",
+                    _ => $"(timecolumn(1, {"%Y-%m-%d %H:%M".ToGnuPlotString()}))"
                 );
             }
 
@@ -1011,8 +1011,9 @@ public class MplotListener : MplotBaseListener
         string fontScale = PlotDpi % TextDpi == 0 ? (PlotDpi / TextDpi).ToString() : ((double)PlotDpi / TextDpi).ToString("f3");
 
         string fontName = FontName ?? "";
+        string fontSpec = $"{fontName},{FontSize}".ToGnuPlotString();
 
-        lines.Add($"set terminal pngcairo size {widthPixels},{heightPixels} font \"{fontName},{FontSize}\" fontscale {fontScale} pointscale {fontScale}");
+        lines.Add($"set terminal pngcairo size {widthPixels},{heightPixels} font {fontSpec} fontscale {fontScale} pointscale {fontScale}");
 
         if (_lmargin.IsValue(out var rational)) lines.Add($"set lmargin {rational.ToDecimalString()}");
         if (_rmargin.IsValue(out rational)) lines.Add($"set rmargin {rational.ToDecimalString()}");
@@ -1041,11 +1042,10 @@ public class MplotListener : MplotBaseListener
             }
         }
 
-        // TODO: escape characters
-        if (!string.IsNullOrWhiteSpace(OutputFile)) lines.Add($"set output \"{OutputFile}\"");
+        if (!string.IsNullOrWhiteSpace(OutputFile)) lines.Add($"set output {OutputFile.ToGnuPlotString()}");
 
         if (!string.IsNullOrWhiteSpace(Title)) lines.Add($"set title {Title.ToGnuPlotString()}");
-        if (!string.IsNullOrWhiteSpace(XLabel)) lines.Add($"set xlabel \"{XLabel}\"");
+        if (!string.IsNullOrWhiteSpace(XLabel)) lines.Add($"set xlabel {XLabel.ToGnuPlotString()}");
 
         if (Grid) lines.Add("set grid lw 2");
         List<Series> seriesList = GenSeries();
@@ -1071,12 +1071,12 @@ public class MplotListener : MplotBaseListener
                 autoYLabel = ySelector.Match(
                     columnSpecifier => columnSpecifier.UseString ? columnSpecifier.ColumnName : null,
                     _ => null
-                )?.Replace("_", "\\\\_"); // Need to escape for enhanced
+                )?.Replace("_", "\\_"); // Need to escape for enhanced
             }
 
             if (!string.IsNullOrWhiteSpace(autoYLabel))
             {
-                lines.Add($"set ylabel \"{autoYLabel}\"");
+                lines.Add($"set ylabel {autoYLabel.ToGnuPlotString()}");
             }
         }
 
@@ -1143,8 +1143,8 @@ public class MplotListener : MplotBaseListener
 
         // Sets the format for tick marks. Typical format modifiers like '%f' and '%e'
         // Also sets the time formats
-        if (!string.IsNullOrWhiteSpace(XFormat)) lines.Add($"set format x \"{XFormat}\"");
-        if (!string.IsNullOrWhiteSpace(YFormat)) lines.Add($"set format y \"{YFormat}\"");
+        if (!string.IsNullOrWhiteSpace(XFormat)) lines.Add($"set format x {XFormat.ToGnuPlotString()}");
+        if (!string.IsNullOrWhiteSpace(YFormat)) lines.Add($"set format y {YFormat.ToGnuPlotString()}");
 
         // If the File Path is set to repeat mode and the last one is a inline data source, we don't want to repeat.
         HashSet<string> varNamesUsed = new();
@@ -1350,7 +1350,7 @@ public class CharactersSeparator : Separator
     {
         Sep = sep;
     }
-    public override string ToGnuplot() => $"set datafile separator \"{Sep}\"";
+    public override string ToGnuplot() => $"set datafile separator {Sep.ToGnuPlotString()}";
     public override List<string> Split(string s) => s.Split(Sep).ToList();
 }
 
@@ -1404,9 +1404,9 @@ public class ColumnSpecifier
         ColumnName = "";
     }
 
-    public override string ToString() => UseString ? $"\"{ColumnName}\"" : OneBasedColumnIndex.ToString();
+    public override string ToString() => UseString ? ColumnName.ToGnuPlotString() : OneBasedColumnIndex.ToString();
 
-    public string ToGnuplotExp() => UseString ? $"(column(\"{ColumnName}\"))" : $"${OneBasedColumnIndex}";
+    public string ToGnuplotExp() => UseString ? $"(column({ColumnName.ToGnuPlotString()}))" : $"${OneBasedColumnIndex}";
 
     public int ColMatchZeroBased(List<string> line)
     {
@@ -1457,8 +1457,7 @@ public class AdditionalTic
 
     public string ToGnuplot()
     {
-        // TODO: escape stuff for label.
-        return $"\"{Label?.Trim() ?? ""}\" {Rational.ToDecimalString()}";
+        return $"{(Label?.Trim() ?? "").ToGnuPlotString()} {Rational.ToDecimalString()}";
     }
 }
 
