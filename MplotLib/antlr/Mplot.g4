@@ -228,8 +228,9 @@ separator_type
 CYCLE : 'cycle' ;
 ASTERISK : '*' ;
 INLINEDATA : START .*? END ;
-fragment START : ('start' | 'Start' | 'START' | 'DATA') [ \t*]* '\n';
-fragment END : ('end' | 'End' | 'END') [ \t*]* '\n';
+fragment NEWLINE : '\r'? '\n' ;
+fragment START : ('start' | 'Start' | 'START' | 'DATA') [ \t*]* NEWLINE;
+fragment END : ('end' | 'End' | 'END') [ \t*]* NEWLINE;
 
 CMD : 'cmd' | 'command' ;
 
@@ -324,10 +325,10 @@ rational
   | negate=MINUS? INT # Integer
   ;
 
-WS : [ \t\n]+ -> skip ;
+WS : [ \t\r\n]+ -> skip ;
 
 COMMENT : '{-' .*? '-}' -> skip ;
-LINE_COMMENT : '//'.*? '\n' -> skip ;
+LINE_COMMENT : '//'.*? NEWLINE -> skip ;
 
 STRING : '"' (ESC|.)*? '"' ;
 fragment ESC : '\\"' | '\\\\' ;
