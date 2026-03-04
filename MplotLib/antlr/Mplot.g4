@@ -314,8 +314,8 @@ knownColorCycleAsterisk : knownColor (ASTERISK | CYCLE)? ;
 fragment HEX_DIGIT : '0'..'9' | 'a'..'f' | 'A'..'F' ;
 
 // Must be above INT for lexing priority
-DAY : [0-9][0-9][0-9][0-9]'-'[0-9][0-9]'-'[0-9][0-9] ;
-TIME : [0-9][0-9]':'[0-9][0-9] ;
+DAY : [0-9][0-9][0-9][0-9]'-'('0' [0-9] | '1' [0-2])'-'[0-3][0-9] ;
+TIME : 'T'? ([0-1][0-9] | '2' [0-3]) ':' [0-5][0-9] (':' [0-5][0-9])? ;
 
 INT : [0-9]+ ;
 

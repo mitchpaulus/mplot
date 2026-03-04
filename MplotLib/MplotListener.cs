@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Text;
 using Antlr4.Runtime.Tree;
 using OneOf;
@@ -1020,7 +1020,7 @@ public class MplotListener : MplotBaseListener
 
         if (TimeAxis)
         {
-            lines.Add("set timefmt \"%Y-%m-%d %H:%M\"");
+            lines.Add("set timefmt \"%Y-%m-%d %H:%M:%S\"");
             lines.Add("set xdata time");
         }
 

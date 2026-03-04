@@ -205,11 +205,22 @@ public static class Extensions
         // TODO: Handle invalid dates?
         if (dtContext.TIME() is null) return new DateTime(year, month, day);
 
-        // HH:mm
+        // TIME : TIME : 'T'? ([0-1][0-9] | '2' [0-3]) (':' [0-5][0-9] (':' [0-5][0-9])? )? ;
         string timeText = dtContext.TIME().GetText();
-        int hour = int.Parse(timeText.Substring(0, 2));
-        int minute = int.Parse(timeText.Substring(3, 2));
-        return new DateTime(year, month, day, hour, minute, 0);
+
+        int start = 0;
+        if (timeText.StartsWith('T')) { start = 1; }
+        int hour = int.Parse(timeText.Substring(start, 2));
+
+        int minute = 0;
+        if (timeText.Length >= start + 3 + 2) minute = int.Parse(timeText.Substring(start + 3, 2));
+
+        int second = 0;
+        if (timeText.Length >= start + 6 + 2) second = int.Parse(timeText.Substring(start + 6, 2));
+
+        // Because of the lexer rule, this should always be valid for year, month, hour, minute, second.
+        // TODO: how to check for valid day of month.
+        return new DateTime(year, month, day, hour, minute, second);
     }
 
     public static MPlotString ToMPlotString(this MplotParser.ArgStringContext stringContext)
