@@ -13,6 +13,8 @@ internal static class Program
 
     private static int Main(string[] args)
     {
+        Console.OutputEncoding = new UTF8Encoding(false);
+
         int i = 0;
 
         List<string> files = new();
@@ -167,7 +169,7 @@ internal static class Program
                     {
                         process.Start();
 
-                        using (StreamWriter w = process.StandardInput)
+                        using (StreamWriter w = new(process.StandardInput.BaseStream, new UTF8Encoding(false)))
                         {
                             if (w.BaseStream.CanWrite)
                             {

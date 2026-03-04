@@ -9,6 +9,7 @@ examples/*.png
 .avalonia-build-tasks/
 .templateengine/
 examples.mplot
+.claude/
 
 publish*/
 tests/*.png

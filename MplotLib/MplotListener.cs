@@ -1005,6 +1005,8 @@ public class MplotListener : MplotBaseListener
     {
         List<string> lines = new();
 
+        lines.Add("set encoding utf8");
+
         int widthPixels = (Width * PlotDpi).Round();
         int heightPixels = (Height * PlotDpi).Round();
 
