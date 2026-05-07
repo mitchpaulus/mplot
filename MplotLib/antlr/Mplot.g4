@@ -248,7 +248,7 @@ TIME_KEYWORD : 'time' ;
 
 hist : HIST ;
 HIST : 'hist' | 'histogram' ;
-BINSIZE : 'binsize' | 'bs' | 'binwidth' | 'barwidth' ;
+BINSIZE : 'binsize' | 'bs' | 'binwidth' | 'barwidth' | 'boxwidth' ;
 
 fstep : 'fstep' ;
 
