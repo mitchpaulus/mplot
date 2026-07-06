@@ -109,7 +109,7 @@ y2label     : ('yl2' | 'y2l' | 'ylabel2' | 'y2label') argString ;
 ycol       : ('y' | 'ycol') (intCount | stringCount | CYCLE | ASTERISK)+ ;
 width      : ('w' | 'width') rational ;
 height     : ('h' | 'height') rational ;
-output     : ('out' | 'output') STRING ;
+output     : ('out' | 'output') argString ;
 timeAxis   : TIME_KEYWORD ;
 timeFormat : ('tf' | 'timeformat') STRING ;
 isoDate : 'isodate' ;

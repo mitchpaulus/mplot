@@ -140,7 +140,7 @@ ct "Plot B"
 
 - `w` / `width` `<rational>`
 - `h` / `height` `<rational>`
-- `out` / `output` `<STRING>`
+- `out` / `output` `<argString>` (accepts a literal string, a `sargN` token, or `(sargN "default")`)
 - `font` / `fo` `<STRING>`
 - `fs` / `fontSize` `<INT>`
 - `dpi` / `d` `<INT>`
@@ -257,6 +257,7 @@ ignore "a" 0 < "b" 10 > and
 f sarg1 sarg2
 f sarg1 (sarg2 "default-file.csv")
 ct (sarg3 "Default Title")
+out (sarg4 "default-plot.png")
 ```
 
 ## Grammar-defined but not currently in `element`

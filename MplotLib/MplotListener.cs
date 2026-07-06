@@ -790,7 +790,7 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterOutput(MplotParser.OutputContext context)
     {
-        OutputFile = context.STRING().GetText().UnescapeMplotString();
+        OutputFile = context.argString().ToMPlotString().GetString(_stringArgs);
     }
 
     public override void EnterXformat(MplotParser.XformatContext context)
