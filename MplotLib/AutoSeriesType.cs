@@ -15,7 +15,7 @@ public static class AutoSeriesType
     public static List<Point> GetData(DataSource source, ColumnSpecifier xSpecifier, ColumnSpecifier ySpecifier, Separator2 sep, int skip = 0)
     {
         using Stream s = source.Stream();
-        using StreamReader reader = new StreamReader(s, Encoding.UTF8);
+        using StreamReader reader = new StreamReader(s, MplotEncoding.Utf8, detectEncodingFromByteOrderMarks: true);
 
         var knownSep = sep.Determine(source);
 

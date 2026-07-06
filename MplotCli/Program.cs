@@ -13,7 +13,7 @@ internal static class Program
 
     private static int Main(string[] args)
     {
-        Console.OutputEncoding = new UTF8Encoding(false);
+        Console.OutputEncoding = MplotEncoding.Utf8;
 
         int i = 0;
 
@@ -77,7 +77,11 @@ internal static class Program
 
         if (files.Count == 0 || files[0] == "-")
         {
-            contents = Console.In.ReadToEnd();
+            using StreamReader reader = new(
+                Console.OpenStandardInput(),
+                MplotEncoding.Utf8,
+                detectEncodingFromByteOrderMarks: true);
+            contents = reader.ReadToEnd();
             fileInfo = NoneMarker.None;
         }
         else
@@ -87,7 +91,7 @@ internal static class Program
 
             try
             {
-                contents = File.ReadAllText(filePath, Encoding.UTF8);
+                contents = File.ReadAllText(filePath, MplotEncoding.Utf8);
             }
             catch (FileNotFoundException)
             {
@@ -169,7 +173,7 @@ internal static class Program
                     {
                         process.Start();
 
-                        using (StreamWriter w = new(process.StandardInput.BaseStream, new UTF8Encoding(false)))
+                        using (StreamWriter w = new(process.StandardInput.BaseStream, MplotEncoding.Utf8))
                         {
                             if (w.BaseStream.CanWrite)
                             {
@@ -218,9 +222,8 @@ internal static class Program
                         _ => "stdin.gnuplot"
                     );
 
-                    Encoding e = new UTF8Encoding(false);
                     string writeGnuplot = listener.WriteGnuplot();
-                    File.WriteAllText(gnuplotFilename, writeGnuplot, e);
+                    File.WriteAllText(gnuplotFilename, writeGnuplot, MplotEncoding.Utf8);
                 }
                 else if (printDependencies)
                 {
@@ -248,7 +251,7 @@ internal static class Program
                         {
                             if (fs.Filepath.EndsWith(".tsv", StringComparison.OrdinalIgnoreCase))
                             {
-                                var headerLine = File.ReadLines(fs.Filepath, Encoding.UTF8).Take(1).ToList();
+                                var headerLine = File.ReadLines(fs.Filepath, MplotEncoding.Utf8).Take(1).ToList();
                                 if (headerLine.Count > 0)
                                 {
                                     foreach (var head in headerLine[0].Split('\t')) headers.Add(head);
@@ -256,7 +259,7 @@ internal static class Program
                             }
                             else if (fs.Filepath.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
                             {
-                                var headerLine = File.ReadLines(fs.Filepath, Encoding.UTF8).Take(1).ToList();
+                                var headerLine = File.ReadLines(fs.Filepath, MplotEncoding.Utf8).Take(1).ToList();
                                 CsvReader csvReader = new();
                                 if (headerLine.Count > 0)
                                 {

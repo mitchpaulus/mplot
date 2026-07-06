@@ -26,8 +26,8 @@ public class DataSource : OneOfBase<FileSource, InlineDataSource, CommandDataSou
     {
         Stream s = Match(
             fs => new FileStream(fs.Filepath, FileMode.Open),
-            inlineDataSource => (Stream) new MemoryStream(Encoding.UTF8.GetBytes(inlineDataSource.Contents)),
-            cmdDataSource => new MemoryStream(Encoding.UTF8.GetBytes(cmdDataSource.Execute().Output)),
+            inlineDataSource => (Stream) new MemoryStream(MplotEncoding.Utf8.GetBytes(inlineDataSource.Contents)),
+            cmdDataSource => new MemoryStream(MplotEncoding.Utf8.GetBytes(cmdDataSource.Execute().Output)),
             stdIn => Console.OpenStandardInput()
         );
         return s;
@@ -123,6 +123,7 @@ public class CommandDataSource
         {
             FileName = Arguments[0],
             RedirectStandardOutput = true,
+            StandardOutputEncoding = MplotEncoding.Utf8,
             UseShellExecute = false,
             CreateNoWindow = true
         };
@@ -212,7 +213,7 @@ public class ExcelFileDataSource
             } while (validRow);
 
             string content = b.ToString();
-            return new MemoryStream(Encoding.UTF8.GetBytes(content));
+            return new MemoryStream(MplotEncoding.Utf8.GetBytes(content));
         }
 
         return new MemoryStream();
