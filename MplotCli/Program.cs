@@ -144,6 +144,11 @@ internal static class Program
             {
                 walker.Walk(listener, plot);
 
+                foreach (var warning in listener.Warnings)
+                {
+                    Console.Error.WriteLine(warning);
+                }
+
                 var checks = listener.GnuplotCheck();
                 if (checks.Any())
                 {

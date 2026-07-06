@@ -118,6 +118,9 @@ public class MplotListener : MplotBaseListener
     public readonly MplotArray<DataSource> FilePathArray;
 
     public LegendPosition LegendPosition = new Empty();
+    private string? _legendPositionKeyword = null;
+
+    public List<string> Warnings = new();
 
     public int LegendCols = -1;
     public int LegendRows = -1;
@@ -194,7 +197,7 @@ public class MplotListener : MplotBaseListener
         for (int i = 0; i < lengths.First(); i++)
         {
             // Stream stream = FilePathArray[i].Stream();
-            // StreamReader reader = new(stream, Encoding.UTF8);
+            // StreamReader reader = new(stream, MplotEncoding.Utf8, detectEncodingFromByteOrderMarks: true);
             // var contents = reader.ReadToEnd();
 
             Separator2 sep2 = SeparatorArray[i];
@@ -831,14 +834,26 @@ public class MplotListener : MplotBaseListener
     public override void EnterCcllcGreen(MplotParser.CcllcGreenContext context) => LineColorArray.Add(CcllcColors.Green);
     public override void EnterCcllcYellow(MplotParser.CcllcYellowContext context) => LineColorArray.Add(CcllcColors.Yellow);
 
-    public override void EnterTopLegend(MplotParser.TopLegendContext context) => LegendPosition = new Top();
-    public override void EnterRightLegend(MplotParser.RightLegendContext context) => LegendPosition = new Right();
-    public override void EnterUpperRightLegend(MplotParser.UpperRightLegendContext context) => LegendPosition = new InsideUpperRight();
-    public override void EnterUpperLeftLegend(MplotParser.UpperLeftLegendContext context) => LegendPosition = new InsideUpperLeft();
-    public override void EnterBottomLeftLegend(MplotParser.BottomLeftLegendContext context) => LegendPosition = new InsideBottomLeft();
-    public override void EnterBottomRightLegend(MplotParser.BottomRightLegendContext context) => LegendPosition = new InsideBottomRight();
+    private void SetLegendPosition(LegendPosition position, string keyword)
+    {
+        if (_legendPositionKeyword is not null)
+        {
+            Warnings.Add(
+                $"Warning: legend position '{keyword}' overrides earlier '{_legendPositionKeyword}'; only the last one is used.");
+        }
 
-    public override void EnterAboveRightLegend(MplotParser.AboveRightLegendContext context) => LegendPosition = new OuterTopRight();
+        LegendPosition = position;
+        _legendPositionKeyword = keyword;
+    }
+
+    public override void EnterTopLegend(MplotParser.TopLegendContext context) => SetLegendPosition(new Top(), context.GetText());
+    public override void EnterRightLegend(MplotParser.RightLegendContext context) => SetLegendPosition(new Right(), context.GetText());
+    public override void EnterUpperRightLegend(MplotParser.UpperRightLegendContext context) => SetLegendPosition(new InsideUpperRight(), context.GetText());
+    public override void EnterUpperLeftLegend(MplotParser.UpperLeftLegendContext context) => SetLegendPosition(new InsideUpperLeft(), context.GetText());
+    public override void EnterBottomLeftLegend(MplotParser.BottomLeftLegendContext context) => SetLegendPosition(new InsideBottomLeft(), context.GetText());
+    public override void EnterBottomRightLegend(MplotParser.BottomRightLegendContext context) => SetLegendPosition(new InsideBottomRight(), context.GetText());
+
+    public override void EnterAboveRightLegend(MplotParser.AboveRightLegendContext context) => SetLegendPosition(new OuterTopRight(), context.GetText());
 
     public override void EnterGrid(MplotParser.GridContext context) => Grid = true;
 
@@ -1300,7 +1315,7 @@ public class AutoSeparator
         }
 
         using Stream stream = source.Stream();
-        using StreamReader reader = new StreamReader(stream, Encoding.UTF8);
+        using StreamReader reader = new StreamReader(stream, MplotEncoding.Utf8, detectEncodingFromByteOrderMarks: true);
 
         var firstLine = reader.ReadLine();
         if (firstLine is null) return new TabSeparator();
