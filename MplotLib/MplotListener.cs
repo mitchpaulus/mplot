@@ -86,6 +86,8 @@ public class MplotListener : MplotBaseListener
 
     public bool TicsOut = false;
 
+    public bool Svg = false;
+
     public RangeSpec YMin { get; set; } = AutoRange.Auto();
     public RangeSpec YMax { get; set; } = AutoRange.Auto();
 
@@ -301,6 +303,8 @@ public class MplotListener : MplotBaseListener
     public override void EnterLegendRows(MplotParser.LegendRowsContext context) => LegendRows = int.Parse(context.INT().GetText());
 
     public override void EnterTicsOut(MplotParser.TicsOutContext context) => TicsOut = true;
+
+    public override void EnterSvg(MplotParser.SvgContext context) => Svg = true;
 
     public override void EnterIgnore(MplotParser.IgnoreContext context)
     {
@@ -1030,7 +1034,10 @@ public class MplotListener : MplotBaseListener
         string fontName = FontName ?? "";
         string fontSpec = $"{fontName},{FontSize}".ToGnuPlotString();
 
-        lines.Add($"set terminal pngcairo size {widthPixels},{heightPixels} font {fontSpec} fontscale {fontScale} pointscale {fontScale}");
+        // The svg terminal does not support the pointscale option.
+        lines.Add(Svg
+            ? $"set terminal svg size {widthPixels},{heightPixels} font {fontSpec} fontscale {fontScale}"
+            : $"set terminal pngcairo size {widthPixels},{heightPixels} font {fontSpec} fontscale {fontScale} pointscale {fontScale}");
 
         if (_lmargin.IsValue(out var rational)) lines.Add($"set lmargin {rational.ToDecimalString()}");
         if (_rmargin.IsValue(out rational)) lines.Add($"set rmargin {rational.ToDecimalString()}");

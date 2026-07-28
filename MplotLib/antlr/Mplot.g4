@@ -76,6 +76,7 @@ element
   | xStep
   | textLabel
   | arrow
+  | svg
   ;
 
 file       : ('f' | 'file') stringArray ;
@@ -128,6 +129,8 @@ textLabel
 arrow
   : 'arrow' rational rational rational rational
   ;
+
+svg : 'svg' ;
 
 stdinInput : STDIN ASTERISK? ;
 STDIN : 'stdin' ;

@@ -190,18 +190,20 @@ internal static class Program
                         {
                             if (fileInfo.IsNone)
                             {
-                                Console.Error.WriteLine("Not going to dump PNG contents to TTY. Please redirect to desired file.");
+                                Console.Error.WriteLine("Not going to dump plot contents to TTY. Please redirect to desired file.");
                                 return 1;
                             }
 
+                            string extension = listener.Svg ? ".svg" : ".png";
+
                             if (fileInfo.AsValue.Name.EndsWith(".mplot", StringComparison.OrdinalIgnoreCase))
                             {
-                                using FileStream fStream = new(fileInfo.AsValue.FullName[..^6] + ".png", FileMode.Create);
+                                using FileStream fStream = new(fileInfo.AsValue.FullName[..^6] + extension, FileMode.Create);
                                 process.StandardOutput.BaseStream.CopyTo(fStream);
                             }
                             else
                             {
-                                using FileStream fStream = new(fileInfo.AsValue.FullName + ".png", FileMode.Create);
+                                using FileStream fStream = new(fileInfo.AsValue.FullName + extension, FileMode.Create);
                                 process.StandardOutput.BaseStream.CopyTo(fStream);
                             }
                         }

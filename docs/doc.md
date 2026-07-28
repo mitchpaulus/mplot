@@ -144,6 +144,7 @@ ct "Plot B"
 - `font` / `fo` `<STRING>`
 - `fs` / `fontSize` `<INT>`
 - `dpi` / `d` `<INT>`
+- `svg` (use the svg gnuplot terminal instead of pngcairo; `-c` writes a `.svg` file)
 
 ## Axis/time/range/format
 
