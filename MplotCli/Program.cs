@@ -9,7 +9,7 @@ namespace MplotCli;
 
 internal static class Program
 {
-    private const string Version = "0.2.0";
+    private const string Version = "0.3.0";
 
     private static int Main(string[] args)
     {

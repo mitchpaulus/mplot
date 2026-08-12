@@ -4,16 +4,19 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         name: Checkout Repo
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 8
 
@@ -24,7 +27,7 @@ jobs:
           java-version: '11'
 
       - name: Download ANTLR
-        run: curl --output antlr-4.11.1-complete.jar https://www.antlr.org/download/antlr-4.11.1-complete.jar
+        run: curl --fail --location --output antlr-4.11.1-complete.jar https://www.antlr.org/download/antlr-4.11.1-complete.jar
 
       - name: Compile ANTLR grammars
         run: |
@@ -33,16 +36,32 @@ jobs:
           cd MplotLib/antlr/
           ./compile_grammer
 
-      - name: Build
-        run: dotnet build
+      - name: Test
+        run: dotnet test
 
       - name: Publish
         run: |
-          dotnet publish -r linux-x64 --self-contained -o publish-linux-x64 -c Release -p:DebugType=None -p:PublishSingleFile=true MplotCli/MplotCli.csproj
+          version="${GITHUB_REF_NAME#v}"
+          for rid in linux-x64 win-x64 osx-x64 osx-arm64; do
+            dotnet publish -r "$rid" --self-contained -o "publish-$rid" -c Release -p:DebugType=None -p:PublishSingleFile=true -p:Version="$version" MplotCli/MplotCli.csproj
+          done
+
+      - name: Collect release assets
+        run: |
+          mkdir dist
+          cp publish-linux-x64/mplot dist/mplot-linux-x64
+          cp publish-win-x64/mplot.exe dist/mplot-win-x64.exe
+          cp publish-osx-x64/mplot dist/mplot-osx-x64
+          cp publish-osx-arm64/mplot dist/mplot-osx-arm64
+          cd dist
+          sha256sum ./* > SHA256SUMS.txt
 
       - name: GH Release
-        uses: softprops/action-gh-release@v0.1.14
-        with:
-          fail_on_unmatched_files: true
-          files: |
-            publish-linux-x64/mplot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --verify-tag \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            dist/*
