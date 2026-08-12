@@ -1,0 +1,44 @@
+name: 'Setup mplot'
+description: 'Install the mplot CLI from a GitHub release and add it to the PATH'
+
+inputs:
+  version:
+    description: "Release tag to install (e.g. 'v0.3.0'), or 'latest'"
+    required: false
+    default: 'latest'
+  token:
+    description: 'GitHub token used to download the release'
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Download mplot
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        VERSION: ${{ inputs.version }}
+      run: |
+        case "$RUNNER_OS-$RUNNER_ARCH" in
+          Linux-X64)    asset="mplot-linux-x64"   bin="mplot" ;;
+          macOS-X64)    asset="mplot-osx-x64"     bin="mplot" ;;
+          macOS-ARM64)  asset="mplot-osx-arm64"   bin="mplot" ;;
+          Windows-X64)  asset="mplot-win-x64.exe" bin="mplot.exe" ;;
+          *) echo "Unsupported runner: $RUNNER_OS $RUNNER_ARCH" >&2; exit 1 ;;
+        esac
+
+        install_dir="$RUNNER_TEMP/mplot-bin"
+        mkdir -p "$install_dir"
+        cd "$install_dir"
+
+        if [ "$VERSION" = "latest" ]; then
+          gh release download --repo mitchpaulus/mplot --pattern "$asset" --pattern "SHA256SUMS.txt"
+        else
+          gh release download "$VERSION" --repo mitchpaulus/mplot --pattern "$asset" --pattern "SHA256SUMS.txt"
+        fi
+
+        grep "$asset" SHA256SUMS.txt | sha256sum --check -
+        mv "$asset" "$bin"
+        chmod +x "$bin"
+        echo "$install_dir" >> "$GITHUB_PATH"
