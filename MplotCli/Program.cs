@@ -369,6 +369,9 @@ internal static class Program
         Console.Write("dt \".-\" \"--\" {- dash types -}\n");
         Console.Write("text \"My Label\" 10 20 {- place a text annotation -}\n");
         Console.Write("arrow 10 20 30 35 {- draw an arrow annotation -}\n");
+        Console.Write("xhighlight 10 20 {- shade a background band between x=10 and x=20, light gray by default -}\n");
+        Console.Write("xhighlight 2024-01-01 2024-01-02T12:00 #ffe0e0 {- datetime bounds, optional color (aliases: highlightx xrect rectx) -}\n");
+        Console.Write("yhighlight 0 5 rgb 200 230 255 {- horizontal band (aliases: highlighty yrect recty) -}\n");
         Console.Write("\n");
         Console.Write("{- time axis settings -}\n");
         Console.Write("time\n");

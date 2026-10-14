@@ -76,6 +76,8 @@ element
   | xStep
   | textLabel
   | arrow
+  | xhighlight
+  | yhighlight
   | svg
   ;
 
@@ -129,6 +131,12 @@ textLabel
 arrow
   : 'arrow' rational rational rational rational
   ;
+
+// Shaded background band spanning the full height (x) or width (y) of the plot area.
+xhighlight : ('xhighlight' | 'highlightx' | 'xrect' | 'rectx') low=highlightValue high=highlightValue highlightColor? ;
+yhighlight : ('yhighlight' | 'highlighty' | 'yrect' | 'recty') low=highlightValue high=highlightValue highlightColor? ;
+highlightValue : rational | dateTime ;
+highlightColor : HEXCOLOR | RGB INT INT INT | knownColor ;
 
 svg : 'svg' ;
 

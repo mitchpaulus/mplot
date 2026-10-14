@@ -251,6 +251,12 @@ A `tf` or `xf` string containing a `%` is passed to gnuplot unchanged. Otherwise
   - `text <x> <y> <argString>`
 - arrow:
   - `arrow <x1> <y1> <x2> <y2>`
+- background highlight band (drawn behind the data):
+  - x band, full plot height: `xhighlight` / `highlightx` / `xrect` / `rectx` `<x1> <x2> [color]`
+  - y band, full plot width: `yhighlight` / `highlighty` / `yrect` / `recty` `<y1> <y2> [color]`
+  - bounds are rationals or datetimes (`2024-01-01`, `2024-01-01T12:00`)
+  - color is optional (default light gray `#D3D3D3`): `#RRGGBB`, `rgb R G B`, or a named color
+  - a color directly after the bounds belongs to the highlight, not the series line colors
 
 ## Ignore/filter expressions
 
@@ -302,6 +308,6 @@ This maps each `element` alternative from the grammar to where it is documented 
 - `xtics`, `ytics`, `x2tics`, `y2tics`, `xticAdd`, `yticAdd`, `xticAdd2`, `yticAdd2`, `xticlabels`, `yticlabels`, `y2ticlabels`, `ticsOut`: Tics and tic labels
 - `legendOption`, `legendCols`, `legendRows`, `legend`, `noLegend`: Legend/key controls
 - `seriesStyle`, `lineWidth`, `dash`, `marker`, `hexColor`, `rgbColor`, `knownColorCycleAsterisk`, `grid`, `binsize`: Style, lines, markers, colors
-- `lmargin`, `rmargin`, `textLabel`, `arrow`: Margins and annotations
+- `lmargin`, `rmargin`, `textLabel`, `arrow`, `xhighlight`, `yhighlight`: Margins and annotations
 - `ignore`: Ignore/filter expressions
 - `gnuplotLiteral`: Raw gnuplot passthrough

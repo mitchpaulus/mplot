@@ -45,6 +45,7 @@ public class MplotListener : MplotBaseListener
 
     public List<TextLabel> TextLabels { get; } = new();
     public List<ArrowAnnotation> Arrows { get; } = new();
+    public List<Highlight> Highlights { get; } = new();
 
     private Maybe<Rational> _lmargin = NoneMarker.None;
     private Maybe<Rational> _rmargin = NoneMarker.None;
@@ -847,21 +848,12 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterKnownColorCycleAsterisk(MplotParser.KnownColorCycleAsteriskContext context)
     {
+        // Named colors are added here rather than in the individual knownColor listeners,
+        // because knownColor is also used by other rules (e.g. highlight colors) that should not affect line colors.
+        LineColorArray.Add(context.knownColor().ToColor());
         if (context.CYCLE() is not null) LineColorArray.SetMode(MplotArrayMode.Cycle);
         if (context.ASTERISK() is not null) LineColorArray.SetMode(MplotArrayMode.Repeat);
     }
-
-    // TODO: Add to arrays.
-    public override void EnterRedColor(MplotParser.RedColorContext context) => LineColorArray.Add(Color.Red);
-    public override void EnterGreenColor(MplotParser.GreenColorContext context) => LineColorArray.Add(Color.Green);
-    public override void EnterBlueColor(MplotParser.BlueColorContext context) => LineColorArray.Add(Color.Blue);
-    public override void EnterBlackColor(MplotParser.BlackColorContext context) => LineColorArray.Add(Color.Black);
-    public override void EnterOrangeColor(MplotParser.OrangeColorContext context) => LineColorArray.Add(Color.Orange);
-    public override void EnterCcllcBlueColor(MplotParser.CcllcBlueColorContext context) => LineColorArray.Add(CcllcColors.Blue);
-    public override void EnterCcllcGray(MplotParser.CcllcGrayContext context) => LineColorArray.Add(CcllcColors.Gray);
-    public override void EnterCcllcMaroon(MplotParser.CcllcMaroonContext context) => LineColorArray.Add(CcllcColors.Maroon);
-    public override void EnterCcllcGreen(MplotParser.CcllcGreenContext context) => LineColorArray.Add(CcllcColors.Green);
-    public override void EnterCcllcYellow(MplotParser.CcllcYellowContext context) => LineColorArray.Add(CcllcColors.Yellow);
 
     private void SetLegendPosition(LegendPosition position, string keyword)
     {
@@ -928,6 +920,12 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterArrow(MplotParser.ArrowContext context) =>
         AddArrow(context.rational(0), context.rational(1), context.rational(2), context.rational(3));
+
+    public override void EnterXhighlight(MplotParser.XhighlightContext context) =>
+        Highlights.Add(new Highlight(HighlightAxis.X, context.low.ToRangeSpec(), context.high.ToRangeSpec(), context.highlightColor()?.ToColor() ?? Highlight.DefaultColor));
+
+    public override void EnterYhighlight(MplotParser.YhighlightContext context) =>
+        Highlights.Add(new Highlight(HighlightAxis.Y, context.low.ToRangeSpec(), context.high.ToRangeSpec(), context.highlightColor()?.ToColor() ?? Highlight.DefaultColor));
 
     public override void EnterCommandSource(MplotParser.CommandSourceContext context)
     {
@@ -1090,6 +1088,9 @@ public class MplotListener : MplotBaseListener
                 lines.Add(arrow.ToGnuplot(index));
             }
         }
+
+        // No explicit object index, so gnuplot assigns the next free tag and doesn't clash with gnuplot literals.
+        foreach (var highlight in Highlights) lines.Add(highlight.ToGnuplot());
 
         if (!string.IsNullOrWhiteSpace(OutputFile)) lines.Add($"set output {OutputFile.ToGnuPlotString()}");
 
@@ -1520,6 +1521,24 @@ public record ArrowAnnotation(Rational X1, Rational Y1, Rational X2, Rational Y2
 {
     public string ToGnuplot(int index) =>
         $"set arrow {index} from {X1.ToDecimalString()},{Y1.ToDecimalString()} to {X2.ToDecimalString()},{Y2.ToDecimalString()} head filled lw 2";
+}
+
+public enum HighlightAxis
+{
+    X,
+    Y
+}
+
+public record Highlight(HighlightAxis Axis, RangeSpec Low, RangeSpec High, Color Color)
+{
+    public static readonly Color DefaultColor = Color.LightGray;
+
+    public string ToGnuplot()
+    {
+        string from = Axis == HighlightAxis.X ? $"{Low.ToGnuplot()}, graph 0" : $"graph 0, first {Low.ToGnuplot()}";
+        string to = Axis == HighlightAxis.X ? $"{High.ToGnuplot()}, graph 1" : $"graph 1, first {High.ToGnuplot()}";
+        return $"set object rect from {from} to {to} fillcolor rgb {Color.ToGnuplot()} fillstyle solid 1.0 noborder behind";
+    }
 }
 
 public class Maybe<T> : OneOfBase<T, NoneMarker>

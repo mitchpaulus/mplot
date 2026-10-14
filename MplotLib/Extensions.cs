@@ -42,6 +42,33 @@ public static class Extensions
         return $"\"0x{r}{g}{b}\"";
     }
 
+    public static Color ToColor(this MplotParser.KnownColorContext context) => context switch
+    {
+        MplotParser.RedColorContext => Color.Red,
+        MplotParser.GreenColorContext => Color.Green,
+        MplotParser.BlueColorContext => Color.Blue,
+        MplotParser.BlackColorContext => Color.Black,
+        MplotParser.OrangeColorContext => Color.Orange,
+        MplotParser.CcllcBlueColorContext => CcllcColors.Blue,
+        MplotParser.CcllcGrayContext => CcllcColors.Gray,
+        MplotParser.CcllcMaroonContext => CcllcColors.Maroon,
+        MplotParser.CcllcGreenContext => CcllcColors.Green,
+        MplotParser.CcllcYellowContext => CcllcColors.Yellow,
+        _ => throw new InvalidOperationException($"Unknown color '{context.GetText()}'")
+    };
+
+    public static Color ToColor(this MplotParser.HighlightColorContext context)
+    {
+        if (context.HEXCOLOR() is not null) return ColorTranslator.FromHtml(context.HEXCOLOR().GetText());
+        if (context.knownColor() is not null) return context.knownColor().ToColor();
+
+        var ints = context.INT().Select(i => int.Parse(i.GetText())).ToArray();
+        return Color.FromArgb(ints[0], ints[1], ints[2]);
+    }
+
+    public static RangeSpec ToRangeSpec(this MplotParser.HighlightValueContext context) =>
+        context.dateTime() is not null ? context.dateTime().ToDatetime() : new Rational(context.rational());
+
     public static IEnumerable<string> SplitLines(this string input)
     {
         using StringReader sr = new(input);

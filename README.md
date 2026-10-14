@@ -45,6 +45,9 @@ lw 2 {- line width -}
 dt ".-" "--" {- dash types -}
 text "My Label" 10 20 {- place a text annotation -}
 arrow 10 20 30 35 {- draw an arrow annotation -}
+xhighlight 10 20 {- shade a background band between x=10 and x=20, light gray by default -}
+xhighlight 2024-01-01 2024-01-02T12:00 #ffe0e0 {- datetime bounds, optional color (aliases: highlightx xrect rectx) -}
+yhighlight 0 5 rgb 200 230 255 {- horizontal band (aliases: highlighty yrect recty) -}
 
 {- time axis settings -}
 time
