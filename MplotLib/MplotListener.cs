@@ -915,8 +915,14 @@ public class MplotListener : MplotBaseListener
         _currentVar++;
     }
 
-    public override void EnterTextLabel(MplotParser.TextLabelContext context) =>
-        AddTextLabel(context.argString(), context.rational(0), context.rational(1));
+    public override void EnterTextLabel(MplotParser.TextLabelContext context)
+    {
+        var anchors = context.textAnchor();
+        if (anchors.Length > 1)
+            throw new InvalidDataException($"Text label on line {context.Start.Line} may have at most one anchor, found {anchors.Length}.");
+
+        AddTextLabel(context.argString(), context.x.ToRangeSpec(), context.y.ToRangeSpec(), anchors.FirstOrDefault()?.anchor.Text);
+    }
 
     public override void EnterArrow(MplotParser.ArrowContext context) =>
         AddArrow(context.rational(0), context.rational(1), context.rational(2), context.rational(3));
@@ -947,12 +953,10 @@ public class MplotListener : MplotBaseListener
         FontSize = int.Parse(context.INT().GetText());
     }
 
-    private void AddTextLabel(MplotParser.ArgStringContext context, MplotParser.RationalContext x, MplotParser.RationalContext y)
+    private void AddTextLabel(MplotParser.ArgStringContext context, RangeSpec x, RangeSpec y, string? anchor)
     {
         string labelText = context.ToMPlotString().GetString(_stringArgs);
-        Rational xValue = new(x);
-        Rational yValue = new(y);
-        TextLabels.Add(new TextLabel(labelText, xValue, yValue));
+        TextLabels.Add(new TextLabel(labelText, x, y, anchor));
     }
 
     private void AddArrow(MplotParser.RationalContext x1, MplotParser.RationalContext y1, MplotParser.RationalContext x2, MplotParser.RationalContext y2)
@@ -1512,9 +1516,26 @@ public class AdditionalTic
     }
 }
 
-public record TextLabel(string Text, Rational X, Rational Y)
+public record TextLabel(string Text, RangeSpec X, RangeSpec Y, string? Anchor = null)
 {
-    public string ToGnuplot(int index) => $"set label {index} {Text.ToGnuPlotString()} at {X.ToDecimalString()},{Y.ToDecimalString()}";
+    public string ToGnuplot(int index) => $"set label {index} {Text.ToGnuPlotString()} at {X.ToGnuplot()},{Y.ToGnuplot()}{AnchorGnuplot()}";
+
+    // Gnuplot only justifies horizontally and always centers labels vertically on the point,
+    // so north/south anchors are approximated with a vertical offset in character heights.
+    private string AnchorGnuplot() => Anchor switch
+    {
+        null => "",
+        "c" => " center",
+        "w" or "l" => " left",
+        "e" or "r" => " right",
+        "n" => " center offset 0,-0.6",
+        "s" => " center offset 0,0.6",
+        "nw" => " left offset 0,-0.6",
+        "ne" => " right offset 0,-0.6",
+        "sw" => " left offset 0,0.6",
+        "se" => " right offset 0,0.6",
+        _ => throw new NotImplementedException($"Unknown text anchor '{Anchor}'")
+    };
 }
 
 public record ArrowAnnotation(Rational X1, Rational Y1, Rational X2, Rational Y2)

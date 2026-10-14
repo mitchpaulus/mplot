@@ -66,7 +66,7 @@ public static class Extensions
         return Color.FromArgb(ints[0], ints[1], ints[2]);
     }
 
-    public static RangeSpec ToRangeSpec(this MplotParser.HighlightValueContext context) =>
+    public static RangeSpec ToRangeSpec(this MplotParser.CoordinateContext context) =>
         context.dateTime() is not null ? context.dateTime().ToDatetime() : new Rational(context.rational());
 
     public static IEnumerable<string> SplitLines(this string input)

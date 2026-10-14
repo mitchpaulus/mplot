@@ -246,9 +246,12 @@ A `tf` or `xf` string containing a `%` is passed to gnuplot unchanged. Otherwise
 
 - left margin: `lmargin` / `lm` `<rational>`
 - right margin: `rmargin` / `rm` `<rational>`
-- text label:
+- text label (`text` / `note` / `annotation`):
   - `text <argString> <x> <y>`
   - `text <x> <y> <argString>`
+  - `<x>` / `<y>` may be a rational or a date/time (e.g. `2026-09-29T12:30`) for time axes
+  - optional anchor `c|n|s|e|w|ne|nw|se|sw|l|r` (`l`/`r` are aliases for `w`/`e`) before, between, or after the string and coordinates (at most one), e.g. `text "Peak" 12 450 sw`
+    - the anchor names the point of the text placed at `<x> <y>`; `n`/`s` variants are approximated with a vertical offset since gnuplot only centers labels vertically
 - arrow:
   - `arrow <x1> <y1> <x2> <y2>`
 - background highlight band (drawn behind the data):

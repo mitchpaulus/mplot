@@ -1,0 +1,11 @@
+start
+0	0
+10	10
+end
+text "plain" 1 1
+text "a" 2 2 s
+text sw "b" 3 3
+text "c" ne 4 4
+text 5 5 c "d"
+text 6 6 "e" w
+s "Series 1"

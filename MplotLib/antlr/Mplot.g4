@@ -123,19 +123,26 @@ lmargin : ('lmargin' | 'lm') rational ;
 rmargin : ('rmargin' | 'rm') rational ;
 axisSide : side=('y1' | 'y2') (count | CYCLE | ASTERISK)? ;
 xStep : ('xstep' | 'xstepwidth') rational ;
+// Anchor may appear in any position; at most one is allowed (checked in the listener).
 textLabel
-  : 'text' argString rational rational
-  | 'text' rational rational argString
+  : textKeyword textAnchor? argString textAnchor? x=coordinate y=coordinate textAnchor?
+  | textKeyword textAnchor? x=coordinate y=coordinate textAnchor? argString textAnchor?
   ;
+
+textKeyword : 'text' | 'note' | 'annotation' ;
+
+// Which point of the text sits on the coordinate. 'l'/'r' are aliases for 'w'/'e'.
+textAnchor : anchor=('c' | 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw' | 'l' | 'r') ;
 
 arrow
   : 'arrow' rational rational rational rational
   ;
 
 // Shaded background band spanning the full height (x) or width (y) of the plot area.
-xhighlight : ('xhighlight' | 'highlightx' | 'xrect' | 'rectx') low=highlightValue high=highlightValue highlightColor? ;
-yhighlight : ('yhighlight' | 'highlighty' | 'yrect' | 'recty') low=highlightValue high=highlightValue highlightColor? ;
-highlightValue : rational | dateTime ;
+xhighlight : ('xhighlight' | 'highlightx' | 'xrect' | 'rectx') low=coordinate high=coordinate highlightColor? ;
+yhighlight : ('yhighlight' | 'highlighty' | 'yrect' | 'recty') low=coordinate high=coordinate highlightColor? ;
+// A position on an axis: plain number, or date/time for time axes.
+coordinate : rational | dateTime ;
 highlightColor : HEXCOLOR | RGB INT INT INT | knownColor ;
 
 svg : 'svg' ;
