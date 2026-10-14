@@ -137,6 +137,7 @@ public class MplotListener : MplotBaseListener
     public Maybe<string> TimeFormat { get; set; } = NoneMarker.None;
 
     public string XFormat { get; set; } = "";
+    private MplotTimeFormat? _xTimeFormat;
     public string YFormat { get; set; } = "";
 
     private readonly ParseTreeWalker _walker = new();
@@ -212,9 +213,13 @@ public class MplotListener : MplotBaseListener
 
             if (TimeAxis)
             {
-                xColSpecifier = TimeFormat.Match(
-                    tf => $"(timecolumn(1, {tf.ToGnuPlotString()}))",
-                    _ => $"(timecolumn(1, {"%Y-%m-%d %H:%M".ToGnuPlotString()}))"
+                string timeFormat = TimeFormat.Match(tf => tf, _ => "%Y-%m-%d %H:%M").ToGnuPlotString();
+                xColSpecifier = XcolsArray[i].Match(
+                    specifier => specifier.UseString
+                        ? $"(strptime({timeFormat}, strcol({specifier.ColumnName.ToGnuPlotString()})))"
+                        : $"(timecolumn({specifier.OneBasedColumnIndex}, {timeFormat}))",
+                    // Expressions for a time x column aren't supported, keep reading from the first column.
+                    _ => $"(timecolumn(1, {timeFormat}))"
                 );
             }
 
@@ -488,7 +493,18 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterTimeFormat(MplotParser.TimeFormatContext context)
     {
-        TimeFormat = context.STRING().GetText().UnescapeMplotString();
+        string format = context.STRING().GetText().UnescapeMplotString();
+        if (MplotTimeFormat.IsGnuplotFormat(format))
+        {
+            TimeFormat = format;
+        }
+        else
+        {
+            MplotTimeFormat timeFormat = MplotTimeFormat.Parse(format);
+            Warnings.AddRange(timeFormat.Warnings);
+            TimeFormat = timeFormat.ToGnuplotInputFormat();
+        }
+
         TimeAxis = true;
     }
 
@@ -800,6 +816,15 @@ public class MplotListener : MplotBaseListener
     public override void EnterXformat(MplotParser.XformatContext context)
     {
         XFormat = context.STRING().GetText().UnescapeMplotString();
+        _xTimeFormat = null;
+
+        // Without a '%', the format is the mplot date/time syntax, which implies a time axis.
+        if (!string.IsNullOrWhiteSpace(XFormat) && !MplotTimeFormat.IsGnuplotFormat(XFormat))
+        {
+            _xTimeFormat = MplotTimeFormat.Parse(XFormat);
+            Warnings.AddRange(_xTimeFormat.Warnings);
+            TimeAxis = true;
+        }
     }
 
     public override void EnterYformat(MplotParser.YformatContext context)
@@ -1167,7 +1192,8 @@ public class MplotListener : MplotBaseListener
 
         // Sets the format for tick marks. Typical format modifiers like '%f' and '%e'
         // Also sets the time formats
-        if (!string.IsNullOrWhiteSpace(XFormat)) lines.Add($"set format x {XFormat.ToGnuPlotString()}");
+        if (_xTimeFormat is not null) lines.Add($"set format x {_xTimeFormat.ToGnuplotOutputFormat().ToGnuPlotString()}");
+        else if (!string.IsNullOrWhiteSpace(XFormat)) lines.Add($"set format x {XFormat.ToGnuPlotString()}");
         if (!string.IsNullOrWhiteSpace(YFormat)) lines.Add($"set format y {YFormat.ToGnuPlotString()}");
 
         // If the File Path is set to repeat mode and the last one is a inline data source, we don't want to repeat.

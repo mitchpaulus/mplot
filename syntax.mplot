@@ -46,7 +46,9 @@ arrow 10 20 30 35 {- draw an arrow annotation -}
 {- time axis settings -}
 time
 tf "%Y-%m-%d"
-isodate {- for "%Y-%m-%d" }
+tf "yyyy-mm-ddThh:nn:ss" {- y m d h(24) c(12) n(minute) s ampm, case-insensitive -}
+xf "mmm d c ampm" {- Jan 5 9 pm, doubled letters zero pad -}
+isodate {- for "%Y-%m-%d" -}
 
 {- legend locations -}
 top right ul upperleft ur upperright

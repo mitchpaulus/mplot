@@ -149,10 +149,31 @@ ct "Plot B"
 ## Axis/time/range/format
 
 - `time` (time axis keyword)
-- `tf` / `timeformat` `<STRING>`
+- `tf` / `timeformat` `<STRING>` (format of the times in the data file; implies `time`)
 - `isodate`
-- `xf` / `xticformat` / `xformat` `<STRING>`
+- `xf` / `xticformat` / `xformat` `<STRING>` (format of the x tic labels)
 - `yf` / `yticformat` / `yformat` `<STRING>`
+
+### Date/time formats
+
+A `tf` or `xf` string containing a `%` is passed to gnuplot unchanged. Otherwise it uses this letter syntax (case-insensitive):
+
+| Letters | Meaning | Example |
+| --- | --- | --- |
+| `yy` `yyyy` | 2 or 4 digit year | `26` `2026` |
+| `m` `mm` `mmm` `mmmm` | month | `1` `01` `Jan` `January` |
+| `d` `dd` `ddd` `dddd` | day | `5` `05` `Mon` `Monday` |
+| `h` `hh` | 24 hour | `9` `09` |
+| `c` `cc` | 12 hour (clock) | `9` `09` |
+| `n` `nn` | minute (always 2 digits) | `04` |
+| `s` `ss` | second (always 2 digits) | `05` |
+| `ampm` `am/pm` | am/pm marker (always lowercase) | `pm` |
+
+- Any other character is copied as is, so `tf "yyyy-mm-ddThh:nn:ss"` works without escaping.
+- Escape a letter with a backslash (`"hh\h"`) or single quotes (`"hh'h'"`).
+- Reading data ignores zero padding: `m` and `mm` both read `1` and `01`.
+- An `xf` in this syntax implies `time`.
+- Unpadded `m`, `d`, `h`, `c` in `xf` become gnuplot's `%1m`, `%1d`, `%1H`, `%1I`.
 - x-range: `xr` / `xrange` / `xlim` / `xlimit` `<range>`
 - y-range: `yr` / `yrange` / `ylim` / `ylimit` `<range>`
 - x2-range: `xr2` / `xrange2` / `xlim2` / `xlimit2` / `x2r` / `x2range` / `x2lim` / `x2limit` `<range>`
