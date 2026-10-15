@@ -14,6 +14,7 @@ mplot [-g] [-s STRING]* FILE
 mplot -d FILE
 mplot -h | --help
 mplot --headers FILE
+mplot lsp
 mplot -V | --version
 
 OPTIONS
@@ -21,12 +22,18 @@ OPTIONS
  -d        Print dependencies
  -g        Write directly to gnuplot file of same name.
  -s STRING Add a string argument (used as sargXX in code)
+
+COMMANDS
+ lsp       Run the language server over stdin/stdout.
 ```
 
 Additional input behavior implemented in `Main()`:
 
 - If stdin is redirected, input may be read from stdin with no file argument.
 - `-` can be used as the file argument to force stdin input.
+
+`mplot lsp` runs a Language Server Protocol server over stdin/stdout (diagnostics, hover, keyword completion, and column-name completion in `x`/`y`/`xexp`/`yexp`/`ignore` from the header line of the plot's data files).
+Point an editor's LSP client at the command `mplot lsp` for `*.mplot` files.
 
 Example of compiling directly to PNG.
 

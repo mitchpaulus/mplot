@@ -3,16 +3,19 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
+using MplotCli.Lsp;
 using MplotLib;
 
 namespace MplotCli;
 
 internal static class Program
 {
-    private const string Version = "0.3.0";
+    internal const string Version = "0.3.0";
 
     private static int Main(string[] args)
     {
+        if (args is ["lsp", ..]) return LspServer.Run();
+
         Console.OutputEncoding = MplotEncoding.Utf8;
 
         int i = 0;
@@ -321,6 +324,7 @@ internal static class Program
         Console.Write("mplot -d FILE\n");
         Console.Write("mplot -h | --help\n");
         Console.Write("mplot --headers FILE\n");
+        Console.Write("mplot lsp\n");
         Console.Write("mplot -V | --version\n");
         Console.Write('\n');
         Console.Write("OPTIONS\n");
@@ -328,6 +332,9 @@ internal static class Program
         Console.Write(" -d        Print dependencies\n");
         Console.Write(" -g        Write directly to gnuplot file of same name.\n");
         Console.Write(" -s STRING Add a string argument (used as sargXX in code)\n");
+        Console.Write('\n');
+        Console.Write("COMMANDS\n");
+        Console.Write(" lsp       Run the language server over stdin/stdout.\n");
         Console.Write('\n');
         Console.Write('\n');
         Console.Write("Example syntax:\n");
