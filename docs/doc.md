@@ -152,6 +152,7 @@ ct "Plot B"
 - `fs` / `fontSize` `<INT>`
 - `dpi` / `d` `<INT>`
 - `svg` (use the svg gnuplot terminal instead of pngcairo; `-c` writes a `.svg` file)
+- `postscript eps` / `ps eps` (use the gnuplot postscript terminal in eps mode instead of pngcairo; `-c` writes a `.eps` file; `font` takes a PostScript font name such as `Helvetica`)
 
 ## Axis/time/range/format
 

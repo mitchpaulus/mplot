@@ -34,12 +34,16 @@ public class Series
         _yAxisSide = yAxisSide;
     }
 
-    public string ToGnuplot()
-    {
-        StringBuilder b = new();
+    public string ToGnuplot() => string.Join(", ", ToGnuplotElements(null));
 
+    /// <summary>
+    /// The plot elements for this series. When <paramref name="legendPointSize"/> is given and the series has a marker,
+    /// the legend entry is split out into a separate keyentry element so that its marker can be sized independently.
+    /// </summary>
+    public List<string> ToGnuplotElements(double? legendPointSize)
+    {
         string skipText = _skip == 0 ? "" : $" skip {_skip}";
-        string title = string.IsNullOrWhiteSpace(Name) ? "" : $" title {Name.ToGnuPlotString()}";
+        bool hasTitle = !string.IsNullOrWhiteSpace(Name);
 
         string source = FilePath.Match(
             fileSource => fileSource.Filepath.ToGnuPlotString(),
@@ -47,10 +51,6 @@ public class Series
             cmdDataSource => cmdDataSource.ToGnuPlotString(),
             _ => "'-'"
         );
-
-        b.Append(source);
-        b.Append($" using {_xCol}:{_yCol}{skipText} axes {_yAxisSide.ToGnuplot()} with ");
-
 
         string gnuplotStyle;
         if (_style.Id == SeriesStyle.Line.Id && _marker is not NoMarker)
@@ -66,26 +66,38 @@ public class Series
             gnuplotStyle = _style.GnuplotStyle;
         }
 
-        b.Append(gnuplotStyle);
+        bool hasMarker = gnuplotStyle != "boxes" && gnuplotStyle != "fstep" && _marker is not NoMarker;
 
-        if (gnuplotStyle != "boxes" && gnuplotStyle != "fstep" && _marker is not NoMarker)
+        string Style(double? pointSize)
         {
-            b.Append($" {_marker.ToGnuplot()}");
+            StringBuilder b = new();
+            b.Append(gnuplotStyle);
+
+            if (hasMarker)
+            {
+                b.Append($" {_marker.ToGnuplot()}");
+                if (pointSize is not null) b.Append($" ps {pointSize.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+            }
+
+            if (gnuplotStyle == "boxes")
+            {
+                b.Append(" fs solid border -1");
+            }
+
+            if (_lineWidth != 1) b.Append($" lw {_lineWidth}");
+
+            if (_dashType is not SolidDash) b.Append($" {_dashType.ToGnuplot()}");
+
+            b.Append($" linecolor {_lineColor.ToGnuplot()}");
+            return b.ToString();
         }
 
-        if (gnuplotStyle == "boxes")
-        {
-            b.Append(" fs solid border -1");
-        }
+        string data = $"{source} using {_xCol}:{_yCol}{skipText} axes {_yAxisSide.ToGnuplot()} with {Style(null)}";
+        // The doubled space before title is kept so existing output does not change.
+        string title = $"  title {Name.ToGnuPlotString()}";
 
-        if (_lineWidth != 1) b.Append($" lw {_lineWidth}");
-
-        if (_dashType is not SolidDash) b.Append($" {_dashType.ToGnuplot()}");
-
-        b.Append($" linecolor {_lineColor.ToGnuplot()}");
-        if (!string.IsNullOrWhiteSpace(title)) b.Append($" {title}");
-        else b.Append(" notitle");
-
-        return b.ToString();
+        if (!hasTitle) return [$"{data} notitle"];
+        if (legendPointSize is null || !hasMarker) return [data + title];
+        return [$"{data} notitle", $"keyentry with {Style(legendPointSize)}{title}"];
     }
 }
