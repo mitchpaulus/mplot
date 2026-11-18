@@ -70,6 +70,7 @@ internal static class MplotDocs
         new("fontSize", ["fs", "fontSize"], "fs <points>", "Font size in points. Default 10."),
         new("dpi", ["dpi", "d"], "dpi <dpi>", "Output resolution in dots per inch."),
         new("svg", ["svg"], "svg", "Use the SVG terminal instead of PNG. With `-c`, writes a `.svg` file."),
+        new("postscript", ["postscript", "ps"], "postscript eps", "Use the PostScript terminal in EPS mode instead of PNG. With `-c`, writes a `.eps` file."),
 
         // Axis, time, range, format
         new("timeAxis", ["time"], "time", "Treat the x axis as time."),

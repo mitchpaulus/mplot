@@ -11,6 +11,13 @@ public enum YAxisSide
     Right
 }
 
+public enum OutputTerminal
+{
+    Png,
+    Svg,
+    PostscriptEps,
+}
+
 public class MplotListener : MplotBaseListener
 {
 
@@ -87,7 +94,7 @@ public class MplotListener : MplotBaseListener
 
     public bool TicsOut = false;
 
-    public bool Svg = false;
+    public OutputTerminal Terminal = OutputTerminal.Png;
 
     public RangeSpec YMin { get; set; } = AutoRange.Auto();
     public RangeSpec YMax { get; set; } = AutoRange.Auto();
@@ -310,7 +317,8 @@ public class MplotListener : MplotBaseListener
 
     public override void EnterTicsOut(MplotParser.TicsOutContext context) => TicsOut = true;
 
-    public override void EnterSvg(MplotParser.SvgContext context) => Svg = true;
+    public override void EnterSvg(MplotParser.SvgContext context) => Terminal = OutputTerminal.Svg;
+    public override void EnterPostscript(MplotParser.PostscriptContext context) => Terminal = OutputTerminal.PostscriptEps;
 
     public override void EnterIgnore(MplotParser.IgnoreContext context)
     {
@@ -1047,6 +1055,17 @@ public class MplotListener : MplotBaseListener
     }
 
 
+    // Point size of legend markers in eps output, relative to the markers in the plot.
+    private const double PostscriptLegendPointSize = 1.5;
+
+    private string PostscriptEpsTerminal(string fontSpec)
+    {
+        // Postscript is sized in inches rather than pixels, so the dpi does not apply.
+        // The eps mode draws everything, fonts included, at half scale, so fontscale 2 restores the requested point size.
+        // linewidth and pointscale are set so that strokes and markers come out the same physical size as the pngcairo output.
+        return $"set terminal postscript eps enhanced color size {Width.ToDecimalString()},{Height.ToDecimalString()} font {fontSpec} fontscale 2 linewidth 0.75 pointscale 1.5";
+    }
+
     public string WriteGnuplot()
     {
         List<string> lines = new();
@@ -1061,10 +1080,13 @@ public class MplotListener : MplotBaseListener
         string fontName = FontName ?? "";
         string fontSpec = $"{fontName},{FontSize}".ToGnuPlotString();
 
-        // The svg terminal does not support the pointscale option.
-        lines.Add(Svg
-            ? $"set terminal svg size {widthPixels},{heightPixels} font {fontSpec} fontscale {fontScale}"
-            : $"set terminal pngcairo size {widthPixels},{heightPixels} font {fontSpec} fontscale {fontScale} pointscale {fontScale}");
+        lines.Add(Terminal switch
+        {
+            // The svg terminal does not support the pointscale option.
+            OutputTerminal.Svg => $"set terminal svg size {widthPixels},{heightPixels} font {fontSpec} fontscale {fontScale}",
+            OutputTerminal.PostscriptEps => PostscriptEpsTerminal(fontSpec),
+            _ => $"set terminal pngcairo size {widthPixels},{heightPixels} font {fontSpec} fontscale {fontScale} pointscale {fontScale}",
+        });
 
         if (_lmargin.IsValue(out var rational)) lines.Add($"set lmargin {rational.ToDecimalString()}");
         if (_rmargin.IsValue(out rational)) lines.Add($"set rmargin {rational.ToDecimalString()}");
@@ -1222,18 +1244,22 @@ public class MplotListener : MplotBaseListener
 
             lines.Add(sepLine);
 
-            if (seriesList.Count == 1)
+            // Postscript draws legend markers small relative to the text, so there the legend entries are
+            // separate keyentry elements with their own point size. Other terminals keep the title on the series.
+            double? legendPointSize = Terminal == OutputTerminal.PostscriptEps ? PostscriptLegendPointSize : null;
+            List<string> elements = seriesList.SelectMany(series => series.ToGnuplotElements(legendPointSize)).ToList();
+
+            if (elements.Count == 1)
             {
-                Series series = seriesList[0];
-                lines.Add($"plot {series.ToGnuplot()}");
+                lines.Add($"plot {elements[0]}");
             }
             else
             {
                 lines.Add("plot \\");
-                foreach (IndexedItem<Series> series in seriesList.WithIndex(1))
+                foreach (IndexedItem<string> element in elements.WithIndex(1))
                 {
-                    string end = series.Index == seriesList.Count ? "" : ", \\";
-                    lines.Add( "  " + series.Item.ToGnuplot() + end);
+                    string end = element.Index == elements.Count ? "" : ", \\";
+                    lines.Add("  " + element.Item + end);
                 }
             }
         }

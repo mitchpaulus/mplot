@@ -79,6 +79,7 @@ element
   | xhighlight
   | yhighlight
   | svg
+  | postscript
   ;
 
 file       : ('f' | 'file') stringArray ;
@@ -146,6 +147,8 @@ coordinate : rational | dateTime ;
 highlightColor : HEXCOLOR | RGB INT INT INT | knownColor ;
 
 svg : 'svg' ;
+// Only the eps mode of the gnuplot postscript terminal is supported.
+postscript : ('postscript' | 'ps') 'eps' ;
 
 stdinInput : STDIN ASTERISK? ;
 STDIN : 'stdin' ;

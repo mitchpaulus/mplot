@@ -197,7 +197,12 @@ internal static class Program
                                 return 1;
                             }
 
-                            string extension = listener.Svg ? ".svg" : ".png";
+                            string extension = listener.Terminal switch
+                            {
+                                OutputTerminal.Svg => ".svg",
+                                OutputTerminal.PostscriptEps => ".eps",
+                                _ => ".png",
+                            };
 
                             if (fileInfo.AsValue.Name.EndsWith(".mplot", StringComparison.OrdinalIgnoreCase))
                             {
