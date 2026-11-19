@@ -254,6 +254,7 @@ A `tf` or `xf` string containing a `%` is passed to gnuplot unchanged. Otherwise
 
 - left margin: `lmargin` / `lm` `<rational>`
 - right margin: `rmargin` / `rm` `<rational>`
+  - in character widths; when a y2 label is set and `rmargin` is not, it defaults to `9` (fits y2 tic labels up to about 5 characters), so set it larger for wider tic labels
 - text label (`text` / `note` / `annotation`):
   - `text <argString> <x> <y>`
   - `text <x> <y> <argString>`

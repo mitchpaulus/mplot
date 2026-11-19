@@ -1066,6 +1066,10 @@ public class MplotListener : MplotBaseListener
         return $"set terminal postscript eps enhanced color size {Width.ToDecimalString()},{Height.ToDecimalString()} font {fontSpec} fontscale 2 linewidth 0.75 pointscale 1.5";
     }
 
+    // Both in character widths. The offset pulls the y2 label in toward the tic labels.
+    private const string DefaultY2LabelRightMargin = "9";
+    private const string DefaultY2LabelOffset = "-1";
+
     public string WriteGnuplot()
     {
         List<string> lines = new();
@@ -1090,6 +1094,9 @@ public class MplotListener : MplotBaseListener
 
         if (_lmargin.IsValue(out var rational)) lines.Add($"set lmargin {rational.ToDecimalString()}");
         if (_rmargin.IsValue(out rational)) lines.Add($"set rmargin {rational.ToDecimalString()}");
+        // Gnuplot's automatic right margin leaves a lot of whitespace outside a y2 label.
+        // This default fits tic labels up to about 5 characters wide; wider ones need an explicit rmargin.
+        else if (!string.IsNullOrWhiteSpace(Y2Label)) lines.Add($"set rmargin {DefaultY2LabelRightMargin}");
 
         if (TimeAxis)
         {
@@ -1157,7 +1164,7 @@ public class MplotListener : MplotBaseListener
         }
 
         if (!string.IsNullOrWhiteSpace(X2Label)) lines.Add($"set x2label {X2Label.ToGnuPlotString()}");
-        if (!string.IsNullOrWhiteSpace(Y2Label)) lines.Add($"set y2label {Y2Label.ToGnuPlotString()}");
+        if (!string.IsNullOrWhiteSpace(Y2Label)) lines.Add($"set y2label {Y2Label.ToGnuPlotString()} offset {DefaultY2LabelOffset},0");
 
         if (!XMin.IsAuto || !XMax.IsAuto) lines.Add($"set xrange [{XMin.ToGnuplot()}:{XMax.ToGnuplot()}]");
         if (!YMin.IsAuto || !YMax.IsAuto) lines.Add($"set yrange [{YMin.ToGnuplot()}:{YMax.ToGnuplot()}]");
